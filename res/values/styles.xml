@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<!-- Base application theme is the default theme. -->
+	<style name="Theme" parent="android:Theme"></style>
+
+	<style name="ButtonBar">
+		<item name="android:layout_width">fill_parent</item>
+		<item name="android:layout_height">wrap_content</item>
+		<item name="android:paddingTop">10dp</item>
+		<item name="android:paddingBottom">10dp</item>
+	</style>
+
+	<style name="FavoriteListingTextView">
+		<item name="android:layout_width">wrap_content</item>
+		<item name="android:layout_height">wrap_content</item>
+		<item name="android:textSize">20dp</item>
+		<item name="android:ellipsize">end</item>
+		<item name="android:singleLine">true</item>
+	</style>
+
+	<style name="ArrivalDestinationText">
+		<item name="android:layout_width">wrap_content</item>
+		<item name="android:layout_height">wrap_content</item>
+		<item name="android:textSize">20dp</item>
+		<item name="android:singleLine">true</item>
+	</style>
+
+	<style name="ArrivalCountdownText">
+		<item name="android:layout_width">wrap_content</item>
+		<item name="android:layout_height">wrap_content</item>
+		<item name="android:textSize">20dp</item>
+		<item name="android:singleLine">true</item>
+	</style>
+</resources>

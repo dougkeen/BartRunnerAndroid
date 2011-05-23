@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent" android:layout_height="wrap_content"
+	android:paddingTop="15dip" android:paddingBottom="15dip"
+	android:paddingLeft="5dip" android:paddingRight="5dip" android:id="@android:id/text1"
+	android:textColor="#cccccc" android:ellipsize="marquee"
+	android:singleLine="true">
+</TextView>

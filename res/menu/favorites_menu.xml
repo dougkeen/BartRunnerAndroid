@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+	<item android:title="@string/add_favorite" android:icon="@android:drawable/ic_menu_add"
+	android:id="@+id/add_favorite_menu_button"></item>
+</menu>

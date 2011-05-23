@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent" android:layout_height="fill_parent"
+	android:paddingLeft="5dp" android:paddingRight="5dp">
+	<TextView android:id="@+id/form_header" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:textSize="24dp"
+		android:textStyle="bold" android:layout_alignParentTop="true"
+		android:text="@string/add_favorite_route" android:paddingBottom="10dp" />
+	<TextView android:id="@+id/origin_label" android:text="@string/origin"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
+		android:textSize="15dp" android:layout_below="@+id/form_header"
+		android:layout_alignLeft="@+id/form_header"></TextView>
+	<Spinner android:id="@+id/origin_spinner" android:layout_below="@id/origin_label"
+		android:layout_height="wrap_content" android:layout_width="fill_parent" />
+	<TextView android:id="@+id/destination_label" android:text="@string/destination"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
+		android:textSize="15dp" android:layout_below="@+id/origin_spinner"
+		android:layout_alignLeft="@+id/origin_spinner"></TextView>
+	<Spinner android:id="@+id/destination_spinner"
+		android:layout_below="@id/destination_label" android:layout_height="wrap_content"
+		android:layout_width="fill_parent" />
+	<LinearLayout android:layout_height="wrap_content"
+		android:layout_width="fill_parent" android:layout_below="@id/destination_spinner"
+		style="@style/ButtonBar" android:id="@+id/buttonBar"
+		android:orientation="horizontal">
+		<Button android:text="@string/save" android:layout_weight="1"
+			android:layout_height="wrap_content" android:id="@+id/saveButton"
+			android:layout_width="fill_parent"></Button>
+		<Button android:text="@string/cancel" android:layout_weight="1"
+			android:layout_height="wrap_content" android:id="@+id/cancelButton"
+			android:layout_width="fill_parent"></Button>
+	</LinearLayout>
+</RelativeLayout>

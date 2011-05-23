@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+	package="com.dougkeen.bart" android:versionCode="2"
+	android:versionName="1.0">
+	<uses-permission android:name="android.permission.INTERNET" />
+	<uses-permission android:name="android.permission.WAKE_LOCK" />
+
+	<uses-sdk android:minSdkVersion="7" />
+
+	<application android:icon="@drawable/icon" android:label="@string/app_name"
+		android:debuggable="true">
+		<activity android:name=".FavoritesDashboardActivity"
+			android:label="@string/app_name">
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+				<category android:name="android.intent.category.LAUNCHER" />
+			</intent-filter>
+			<intent-filter>
+				<action android:name="android.intent.action.VIEW" />
+				<action android:name="android.intent.action.EDIT" />
+				<action android:name="android.intent.action.PICK" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<data android:mimeType="vnd.android.cursor.dir/com.dougkeen.bart.favorite" />
+			</intent-filter>
+			<intent-filter>
+				<action android:name="android.intent.action.GET_CONTENT" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<data android:mimeType="vnd.android.cursor.item/com.dougkeen.bart.favorite" />
+			</intent-filter>
+		</activity>
+		<activity android:name=".AddFavoriteActivity" android:label="@string/app_name">
+			<intent-filter>
+				<action android:name="android.intent.action.INSERT" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<data android:mimeType="vnd.android.cursor.dir/com.dougkeen.bart.favorite" />
+			</intent-filter>
+		</activity>
+		<activity android:name=".ViewArrivalsActivity"
+			android:label="@string/app_name">
+			<intent-filter>
+				<action android:name="android.intent.action.VIEW" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<data android:mimeType="vnd.android.cursor.item/com.dougkeen.bart.favorite" />
+			</intent-filter>
+		</activity>
+		<provider android:name=".data.BartContentProvider"
+			android:authorities="com.dougkeen.bart.dataprovider" android:label="Don\'t Miss The Bart data provider" />
+	</application>
+
+</manifest>
