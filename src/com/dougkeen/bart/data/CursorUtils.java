@@ -12,4 +12,9 @@ public final class CursorUtils {
 			cursor.close();
 		}
 	}
+
+	public static final String getString(Cursor cursor, FavoritesColumns column) {
+		return cursor.getString(cursor.getColumnIndex(column.string));
+	}
+
 }

@@ -113,6 +113,12 @@ public class ViewArrivalsActivity extends ListActivity {
 	}
 
 	protected void processLatestArrivals(RealTimeArrivals result) {
+		if (result.getArrivals().isEmpty()) {
+			((TextView) findViewById(android.R.id.empty))
+					.setText(R.string.no_data_message);
+			return;
+		}
+
 		Arrival firstArrival = null;
 		final List<Arrival> arrivals = result.getArrivals();
 		if (mArrivalsAdapter.getCount() > 0) {
