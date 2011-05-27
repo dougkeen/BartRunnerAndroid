@@ -5,6 +5,7 @@ public class Route {
 	private Station destination;
 	private Line line;
 	private boolean requiresTransfer;
+	private Station transferStation;
 	private String direction;
 
 	public Station getOrigin() {
@@ -39,6 +40,14 @@ public class Route {
 		this.requiresTransfer = requiresTransfer;
 	}
 
+	public Station getTransferStation() {
+		return transferStation;
+	}
+
+	public void setTransferStation(Station transferStation) {
+		this.transferStation = transferStation;
+	}
+
 	public String getDirection() {
 		return direction;
 	}
@@ -58,6 +67,8 @@ public class Route {
 		builder.append(line);
 		builder.append(", requiresTransfer=");
 		builder.append(requiresTransfer);
+		builder.append(", transferStation=");
+		builder.append(transferStation);
 		builder.append(", direction=");
 		builder.append(direction);
 		builder.append("]");

@@ -13,7 +13,7 @@ public final class CursorUtils {
 		}
 	}
 
-	public static final String getString(Cursor cursor, FavoritesColumns column) {
+	public static final String getString(Cursor cursor, RoutesColumns column) {
 		return cursor.getString(cursor.getColumnIndex(column.string));
 	}
 

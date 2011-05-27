@@ -26,7 +26,7 @@ public class BartContentProvider extends ContentProvider {
 	/**
 	 * The default sort order for events
 	 */
-	private static final String DEFAULT_SORT_ORDER = FavoritesColumns.FROM_STATION.string
+	private static final String DEFAULT_SORT_ORDER = RoutesColumns.FROM_STATION.string
 			+ " DESC";
 
 	static {
@@ -35,12 +35,12 @@ public class BartContentProvider extends ContentProvider {
 		sUriMatcher.addURI(Constants.AUTHORITY, "favorites/#", FAVORITE_ID);
 
 		sFavoritesProjectionMap = new HashMap<String, String>();
-		sFavoritesProjectionMap.put(FavoritesColumns._ID.string,
-				FavoritesColumns._ID.string);
-		sFavoritesProjectionMap.put(FavoritesColumns.FROM_STATION.string,
-				FavoritesColumns.FROM_STATION.string);
-		sFavoritesProjectionMap.put(FavoritesColumns.TO_STATION.string,
-				FavoritesColumns.TO_STATION.string);
+		sFavoritesProjectionMap.put(RoutesColumns._ID.string,
+				RoutesColumns._ID.string);
+		sFavoritesProjectionMap.put(RoutesColumns.FROM_STATION.string,
+				RoutesColumns.FROM_STATION.string);
+		sFavoritesProjectionMap.put(RoutesColumns.TO_STATION.string,
+				RoutesColumns.TO_STATION.string);
 	}
 
 	private DatabaseHelper mDatabaseHelper;
@@ -81,7 +81,7 @@ public class BartContentProvider extends ContentProvider {
 		} else if (match == FAVORITE_ID) {
 			qb.setTables(DatabaseHelper.FAVORITES_TABLE_NAME);
 			qb.setProjectionMap(sFavoritesProjectionMap);
-			qb.appendWhere(FavoritesColumns._ID + " = "
+			qb.appendWhere(RoutesColumns._ID + " = "
 					+ uri.getPathSegments().get(1));
 		} else {
 			throw new IllegalArgumentException("Unknown URI " + uri);
@@ -121,12 +121,12 @@ public class BartContentProvider extends ContentProvider {
 			long rowId = -1;
 			Cursor cursor = db
 					.query(DatabaseHelper.FAVORITES_TABLE_NAME,
-							new String[] { FavoritesColumns._ID.string },
-							FavoritesColumns.FROM_STATION + "=? AND "
-									+ FavoritesColumns.TO_STATION + "=?",
+							new String[] { RoutesColumns._ID.string },
+							RoutesColumns.FROM_STATION + "=? AND "
+									+ RoutesColumns.TO_STATION + "=?",
 							new String[] {
-									values.getAsString(FavoritesColumns.FROM_STATION.string),
-									values.getAsString(FavoritesColumns.TO_STATION.string) },
+									values.getAsString(RoutesColumns.FROM_STATION.string),
+									values.getAsString(RoutesColumns.TO_STATION.string) },
 							null,
 							null,
 							null);
@@ -139,7 +139,7 @@ public class BartContentProvider extends ContentProvider {
 			}
 			if (rowId < 0) {
 				rowId = db.insert(DatabaseHelper.FAVORITES_TABLE_NAME,
-						FavoritesColumns.FROM_STATION.string, values);
+						RoutesColumns.FROM_STATION.string, values);
 			}
 			if (rowId > 0) {
 				Uri eventUri = ContentUris.withAppendedId(
@@ -174,7 +174,7 @@ public class BartContentProvider extends ContentProvider {
 		} else if (match == FAVORITE_ID) {
 			String favoriteId = uri.getPathSegments().get(1);
 			count = db.delete(DatabaseHelper.FAVORITES_TABLE_NAME,
-					FavoritesColumns._ID + " = "
+					RoutesColumns._ID + " = "
 							+ favoriteId
 							+ (!TextUtils.isEmpty(where) ? " AND (" + where
 									+ ')' : ""), whereArgs);

@@ -40,7 +40,11 @@ public abstract class GetRealTimeArrivalsTask extends
 			throw new RuntimeException(e);
 		}
 
-		return getArrivalsFromNetwork(params, sourceUrl, 0);
+		if (!isCancelled()) {
+			return getArrivalsFromNetwork(params, sourceUrl, 0);
+		} else {
+			return null;
+		}
 	}
 
 	private RealTimeArrivals getArrivalsFromNetwork(Params params,
@@ -48,6 +52,9 @@ public abstract class GetRealTimeArrivalsTask extends
 		try {
 			EtdContentHandler handler = new EtdContentHandler(params.origin,
 					params.destination, mRoutes);
+			if (isCancelled()) {
+				return null;
+			}
 			Xml.parse(sourceUrl.openStream(), Xml.findEncodingByName("UTF-8"),
 					handler);
 			final RealTimeArrivals realTimeArrivals = handler

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="32px"
+   height="32px"
+   id="svg2383"
+   sodipodi:version="0.32"
+   inkscape:version="0.46"
+   sodipodi:docname="xfer.svg"
+   inkscape:output_extension="org.inkscape.output.svg.inkscape">
+  <defs
+     id="defs2385">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 16 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="32 : 16 : 1"
+       inkscape:persp3d-origin="16 : 10.666667 : 1"
+       id="perspective2391" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="22.395604"
+     inkscape:cx="14.100126"
+     inkscape:cy="15.964773"
+     inkscape:current-layer="layer1"
+     showgrid="true"
+     inkscape:grid-bbox="true"
+     inkscape:document-units="px"
+     inkscape:window-width="1920"
+     inkscape:window-height="1125"
+     inkscape:window-x="1911"
+     inkscape:window-y="-9" />
+  <metadata
+     id="metadata2388">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     id="layer1"
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer">
+    <path
+       style="fill:#29716d;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 6.117272,8.0220801 L 0.58047106,15.702158 L 26.255152,15.702158 L 26.255152,11.460255 L 6.117272,11.504906 L 6.117272,8.0220801 z"
+       id="path2393"
+       sodipodi:nodetypes="cccccc"
+       inkscape:export-filename="C:\Users\dkeen\Workspaces\AndroidExperiments\DontMissTheBart\res\drawable\xfer.png"
+       inkscape:export-xdpi="117.18631"
+       inkscape:export-ydpi="117.18631" />
+    <path
+       style="fill:#143635;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 25.964917,23.382236 L 31.501718,15.702158 L 5.8270365,15.702158 L 5.8270365,19.944061 L 25.964917,19.89941 L 25.964917,23.382236 z"
+       id="path3165"
+       sodipodi:nodetypes="cccccc"
+       inkscape:export-filename="C:\Users\dkeen\Workspaces\AndroidExperiments\DontMissTheBart\res\drawable\xfer.png"
+       inkscape:export-xdpi="117.18631"
+       inkscape:export-ydpi="117.18631" />
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot3167"
+       style="font-size:4;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       transform="translate(8.0372916,9.5554467)"
+       inkscape:export-filename="C:\Users\dkeen\Workspaces\AndroidExperiments\DontMissTheBart\res\drawable\xfer.png"
+       inkscape:export-xdpi="117.18631"
+       inkscape:export-ydpi="117.18631"><flowRegion
+         id="flowRegion3169"><rect
+           id="rect3171"
+           width="17.63739"
+           height="10.359176"
+           x="3.2595682"
+           y="4.2266922"
+           style="font-size:4px;fill:#000000" /></flowRegion><flowPara
+         id="flowPara3173"
+         style="font-size:4" /></flowRoot>    <text
+       xml:space="preserve"
+       style="font-size:4px;font-style:normal;font-weight:normal;line-height:125%;fill:#f2f3ed;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="10.001963"
+       y="18.068693"
+       id="text3175"
+       sodipodi:linespacing="125%"
+       inkscape:export-xdpi="117.18631"
+       inkscape:export-ydpi="117.18631"
+       inkscape:export-filename="C:\Users\dkeen\Workspaces\AndroidExperiments\DontMissTheBart\res\drawable\xfer.png"><tspan
+         sodipodi:role="line"
+         id="tspan3177"
+         x="10.001963"
+         y="18.068693"
+         style="font-size:6px;font-style:normal;font-variant:normal;font-weight:800;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Helvetica Inserat LT Std;-inkscape-font-specification:Helvetica Inserat LT Std Ultra-Bold;fill:#f2f3ed">XFER</tspan></text>
+  </g>
+</svg>

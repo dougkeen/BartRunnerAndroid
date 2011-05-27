@@ -115,10 +115,11 @@ public enum Station {
 	}
 
 	public List<Route> getRoutesForDestination(Station dest) {
-		return getRoutesForDestination(dest, false);
+		return getRoutesForDestination(dest, null);
 	}
 
-	public List<Route> getRoutesForDestination(Station dest, boolean isTransfer) {
+	public List<Route> getRoutesForDestination(Station dest,
+			Station transferStation) {
 		if (dest == null)
 			return null;
 		Boolean isNorth = null;
@@ -140,7 +141,7 @@ public enum Station {
 			route.setDestination(dest);
 			route.setDirection(isNorth ? "n" : "s");
 			route.setLine(line);
-			if (isTransfer || line.requiresTransfer) {
+			if (transferStation != null || line.requiresTransfer) {
 				route.setTransfer(true);
 			} else {
 				route.setTransfer(false);
@@ -149,11 +150,14 @@ public enum Station {
 		}
 		if (isNorth == null) {
 			if (outboundTransferStation != null) {
-				returnList.addAll(getOutboundTransferStation()
-						.getRoutesForDestination(dest, true));
+				returnList
+						.addAll(getOutboundTransferStation()
+								.getRoutesForDestination(dest,
+										getOutboundTransferStation()));
 			} else {
 				returnList.addAll(getRoutesForDestination(dest
-						.getInboundTransferStation(), true));
+						.getInboundTransferStation(), dest
+						.getInboundTransferStation()));
 			}
 		}
 		return returnList;

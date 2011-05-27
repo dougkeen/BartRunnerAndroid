@@ -18,9 +18,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	@Override
 	public void onCreate(SQLiteDatabase db) {
 		db.execSQL("CREATE TABLE " + FAVORITES_TABLE_NAME + " (" +
-				FavoritesColumns._ID.getColumnDef() + " PRIMARY KEY, " +
-				FavoritesColumns.FROM_STATION.getColumnDef() + ", " +
-				FavoritesColumns.TO_STATION.getColumnDef() + ");");
+				RoutesColumns._ID.getColumnDef() + " PRIMARY KEY, " +
+				RoutesColumns.FROM_STATION.getColumnDef() + ", " +
+				RoutesColumns.TO_STATION.getColumnDef() + ");");
 	}
 
 	@Override

@@ -10,17 +10,28 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.os.PowerManager;
+import android.text.format.DateFormat;
+import android.util.Log;
+import android.util.TimeFormatException;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dougkeen.bart.GetRealTimeArrivalsTask.Params;
 import com.dougkeen.bart.data.Arrival;
-import com.dougkeen.bart.data.FavoritesColumns;
+import com.dougkeen.bart.data.RoutesColumns;
 import com.dougkeen.bart.data.RealTimeArrivals;
 
 public class ViewArrivalsActivity extends ListActivity {
+
+	private static final String TAG = "BartCatcher";
+
+	private static final int UNCERTAINTY_THRESHOLD = 17;
 
 	private Uri mUri;
 
@@ -44,9 +55,10 @@ public class ViewArrivalsActivity extends ListActivity {
 
 	private PowerManager.WakeLock mWakeLock;
 
+	private boolean mFetchArrivalsOnNextFocus;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
@@ -59,8 +71,8 @@ public class ViewArrivalsActivity extends ListActivity {
 		}
 
 		Cursor cursor = managedQuery(mUri, new String[] {
-				FavoritesColumns.FROM_STATION.string,
-				FavoritesColumns.TO_STATION.string }, null, null, null);
+				RoutesColumns.FROM_STATION.string,
+				RoutesColumns.TO_STATION.string }, null, null, null);
 
 		if (!cursor.moveToFirst()) {
 			throw new IllegalStateException("URI not found: " + mUri.toString());
@@ -75,31 +87,69 @@ public class ViewArrivalsActivity extends ListActivity {
 		((TextView) findViewById(android.R.id.empty))
 				.setText(R.string.arrival_wait_message);
 
-		mArrivalsAdapter = new ArrayAdapter<Arrival>(
-				this, R.layout.simple_spinner_item);
+		mArrivalsAdapter = new ArrivalArrayAdapter(this,
+				R.layout.arrival_listing);
+		if (savedInstanceState != null
+				&& savedInstanceState.containsKey("arrivals")) {
+			for (Parcelable arrival : savedInstanceState
+					.getParcelableArray("arrivals")) {
+				mArrivalsAdapter.add((Arrival) arrival);
+			}
+		}
 		setListAdapter(mArrivalsAdapter);
 
-		fetchLatestArrivals();
+		mFetchArrivalsOnNextFocus = true;
+	}
+
+	@Override
+	protected void onDestroy() {
+		if (mGetArrivalsTask != null) {
+			mGetArrivalsTask.cancel(true);
+		}
+		super.onDestroy();
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		Arrival[] arrivals = new Arrival[mArrivalsAdapter.getCount()];
+		for (int i = mArrivalsAdapter.getCount() - 1; i >= 0; i--) {
+			arrivals[i] = mArrivalsAdapter.getItem(i);
+		}
+		outState.putParcelableArray("arrivals", arrivals);
 	}
 
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
 		super.onWindowFocusChanged(hasFocus);
 		if (hasFocus) {
+			if (mFetchArrivalsOnNextFocus) {
+				fetchLatestArrivals();
+				mFetchArrivalsOnNextFocus = false;
+			}
 			PowerManager powerManaer = (PowerManager) getSystemService(Context.POWER_SERVICE);
 			mWakeLock = powerManaer.newWakeLock(
 					PowerManager.SCREEN_DIM_WAKE_LOCK, "ViewArrivalsActivity");
 			mWakeLock.acquire();
+			if (mArrivalsAdapter != null && !mArrivalsAdapter.isEmpty()) {
+				mIsAutoUpdating = true;
+			}
+			runAutoUpdate();
 		} else if (mWakeLock != null) {
 			mWakeLock.release();
 		}
 	}
 
 	private void fetchLatestArrivals() {
+		if (!hasWindowFocus())
+			return;
+
 		mGetArrivalsTask = new GetRealTimeArrivalsTask() {
 			@Override
 			public void onResult(RealTimeArrivals result) {
+				Log.i(TAG, "Processing data from server");
 				processLatestArrivals(result);
+				Log.i(TAG, "Done processing data from server");
 			}
 
 			@Override
@@ -108,6 +158,7 @@ public class ViewArrivalsActivity extends ListActivity {
 						Toast.LENGTH_SHORT).show();
 			}
 		};
+		Log.i(TAG, "Fetching data from server");
 		mGetArrivalsTask.execute(new GetRealTimeArrivalsTask.Params(mOrigin,
 				mDestination));
 	}
@@ -119,6 +170,7 @@ public class ViewArrivalsActivity extends ListActivity {
 			return;
 		}
 
+		boolean needsBetterAccuracy = false;
 		Arrival firstArrival = null;
 		final List<Arrival> arrivals = result.getArrivals();
 		if (mArrivalsAdapter.getCount() > 0) {
@@ -148,6 +200,9 @@ public class ViewArrivalsActivity extends ListActivity {
 				if (firstArrival == null) {
 					firstArrival = existingArrival;
 				}
+				if (existingArrival.getUncertaintySeconds() > UNCERTAINTY_THRESHOLD) {
+					needsBetterAccuracy = true;
+				}
 			}
 		} else {
 			for (Arrival arrival : arrivals) {
@@ -156,12 +211,13 @@ public class ViewArrivalsActivity extends ListActivity {
 				}
 				mArrivalsAdapter.add(arrival);
 			}
+			needsBetterAccuracy = true;
 		}
 		mArrivalsAdapter.notifyDataSetChanged();
 
 		if (hasWindowFocus() && firstArrival != null) {
-			if (firstArrival.getUncertaintySeconds() > 17
-					|| firstArrival.getMinutes() == 0) {
+			if (needsBetterAccuracy
+					|| firstArrival.hasArrived()) {
 				// Get more data in 20s
 				mListTitleView.postDelayed(new Runnable() {
 					@Override
@@ -169,33 +225,61 @@ public class ViewArrivalsActivity extends ListActivity {
 						fetchLatestArrivals();
 					}
 				}, 20000);
+				Log.i(TAG, "Scheduled another data fetch in 20s");
 			} else {
 				// Get more when next train arrives
+				final int interval = firstArrival.getMinSecondsLeft() * 1000;
 				mListTitleView.postDelayed(new Runnable() {
 					@Override
 					public void run() {
 						fetchLatestArrivals();
 					}
-				}, firstArrival.getMinSecondsLeft() * 1000);
+				}, interval);
+				Log.i(TAG, "Scheduled another data fetch in " + interval / 1000
+						+ "s");
 			}
 			if (!mIsAutoUpdating) {
 				mIsAutoUpdating = true;
-				runAutoUpdate();
 			}
 		} else {
 			mIsAutoUpdating = false;
 		}
-
 	}
 
 	private void runAutoUpdate() {
-		if (mIsAutoUpdating) {
+		if (mIsAutoUpdating && mArrivalsAdapter != null) {
 			mArrivalsAdapter.notifyDataSetChanged();
 		}
 		if (hasWindowFocus()) {
 			mListTitleView.postDelayed(AUTO_UPDATE_RUNNABLE, 1000);
 		} else {
 			mIsAutoUpdating = false;
+		}
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.route_menu, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		int itemId = item.getItemId();
+		if (itemId == R.id.view_on_bart_site_button) {
+			startActivity(new Intent(
+					Intent.ACTION_VIEW,
+					Uri.parse("http://m.bart.gov/schedules/qp_results.aspx?type=departure&date=today&time="
+							+ DateFormat.format("h:mmaa",
+									System.currentTimeMillis()) + "&orig="
+							+ mOrigin.abbreviation
+							+ "&dest="
+							+ mDestination.abbreviation)));
+			mFetchArrivalsOnNextFocus = true;
+			return true;
+		} else {
+			return super.onOptionsItemSelected(item);
 		}
 	}
 }

@@ -24,9 +24,9 @@ import android.widget.SimpleCursorAdapter.ViewBinder;
 import android.widget.TextView;
 
 import com.dougkeen.bart.data.CursorUtils;
-import com.dougkeen.bart.data.FavoritesColumns;
+import com.dougkeen.bart.data.RoutesColumns;
 
-public class FavoritesDashboardActivity extends ListActivity {
+public class RoutesListActivity extends ListActivity {
 	private static final int DIALOG_DELETE_EVENT = 0;
 
 	protected Cursor mQuery;
@@ -41,22 +41,17 @@ public class FavoritesDashboardActivity extends ListActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
-		((TextView) findViewById(R.id.listTitle))
-				.setText(R.string.favorite_routes);
-		((TextView) findViewById(android.R.id.empty))
-				.setText(R.string.empty_favorites_list_message);
-
 		mQuery = managedQuery(Constants.FAVORITE_CONTENT_URI, new String[] {
-				FavoritesColumns._ID.string,
-				FavoritesColumns.FROM_STATION.string,
-				FavoritesColumns.TO_STATION.string }, null, null,
-				FavoritesColumns._ID.string);
+				RoutesColumns._ID.string,
+				RoutesColumns.FROM_STATION.string,
+				RoutesColumns.TO_STATION.string }, null, null,
+				RoutesColumns._ID.string);
 
 		SimpleCursorAdapter adapter = new SimpleCursorAdapter(this,
 				R.layout.favorite_listing,
 				mQuery,
-				new String[] { FavoritesColumns.FROM_STATION.string,
-								FavoritesColumns.TO_STATION.string },
+				new String[] { RoutesColumns.FROM_STATION.string,
+								RoutesColumns.TO_STATION.string },
 				new int[] { R.id.originText,
 							R.id.destinationText });
 		adapter.setViewBinder(new ViewBinder() {
@@ -75,9 +70,18 @@ public class FavoritesDashboardActivity extends ListActivity {
 	}
 
 	@Override
+	protected void onResume() {
+		super.onResume();
+		((TextView) findViewById(R.id.listTitle))
+				.setText(R.string.favorite_routes);
+		((TextView) findViewById(android.R.id.empty))
+				.setText(R.string.empty_favorites_list_message);
+	}
+
+	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.favorites_menu, menu);
+		inflater.inflate(R.menu.routes_list_menu, menu);
 		return true;
 	}
 
@@ -105,15 +109,15 @@ public class FavoritesDashboardActivity extends ListActivity {
 		super.onCreateContextMenu(menu, v, menuInfo);
 
 		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.favorite_context_menu, menu);
+		inflater.inflate(R.menu.route_context_menu, menu);
 
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
 		CursorWrapper item = (CursorWrapper) getListAdapter().getItem(
 				info.position);
 		Station orig = Station.getByAbbreviation(CursorUtils.getString(item,
-				FavoritesColumns.FROM_STATION));
+				RoutesColumns.FROM_STATION));
 		Station dest = Station.getByAbbreviation(CursorUtils.getString(item,
-				FavoritesColumns.TO_STATION));
+				RoutesColumns.TO_STATION));
 		mCurrentlySelectedRouteName = orig.name + " - " + dest.name;
 		menu.setHeaderTitle(mCurrentlySelectedRouteName);
 	}

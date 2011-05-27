@@ -1,8 +1,11 @@
 package com.dougkeen.bart.data;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.dougkeen.bart.Station;
 
-public class Arrival implements Comparable<Arrival> {
+public class Arrival implements Parcelable, Comparable<Arrival> {
 	public Arrival() {
 		super();
 	}
@@ -18,6 +21,10 @@ public class Arrival implements Comparable<Arrival> {
 		this.bikeAllowed = bikeAllowed;
 		this.trainLength = trainLength;
 		this.minutes = minutes;
+	}
+
+	public Arrival(Parcel in) {
+		readFromParcel(in);
 	}
 
 	private Station destination;
@@ -93,6 +100,10 @@ public class Arrival implements Comparable<Arrival> {
 		this.trainLength = trainLength;
 	}
 
+	public String getTrainLengthText() {
+		return trainLength + " car train";
+	}
+
 	public boolean getRequiresTransfer() {
 		return requiresTransfer;
 	}
@@ -142,14 +153,24 @@ public class Arrival implements Comparable<Arrival> {
 				.currentTimeMillis()) / 1000);
 	}
 
+	public boolean hasArrived() {
+		return getMinutes() == 0 || getMeanSecondsLeft() < 0;
+	}
+
 	public void calculateEstimates(long originalEstimateTime) {
 		setMinEstimate(originalEstimateTime + (getMinutes() * 60 * 1000));
 		setMaxEstimate(getMinEstimate() + (59 * 1000));
 	}
 
 	public void mergeEstimate(Arrival arrival) {
-		setMinEstimate(Math.max(getMinEstimate(), arrival.getMinEstimate()));
-		setMaxEstimate(Math.min(getMaxEstimate(), arrival.getMaxEstimate()));
+		final long newMin = Math
+				.max(getMinEstimate(), arrival.getMinEstimate());
+		final long newMax = Math
+				.min(getMaxEstimate(), arrival.getMaxEstimate());
+		if (newMax > newMin) { // We can never have 0 or negative uncertainty
+			setMinEstimate(newMin);
+			setMaxEstimate(newMax);
+		}
 	}
 
 	@Override
@@ -193,27 +214,79 @@ public class Arrival implements Comparable<Arrival> {
 		return delta > -60000 && delta < 60000;
 	}
 
-	@Override
-	public String toString() {
+	public String getCountdownText() {
 		StringBuilder builder = new StringBuilder();
-		builder.append(destination);
-		if(requiresTransfer) {
-			builder.append(" (w/ xfer)");
-		}
-		builder.append(", ");
-		builder.append(trainLength);
 		int secondsLeft = getMeanSecondsLeft();
-		if (getMinutes() == 0 || secondsLeft < 0) {
-			builder.append(" car train has arrived");
+		if (hasArrived()) {
+			builder.append("Arrived");
 		} else {
-			builder.append(" car train in ");
 			builder.append(secondsLeft / 60);
 			builder.append("m, ");
 			builder.append(secondsLeft % 60);
-			builder.append("s, ±");
-			builder.append(getUncertaintySeconds());
 			builder.append("s");
 		}
 		return builder.toString();
 	}
+
+	public String getUncertaintyText() {
+		if (hasArrived()) {
+			return "";
+		} else {
+			return "(±" + getUncertaintySeconds() + "s)";
+		}
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append(destination);
+		if (requiresTransfer) {
+			builder.append(" (w/ xfer)");
+		}
+		builder.append(", ");
+		builder.append(getCountdownText());
+		return builder.toString();
+	}
+
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(destination.abbreviation);
+		dest.writeString(destinationColor);
+		dest.writeString(platform);
+		dest.writeString(direction);
+		dest.writeByte((byte) (bikeAllowed ? 1 : 0));
+		dest.writeInt(trainLength);
+		dest.writeByte((byte) (requiresTransfer ? 1 : 0));
+		dest.writeInt(minutes);
+		dest.writeLong(minEstimate);
+		dest.writeLong(maxEstimate);
+	}
+
+	private void readFromParcel(Parcel in) {
+		destination = Station.getByAbbreviation(in.readString());
+		destinationColor = in.readString();
+		platform = in.readString();
+		direction = in.readString();
+		bikeAllowed = in.readByte() != 0;
+		trainLength = in.readInt();
+		requiresTransfer = in.readByte() != 0;
+		minutes = in.readInt();
+		minEstimate = in.readLong();
+		maxEstimate = in.readLong();
+	}
+
+	public static final Parcelable.Creator<Arrival> CREATOR = new Parcelable.Creator<Arrival>() {
+		public Arrival createFromParcel(Parcel in) {
+			return new Arrival(in);
+		}
+
+		public Arrival[] newArray(int size) {
+			return new Arrival[size];
+		}
+	};
 }

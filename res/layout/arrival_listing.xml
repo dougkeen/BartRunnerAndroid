@@ -1,12 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent" android:layout_height="fill_parent">
-	<TextView android:id="@+id/destinationText" style="@style/ArrivalDestinationText"
-		android:layout_alignParentTop="true" android:layout_alignParentLeft="true" />
 	<ImageView android:id="@+id/destinationColorBar" android:src="@drawable/basic_rectangle"
 		android:layout_width="wrap_content" android:layout_height="wrap_content"
+		android:layout_alignParentLeft="true" android:layout_centerVertical="true" />
+	<TextView android:id="@+id/destinationText" style="@style/ArrivalDestinationText"
+		android:layout_alignParentTop="true" android:layout_toRightOf="@id/destinationColorBar" />
+	<TextView android:id="@+id/trainLengthText" style="@style/ArrivalTrainLengthText"
+		android:layout_toRightOf="@id/destinationColorBar"
 		android:layout_below="@id/destinationText" />
-	<TextView android:layout_centerVertical="true"
-		android:layout_alignParentRight="true" android:id="@+id/countdown"
+	<TextView android:layout_alignParentRight="true" android:id="@+id/countdown"
 		style="@style/ArrivalCountdownText" />
+	<TextView android:layout_alignParentRight="true" android:id="@+id/uncertainty"
+		android:layout_below="@id/countdown" style="@style/ArrivalUncertaintyText" />
+	<ImageView android:id="@+id/bikeIcon" android:src="@drawable/bike"
+		android:layout_alignParentTop="true" android:layout_alignParentRight="true"
+		style="@style/BikeIcon" />
+	<ImageView android:id="@+id/xferIcon" android:src="@drawable/xfer"
+		android:layout_below="@id/bikeIcon" android:layout_alignParentRight="true"
+		style="@style/XferIcon" />
 </RelativeLayout>

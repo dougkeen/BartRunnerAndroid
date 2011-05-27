@@ -2,23 +2,24 @@
 <resources>
 	<string name="app_name">Bart Catcher</string>
 	<string name="favorite_routes">Favorite Routes</string>
-	<string name="empty_favorites_list_message">Press the menu button and select "Add
-		favorite" to
-		add a route</string>
-	<string name="add_favorite">Add favorite</string>
-	<string name="add_favorite_route">Add a favorite route</string>
+	<string name="empty_favorites_list_message">Press the menu button and select \"Add route\" to add
+		a route</string>
+	<string name="add_route">Add a route</string>
 	<string name="origin">Origin</string>
 	<string name="destination">Destination</string>
 	<string name="save">Save</string>
-	<string name="error_matching_origin_and_destination">The origin and destination stations must be different</string>
+	<string name="error_matching_origin_and_destination">The origin and destination stations must be
+		different</string>
 	<string name="error_null_destination">You must select a destination station</string>
 	<string name="error_null_origin">You must select an origin station</string>
-	<string name="arrival_wait_message">Please wait while real time arrival data is loaded...</string>
-	<string name="no_data_message">No arrival data is currently available for this route</string>
+	<string name="arrival_wait_message">Please wait while real time arrival data is
+		loaded...</string>
+	<string name="no_data_message">No arrival data is currently available for this
+		route</string>
 	<string name="view">View</string>
 	<string name="view_arrivals">View arrivals</string>
 	<string name="delete">Delete</string>
 	<string name="yes">Yes</string>
 	<string name="cancel">Cancel</string>
-	
+	<string name="view_on_bart_site">View details on BART site</string>
 </resources>

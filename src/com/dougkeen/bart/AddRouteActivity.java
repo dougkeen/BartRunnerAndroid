@@ -1,6 +1,6 @@
 package com.dougkeen.bart;
 
-import com.dougkeen.bart.data.FavoritesColumns;
+import com.dougkeen.bart.data.RoutesColumns;
 
 import android.app.Activity;
 import android.content.ContentValues;
@@ -14,7 +14,7 @@ import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import android.widget.Toast;
 
-public class AddFavoriteActivity extends Activity {
+public class AddRouteActivity extends Activity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -80,8 +80,8 @@ public class AddFavoriteActivity extends Activity {
 		}
 
 		ContentValues values = new ContentValues();
-		values.put(FavoritesColumns.FROM_STATION.string, origin.abbreviation);
-		values.put(FavoritesColumns.TO_STATION.string, destination.abbreviation);
+		values.put(RoutesColumns.FROM_STATION.string, origin.abbreviation);
+		values.put(RoutesColumns.TO_STATION.string, destination.abbreviation);
 
 		Uri newUri = getContentResolver().insert(
 				Constants.FAVORITE_CONTENT_URI, values);

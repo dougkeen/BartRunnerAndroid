@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	package="com.dougkeen.bart" android:versionCode="2"
+	package="com.dougkeen.bart" android:versionCode="3"
 	android:versionName="1.0">
 	<uses-permission android:name="android.permission.INTERNET" />
 	<uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -9,7 +9,7 @@
 
 	<application android:icon="@drawable/icon" android:label="@string/app_name"
 		android:debuggable="true">
-		<activity android:name=".FavoritesDashboardActivity"
+		<activity android:name="RoutesListActivity"
 			android:label="@string/app_name">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
@@ -28,7 +28,7 @@
 				<data android:mimeType="vnd.android.cursor.item/com.dougkeen.bart.favorite" />
 			</intent-filter>
 		</activity>
-		<activity android:name=".AddFavoriteActivity" android:label="@string/app_name">
+		<activity android:name="AddRouteActivity" android:label="@string/app_name">
 			<intent-filter>
 				<action android:name="android.intent.action.INSERT" />
 				<category android:name="android.intent.category.DEFAULT" />
