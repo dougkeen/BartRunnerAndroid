@@ -1,9 +1,8 @@
-
 syntax: glob
 bin/*
 syntax: regexp
 ^app_icon\.psd$
-syntax: regexp
 ^bart-train\.jpg$
-syntax: regexp
 ^colorscheme\.jpg$
+^release-builds\/.*$
+^gen\/.*$
