@@ -4,19 +4,24 @@
 	<ImageView android:id="@+id/destinationColorBar" android:src="@drawable/basic_rectangle"
 		android:layout_width="wrap_content" android:layout_height="wrap_content"
 		android:layout_alignParentLeft="true" android:layout_centerVertical="true" />
-	<TextView android:id="@+id/destinationText" style="@style/ArrivalDestinationText"
-		android:layout_alignParentTop="true" android:layout_toRightOf="@id/destinationColorBar" />
+	<LinearLayout android:id="@+id/topRow"
+		android:layout_width="fill_parent" android:layout_height="wrap_content"
+		android:layout_toRightOf="@id/destinationColorBar"
+		android:layout_alignParentTop="true">
+		<TextView android:id="@+id/destinationText" style="@style/ArrivalDestinationText"
+			android:layout_weight="1" android:singleLine="true"
+			android:ellipsize="marquee" />
+		<ImageView android:id="@+id/bikeIcon" android:src="@drawable/bike"
+			style="@style/BikeIcon" />
+		<TextView android:id="@+id/countdown" style="@style/ArrivalCountdownText"
+			android:gravity="right" />
+	</LinearLayout>
+	<ImageView android:id="@+id/xferIcon" android:src="@drawable/xfer"
+		android:layout_below="@id/topRow" android:layout_alignParentRight="true"
+		style="@style/XferIcon" />
 	<TextView android:id="@+id/trainLengthText" style="@style/ArrivalTrainLengthText"
 		android:layout_toRightOf="@id/destinationColorBar"
-		android:layout_below="@id/destinationText" />
-	<TextView android:layout_alignParentRight="true" android:id="@+id/countdown"
-		style="@style/ArrivalCountdownText" />
+		android:layout_below="@id/topRow" />
 	<TextView android:layout_alignParentRight="true" android:id="@+id/uncertainty"
-		android:layout_below="@id/countdown" style="@style/ArrivalUncertaintyText" />
-	<ImageView android:id="@+id/bikeIcon" android:src="@drawable/bike"
-		android:layout_alignParentTop="true" android:layout_alignParentRight="true"
-		style="@style/BikeIcon" />
-	<ImageView android:id="@+id/xferIcon" android:src="@drawable/xfer"
-		android:layout_below="@id/bikeIcon" android:layout_alignParentRight="true"
-		style="@style/XferIcon" />
+		android:layout_below="@id/topRow" style="@style/ArrivalUncertaintyText" />
 </RelativeLayout>
