@@ -8,6 +8,8 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import android.util.Log;
+
 import com.dougkeen.bart.data.Arrival;
 import com.dougkeen.bart.data.RealTimeArrivals;
 
@@ -20,7 +22,7 @@ public class EtdContentHandler extends DefaultHandler {
 
 	private final static List<String> TAGS = Arrays.asList("date", "time",
 			"abbreviation", "minutes", "platform", "direction", "length",
-			"hexcolor", "bikeflag");
+			"color", "hexcolor", "bikeflag");
 
 	private RealTimeArrivals realTimeArrivals;
 
@@ -76,6 +78,13 @@ public class EtdContentHandler extends DefaultHandler {
 			currentArrival.setDirection(currentValue);
 		} else if (localName.equals("length")) {
 			currentArrival.setTrainLength(Integer.parseInt(currentValue));
+		} else if (localName.equals("color")) {
+			try {
+				currentArrival.setLine(Line.valueOf(currentValue));
+			} catch (IllegalArgumentException e) {
+				Log.w("BartApp", "There is no line called '" + currentValue
+						+ "'");
+			}
 		} else if (localName.equals("hexcolor")) {
 			currentArrival.setDestinationColor("#ff"
 					+ currentValue.substring(1));

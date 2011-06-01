@@ -154,10 +154,14 @@ public enum Station {
 						.addAll(getOutboundTransferStation()
 								.getRoutesForDestination(dest,
 										getOutboundTransferStation()));
-			} else {
-				returnList.addAll(getRoutesForDestination(dest
-						.getInboundTransferStation(), dest
-						.getInboundTransferStation()));
+			} else if (dest.getInboundTransferStation() != null) {
+				final List<Route> routesForDestination = getRoutesForDestination(
+						dest.getInboundTransferStation(),
+						dest.getInboundTransferStation());
+				if (routesForDestination != null
+						&& !routesForDestination.isEmpty()) {
+					returnList.addAll(routesForDestination);
+				}
 			}
 		}
 		return returnList;

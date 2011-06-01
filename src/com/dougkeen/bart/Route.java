@@ -74,4 +74,25 @@ public class Route {
 		builder.append("]");
 		return builder.toString();
 	}
+
+	public boolean trainDestinationIsApplicable(Station lineDestination,
+			Line viaLine) {
+		Line routeLine = getLine();
+		if (routeLine.transferLine1 != null
+				&& viaLine.equals(routeLine.transferLine1)) {
+			return true;
+		} else if (routeLine.transferLine2 != null
+				&& viaLine.equals(routeLine.transferLine2)) {
+			return true;
+		} else {
+			int originIndex = viaLine.stations.indexOf(origin);
+			int routeDestinationIndex = viaLine.stations.indexOf(destination);
+			int lineDestinationIndex = viaLine.stations
+					.indexOf(lineDestination);
+			return routeDestinationIndex >= 0
+					&& ((originIndex <= routeDestinationIndex && routeDestinationIndex <= lineDestinationIndex)
+							|| (originIndex >= routeDestinationIndex && routeDestinationIndex >= lineDestinationIndex));
+		}
+	}
+
 }

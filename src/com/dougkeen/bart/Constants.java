@@ -8,4 +8,6 @@ public class Constants {
 	public static final String FAVORITE_CONTENT_ITEM_TYPE = "vnd.android.cursor.item/com.dougkeen.bart.favorite";
 	public static final Uri FAVORITE_CONTENT_URI = Uri.parse("content://"
 			+ AUTHORITY + "/favorites");
+	
+	public static final String TAG = "BartCatcher";
 }

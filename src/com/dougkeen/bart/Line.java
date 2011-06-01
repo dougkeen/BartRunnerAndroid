@@ -25,7 +25,7 @@ public enum Line {
 			Station.POWL, Station.MONT, Station.EMBR, Station.WOAK,
 			Station._12TH, Station._19TH, Station.MCAR, Station.ROCK,
 			Station.ORIN, Station.LAFY, Station.WCRK, Station.PHIL,
-			Station.CONC, Station.NCON),
+			Station.CONC, Station.NCON, Station.PITT),
 	BLUE(true, Station.DALY, Station.BALB, Station.GLEN, Station._24TH,
 			Station._16TH, Station.CIVC, Station.POWL, Station.MONT,
 			Station.EMBR, Station.WOAK, Station.LAKE, Station.FTVL,
@@ -36,13 +36,12 @@ public enum Line {
 			Station.EMBR, Station.WOAK, Station.LAKE, Station.FTVL,
 			Station.COLS, Station.SANL, Station.BAYF, Station.HAYW,
 			Station.SHAY, Station.UCTY, Station.FRMT),
-	YELLOW_ORANGE_TRANSFER(YELLOW, ORANGE, Station.MLBR, Station.SFIA,
-			Station.SBRN, Station.SSAN, Station.COLM, Station.DALY,
-			Station.BALB, Station.GLEN, Station._24TH, Station._16TH,
-			Station.CIVC, Station.POWL, Station.MONT, Station.EMBR,
-			Station.WOAK, Station._12TH, Station._19TH,
-			Station.MCAR, Station.ASHB, Station.DBRK, Station.NBRK,
-			Station.PLZA, Station.DELN, Station.RICH);
+	YELLOW_ORANGE_SCHEDULED_TRANSFER(YELLOW, ORANGE, Station.MLBR,
+			Station.SFIA, Station.SBRN, Station.SSAN, Station.COLM,
+			Station.DALY, Station.BALB, Station.GLEN, Station._24TH,
+			Station._16TH, Station.CIVC, Station.POWL, Station.MONT,
+			Station.EMBR, Station.WOAK, Station.ASHB, Station.DBRK,
+			Station.NBRK, Station.PLZA, Station.DELN, Station.RICH);
 
 	public final List<Station> stations;
 
@@ -93,16 +92,4 @@ public enum Line {
 
 		return destinations;
 	}
-
-	public boolean trainDestinationIsApplicable(Station station) {
-		if (transferLine1 != null && transferLine1.stations.contains(station)) {
-			return true;
-		} else if (transferLine2 != null
-				&& transferLine2.stations.contains(station)) {
-			return true;
-		} else {
-			return stations.contains(station);
-		}
-	}
-
 }

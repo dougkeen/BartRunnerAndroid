@@ -62,7 +62,7 @@ public class RealTimeArrivals {
 		Station destination = Station.getByAbbreviation(arrival
 				.getDestinationAbbreviation());
 		for (Route route : routes) {
-			if (route.getLine().trainDestinationIsApplicable(destination)) {
+			if (route.trainDestinationIsApplicable(destination, arrival.getLine())) {
 				arrival.setRequiresTransfer(route.hasTransfer());
 				getArrivals().add(arrival);
 				arrival.calculateEstimates(time);

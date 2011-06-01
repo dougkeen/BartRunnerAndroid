@@ -14,7 +14,6 @@ import android.os.Parcelable;
 import android.os.PowerManager;
 import android.text.format.DateFormat;
 import android.util.Log;
-import android.util.TimeFormatException;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -24,12 +23,10 @@ import android.widget.Toast;
 
 import com.dougkeen.bart.GetRealTimeArrivalsTask.Params;
 import com.dougkeen.bart.data.Arrival;
-import com.dougkeen.bart.data.RoutesColumns;
 import com.dougkeen.bart.data.RealTimeArrivals;
+import com.dougkeen.bart.data.RoutesColumns;
 
 public class ViewArrivalsActivity extends ListActivity {
-
-	private static final String TAG = "BartCatcher";
 
 	private static final int UNCERTAINTY_THRESHOLD = 17;
 
@@ -143,22 +140,33 @@ public class ViewArrivalsActivity extends ListActivity {
 	private void fetchLatestArrivals() {
 		if (!hasWindowFocus())
 			return;
+		if (mGetArrivalsTask != null
+				&& mGetArrivalsTask.getStatus()
+						.equals(AsyncTask.Status.RUNNING)) {
+			// Don't overlap fetches
+			return;
+		}
 
 		mGetArrivalsTask = new GetRealTimeArrivalsTask() {
 			@Override
 			public void onResult(RealTimeArrivals result) {
-				Log.i(TAG, "Processing data from server");
+				Log.i(Constants.TAG, "Processing data from server");
 				processLatestArrivals(result);
-				Log.i(TAG, "Done processing data from server");
+				Log.i(Constants.TAG, "Done processing data from server");
 			}
 
 			@Override
 			public void onNetworkError(IOException e) {
-				Toast.makeText(ViewArrivalsActivity.this, e.getMessage(),
-						Toast.LENGTH_SHORT).show();
+				Log.w(Constants.TAG, e.getMessage());
+				Toast.makeText(ViewArrivalsActivity.this,
+						R.string.could_not_connect,
+						Toast.LENGTH_LONG).show();
+				((TextView) findViewById(android.R.id.empty))
+						.setText(R.string.could_not_connect);
+
 			}
 		};
-		Log.i(TAG, "Fetching data from server");
+		Log.i(Constants.TAG, "Fetching data from server");
 		mGetArrivalsTask.execute(new GetRealTimeArrivalsTask.Params(mOrigin,
 				mDestination));
 	}
@@ -225,7 +233,7 @@ public class ViewArrivalsActivity extends ListActivity {
 						fetchLatestArrivals();
 					}
 				}, 20000);
-				Log.i(TAG, "Scheduled another data fetch in 20s");
+				Log.i(Constants.TAG, "Scheduled another data fetch in 20s");
 			} else {
 				// Get more when next train arrives
 				final int interval = firstArrival.getMinSecondsLeft() * 1000;
@@ -235,7 +243,8 @@ public class ViewArrivalsActivity extends ListActivity {
 						fetchLatestArrivals();
 					}
 				}, interval);
-				Log.i(TAG, "Scheduled another data fetch in " + interval / 1000
+				Log.i(Constants.TAG, "Scheduled another data fetch in "
+						+ interval / 1000
 						+ "s");
 			}
 			if (!mIsAutoUpdating) {

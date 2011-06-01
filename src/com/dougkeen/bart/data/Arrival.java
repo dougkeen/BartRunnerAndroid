@@ -3,6 +3,7 @@ package com.dougkeen.bart.data;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.dougkeen.bart.Line;
 import com.dougkeen.bart.Station;
 
 public class Arrival implements Parcelable, Comparable<Arrival> {
@@ -28,6 +29,7 @@ public class Arrival implements Parcelable, Comparable<Arrival> {
 	}
 
 	private Station destination;
+	private Line line;
 	private String destinationColor;
 	private String platform;
 	private String direction;
@@ -58,6 +60,14 @@ public class Arrival implements Parcelable, Comparable<Arrival> {
 		if (destination != null)
 			return destination.abbreviation;
 		return null;
+	}
+
+	public Line getLine() {
+		return line;
+	}
+
+	public void setLine(Line line) {
+		this.line = line;
 	}
 
 	public String getDestinationColor() {

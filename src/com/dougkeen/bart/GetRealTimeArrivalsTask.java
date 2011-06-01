@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.List;
 
 import org.xml.sax.SAXException;
@@ -16,6 +17,7 @@ import android.util.Xml;
 public abstract class GetRealTimeArrivalsTask extends
 		AsyncTask<GetRealTimeArrivalsTask.Params, Integer, RealTimeArrivals> {
 
+	private static final int CONNECTION_TIMEOUT_MILLIS = 10000;
 	private final static String API_KEY = "5LD9-IAYI-TRAT-MHHW";
 	private final static String API_URL = "http://api.bart.gov/api/etd.aspx?cmd=etd&key="
 								+ API_KEY + "&orig=%1$s&dir=%2$s";
@@ -32,30 +34,28 @@ public abstract class GetRealTimeArrivalsTask extends
 
 		mRoutes = params.origin.getRoutesForDestination(params.destination);
 
-		URL sourceUrl;
-		try {
-			sourceUrl = new URL(String.format(API_URL,
-					params.origin.abbreviation, mRoutes.get(0).getDirection()));
-		} catch (MalformedURLException e) {
-			throw new RuntimeException(e);
-		}
-
 		if (!isCancelled()) {
-			return getArrivalsFromNetwork(params, sourceUrl, 0);
+			return getArrivalsFromNetwork(params, 0);
 		} else {
 			return null;
 		}
 	}
 
 	private RealTimeArrivals getArrivalsFromNetwork(Params params,
-			URL sourceUrl, int attemptNumber) {
+			int attemptNumber) {
 		try {
+			URL sourceUrl = new URL(String.format(API_URL,
+					params.origin.abbreviation, mRoutes.get(0).getDirection()));
+
 			EtdContentHandler handler = new EtdContentHandler(params.origin,
 					params.destination, mRoutes);
 			if (isCancelled()) {
 				return null;
 			}
-			Xml.parse(sourceUrl.openStream(), Xml.findEncodingByName("UTF-8"),
+			URLConnection connection = sourceUrl.openConnection();
+			connection.setConnectTimeout(CONNECTION_TIMEOUT_MILLIS);
+			Xml.parse(connection.getInputStream(),
+					Xml.findEncodingByName("UTF-8"),
 					handler);
 			final RealTimeArrivals realTimeArrivals = handler
 					.getRealTimeArrivals();
@@ -71,8 +71,7 @@ public abstract class GetRealTimeArrivalsTask extends
 				} catch (InterruptedException interrupt) {
 					// Ignore... just go on to next attempt
 				}
-				return getArrivalsFromNetwork(params, sourceUrl,
-						attemptNumber++);
+				return getArrivalsFromNetwork(params, attemptNumber + 1);
 			} else {
 				mIOException = e;
 				return null;
