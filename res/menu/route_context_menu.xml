@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-	<item android:title="@string/view_arrivals" android:id="@+id/view"></item>
+	<item android:title="@string/view_departures" android:id="@+id/view"></item>
 	<item android:title="@string/delete" android:id="@+id/delete"></item>
 </menu>

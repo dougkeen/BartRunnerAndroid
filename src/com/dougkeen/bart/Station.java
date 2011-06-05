@@ -47,7 +47,8 @@ public enum Station {
 	UCTY("ucty", "Union City", true, "bayf"),
 	WCRK("wcrk", "Walnut Creek", false, "mcar"),
 	WDUB("wdub", "West Dublin/Pleasanton", false, "bayf"),
-	WOAK("woak", "West Oakland", false);
+	WOAK("woak", "West Oakland", false),
+	SPCL("spcl", "Special", false);
 
 	public final String abbreviation;
 	public final String name;

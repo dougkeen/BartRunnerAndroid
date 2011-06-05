@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.PowerManager;
 import android.text.format.DateFormat;
+import android.text.util.Linkify;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -21,12 +22,12 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.dougkeen.bart.GetRealTimeArrivalsTask.Params;
-import com.dougkeen.bart.data.Arrival;
-import com.dougkeen.bart.data.RealTimeArrivals;
+import com.dougkeen.bart.GetRealTimeDeparturesTask.Params;
+import com.dougkeen.bart.data.Departure;
+import com.dougkeen.bart.data.RealTimeDepartures;
 import com.dougkeen.bart.data.RoutesColumns;
 
-public class ViewArrivalsActivity extends ListActivity {
+public class ViewDeparturesActivity extends ListActivity {
 
 	private static final int UNCERTAINTY_THRESHOLD = 17;
 
@@ -35,11 +36,11 @@ public class ViewArrivalsActivity extends ListActivity {
 	private Station mOrigin;
 	private Station mDestination;
 
-	private ArrayAdapter<Arrival> mArrivalsAdapter;
+	private ArrayAdapter<Departure> mDeparturesAdapter;
 
 	private TextView mListTitleView;
 
-	private AsyncTask<Params, Integer, RealTimeArrivals> mGetArrivalsTask;
+	private AsyncTask<Params, Integer, RealTimeDepartures> mGetDeparturesTask;
 
 	private boolean mIsAutoUpdating = false;
 
@@ -52,7 +53,7 @@ public class ViewArrivalsActivity extends ListActivity {
 
 	private PowerManager.WakeLock mWakeLock;
 
-	private boolean mFetchArrivalsOnNextFocus;
+	private boolean mFetchDeparturesOnNextFocus;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -77,31 +78,32 @@ public class ViewArrivalsActivity extends ListActivity {
 		mOrigin = Station.getByAbbreviation(cursor.getString(0));
 		mDestination = Station.getByAbbreviation(cursor.getString(1));
 
-		String header = mOrigin.name + " to " + mDestination.name;
+		String header = "Departures:\n" + mOrigin.name + " to "
+				+ mDestination.name;
 
 		mListTitleView = (TextView) findViewById(R.id.listTitle);
 		mListTitleView.setText(header);
 		((TextView) findViewById(android.R.id.empty))
-				.setText(R.string.arrival_wait_message);
+				.setText(R.string.departure_wait_message);
 
-		mArrivalsAdapter = new ArrivalArrayAdapter(this,
-				R.layout.arrival_listing);
+		mDeparturesAdapter = new DepartureArrayAdapter(this,
+				R.layout.departure_listing);
 		if (savedInstanceState != null
-				&& savedInstanceState.containsKey("arrivals")) {
-			for (Parcelable arrival : savedInstanceState
-					.getParcelableArray("arrivals")) {
-				mArrivalsAdapter.add((Arrival) arrival);
+				&& savedInstanceState.containsKey("departures")) {
+			for (Parcelable departure : savedInstanceState
+					.getParcelableArray("departures")) {
+				mDeparturesAdapter.add((Departure) departure);
 			}
 		}
-		setListAdapter(mArrivalsAdapter);
+		setListAdapter(mDeparturesAdapter);
 
-		mFetchArrivalsOnNextFocus = true;
+		mFetchDeparturesOnNextFocus = true;
 	}
 
 	@Override
 	protected void onDestroy() {
-		if (mGetArrivalsTask != null) {
-			mGetArrivalsTask.cancel(true);
+		if (mGetDeparturesTask != null) {
+			mGetDeparturesTask.cancel(true);
 		}
 		super.onDestroy();
 	}
@@ -109,26 +111,28 @@ public class ViewArrivalsActivity extends ListActivity {
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		Arrival[] arrivals = new Arrival[mArrivalsAdapter.getCount()];
-		for (int i = mArrivalsAdapter.getCount() - 1; i >= 0; i--) {
-			arrivals[i] = mArrivalsAdapter.getItem(i);
+		Departure[] departures = new Departure[mDeparturesAdapter.getCount()];
+		for (int i = mDeparturesAdapter.getCount() - 1; i >= 0; i--) {
+			departures[i] = mDeparturesAdapter.getItem(i);
 		}
-		outState.putParcelableArray("arrivals", arrivals);
+		outState.putParcelableArray("departures", departures);
 	}
 
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
 		super.onWindowFocusChanged(hasFocus);
 		if (hasFocus) {
-			if (mFetchArrivalsOnNextFocus) {
-				fetchLatestArrivals();
-				mFetchArrivalsOnNextFocus = false;
+			if (mFetchDeparturesOnNextFocus) {
+				fetchLatestDepartures();
+				mFetchDeparturesOnNextFocus = false;
 			}
 			PowerManager powerManaer = (PowerManager) getSystemService(Context.POWER_SERVICE);
-			mWakeLock = powerManaer.newWakeLock(
-					PowerManager.SCREEN_DIM_WAKE_LOCK, "ViewArrivalsActivity");
+			mWakeLock = powerManaer
+					.newWakeLock(
+							PowerManager.SCREEN_DIM_WAKE_LOCK,
+							"ViewDeparturesActivity");
 			mWakeLock.acquire();
-			if (mArrivalsAdapter != null && !mArrivalsAdapter.isEmpty()) {
+			if (mDeparturesAdapter != null && !mDeparturesAdapter.isEmpty()) {
 				mIsAutoUpdating = true;
 			}
 			runAutoUpdate();
@@ -137,28 +141,28 @@ public class ViewArrivalsActivity extends ListActivity {
 		}
 	}
 
-	private void fetchLatestArrivals() {
+	private void fetchLatestDepartures() {
 		if (!hasWindowFocus())
 			return;
-		if (mGetArrivalsTask != null
-				&& mGetArrivalsTask.getStatus()
+		if (mGetDeparturesTask != null
+				&& mGetDeparturesTask.getStatus()
 						.equals(AsyncTask.Status.RUNNING)) {
 			// Don't overlap fetches
 			return;
 		}
 
-		mGetArrivalsTask = new GetRealTimeArrivalsTask() {
+		mGetDeparturesTask = new GetRealTimeDeparturesTask() {
 			@Override
-			public void onResult(RealTimeArrivals result) {
+			public void onResult(RealTimeDepartures result) {
 				Log.i(Constants.TAG, "Processing data from server");
-				processLatestArrivals(result);
+				processLatestDepartures(result);
 				Log.i(Constants.TAG, "Done processing data from server");
 			}
 
 			@Override
 			public void onNetworkError(IOException e) {
 				Log.w(Constants.TAG, e.getMessage());
-				Toast.makeText(ViewArrivalsActivity.this,
+				Toast.makeText(ViewDeparturesActivity.this,
 						R.string.could_not_connect,
 						Toast.LENGTH_LONG).show();
 				((TextView) findViewById(android.R.id.empty))
@@ -167,80 +171,96 @@ public class ViewArrivalsActivity extends ListActivity {
 			}
 		};
 		Log.i(Constants.TAG, "Fetching data from server");
-		mGetArrivalsTask.execute(new GetRealTimeArrivalsTask.Params(mOrigin,
+		mGetDeparturesTask.execute(new GetRealTimeDeparturesTask.Params(
+				mOrigin,
 				mDestination));
 	}
 
-	protected void processLatestArrivals(RealTimeArrivals result) {
-		if (result.getArrivals().isEmpty()) {
-			((TextView) findViewById(android.R.id.empty))
-					.setText(R.string.no_data_message);
+	protected void processLatestDepartures(RealTimeDepartures result) {
+		if (result.getDepartures().isEmpty()) {
+			final TextView textView = (TextView) findViewById(android.R.id.empty);
+			textView.setText(R.string.no_data_message);
+			Linkify.addLinks(textView, Linkify.WEB_URLS);
 			return;
 		}
 
 		boolean needsBetterAccuracy = false;
-		Arrival firstArrival = null;
-		final List<Arrival> arrivals = result.getArrivals();
-		if (mArrivalsAdapter.getCount() > 0) {
+		Departure firstDeparture = null;
+		final List<Departure> departures = result.getDepartures();
+		if (mDeparturesAdapter.getCount() > 0) {
 			int adapterIndex = -1;
-			for (Arrival arrival : arrivals) {
+			for (Departure departure : departures) {
 				adapterIndex++;
-				Arrival existingArrival = null;
-				if (adapterIndex < mArrivalsAdapter.getCount()) {
-					existingArrival = mArrivalsAdapter.getItem(adapterIndex);
+				Departure existingDeparture = null;
+				if (adapterIndex < mDeparturesAdapter.getCount()) {
+					existingDeparture = mDeparturesAdapter
+							.getItem(adapterIndex);
 				}
-				while (existingArrival != null
-						&& !arrival.equals(existingArrival)) {
-					mArrivalsAdapter.remove(existingArrival);
-					if (adapterIndex < mArrivalsAdapter.getCount()) {
-						existingArrival = mArrivalsAdapter
+				while (existingDeparture != null
+						&& !departure.equals(existingDeparture)) {
+					mDeparturesAdapter.remove(existingDeparture);
+					if (adapterIndex < mDeparturesAdapter.getCount()) {
+						existingDeparture = mDeparturesAdapter
 								.getItem(adapterIndex);
 					} else {
-						existingArrival = null;
+						existingDeparture = null;
 					}
 				}
-				if (existingArrival != null) {
-					existingArrival.mergeEstimate(arrival);
+				if (existingDeparture != null) {
+					existingDeparture.mergeEstimate(departure);
 				} else {
-					mArrivalsAdapter.add(arrival);
-					existingArrival = arrival;
+					mDeparturesAdapter.add(departure);
+					existingDeparture = departure;
 				}
-				if (firstArrival == null) {
-					firstArrival = existingArrival;
+				if (firstDeparture == null) {
+					firstDeparture = existingDeparture;
 				}
-				if (existingArrival.getUncertaintySeconds() > UNCERTAINTY_THRESHOLD) {
+				if (existingDeparture.getUncertaintySeconds() > UNCERTAINTY_THRESHOLD) {
 					needsBetterAccuracy = true;
 				}
 			}
 		} else {
-			for (Arrival arrival : arrivals) {
-				if (firstArrival == null) {
-					firstArrival = arrival;
+			for (Departure departure : departures) {
+				if (firstDeparture == null) {
+					firstDeparture = departure;
 				}
-				mArrivalsAdapter.add(arrival);
+				mDeparturesAdapter.add(departure);
 			}
 			needsBetterAccuracy = true;
 		}
-		mArrivalsAdapter.notifyDataSetChanged();
+		mDeparturesAdapter.notifyDataSetChanged();
 
-		if (hasWindowFocus() && firstArrival != null) {
+		if (hasWindowFocus() && firstDeparture != null) {
 			if (needsBetterAccuracy
-					|| firstArrival.hasArrived()) {
+					|| firstDeparture.hasDeparted()) {
 				// Get more data in 20s
 				mListTitleView.postDelayed(new Runnable() {
 					@Override
 					public void run() {
-						fetchLatestArrivals();
+						fetchLatestDepartures();
 					}
 				}, 20000);
 				Log.i(Constants.TAG, "Scheduled another data fetch in 20s");
 			} else {
-				// Get more when next train arrives
-				final int interval = firstArrival.getMinSecondsLeft() * 1000;
+				// Get more 90 seconds before next train arrives, right when
+				// next train arrives, or 3 minutes, whichever is sooner
+				final long now = System.currentTimeMillis();
+				final long nextDepartureMillis = firstDeparture
+						.getMinSecondsLeft() * 1000L;
+				final int intervalUntilNextDeparture = (int) (nextDepartureMillis - now);
+				final int alternativeInterval = 3 * 60 * 1000;
+
+				int interval = intervalUntilNextDeparture;
+				if (intervalUntilNextDeparture > 95000
+						&& intervalUntilNextDeparture < alternativeInterval) {
+					interval = interval - 90 * 1000;
+				} else if (intervalUntilNextDeparture > alternativeInterval) {
+					interval = alternativeInterval;
+				}
 				mListTitleView.postDelayed(new Runnable() {
 					@Override
 					public void run() {
-						fetchLatestArrivals();
+						fetchLatestDepartures();
 					}
 				}, interval);
 				Log.i(Constants.TAG, "Scheduled another data fetch in "
@@ -256,8 +276,8 @@ public class ViewArrivalsActivity extends ListActivity {
 	}
 
 	private void runAutoUpdate() {
-		if (mIsAutoUpdating && mArrivalsAdapter != null) {
-			mArrivalsAdapter.notifyDataSetChanged();
+		if (mIsAutoUpdating && mDeparturesAdapter != null) {
+			mDeparturesAdapter.notifyDataSetChanged();
 		}
 		if (hasWindowFocus()) {
 			mListTitleView.postDelayed(AUTO_UPDATE_RUNNABLE, 1000);
@@ -285,7 +305,7 @@ public class ViewArrivalsActivity extends ListActivity {
 							+ mOrigin.abbreviation
 							+ "&dest="
 							+ mDestination.abbreviation)));
-			mFetchArrivalsOnNextFocus = true;
+			mFetchDeparturesOnNextFocus = true;
 			return true;
 		} else {
 			return super.onOptionsItemSelected(item);

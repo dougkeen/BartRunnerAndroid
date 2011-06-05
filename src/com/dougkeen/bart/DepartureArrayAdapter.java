@@ -13,36 +13,36 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.dougkeen.bart.data.Arrival;
+import com.dougkeen.bart.data.Departure;
 
-public class ArrivalArrayAdapter extends ArrayAdapter<Arrival> {
+public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
 
-	public ArrivalArrayAdapter(Context context, int textViewResourceId,
-			Arrival[] objects) {
+	public DepartureArrayAdapter(Context context, int textViewResourceId,
+			Departure[] objects) {
 		super(context, textViewResourceId, objects);
 	}
 
-	public ArrivalArrayAdapter(Context context, int resource,
-			int textViewResourceId, Arrival[] objects) {
+	public DepartureArrayAdapter(Context context, int resource,
+			int textViewResourceId, Departure[] objects) {
 		super(context, resource, textViewResourceId, objects);
 	}
 
-	public ArrivalArrayAdapter(Context context, int resource,
-			int textViewResourceId, List<Arrival> objects) {
+	public DepartureArrayAdapter(Context context, int resource,
+			int textViewResourceId, List<Departure> objects) {
 		super(context, resource, textViewResourceId, objects);
 	}
 
-	public ArrivalArrayAdapter(Context context, int resource,
+	public DepartureArrayAdapter(Context context, int resource,
 			int textViewResourceId) {
 		super(context, resource, textViewResourceId);
 	}
 
-	public ArrivalArrayAdapter(Context context, int textViewResourceId,
-			List<Arrival> objects) {
+	public DepartureArrayAdapter(Context context, int textViewResourceId,
+			List<Departure> objects) {
 		super(context, textViewResourceId, objects);
 	}
 
-	public ArrivalArrayAdapter(Context context, int textViewResourceId) {
+	public DepartureArrayAdapter(Context context, int textViewResourceId) {
 		super(context, textViewResourceId);
 	}
 
@@ -53,30 +53,30 @@ public class ArrivalArrayAdapter extends ArrayAdapter<Arrival> {
 			view = convertView;
 		} else {
 			LayoutInflater inflater = LayoutInflater.from(getContext());
-			view = inflater.inflate(R.layout.arrival_listing, parent, false);
+			view = inflater.inflate(R.layout.departure_listing, parent, false);
 		}
 
-		Arrival arrival = getItem(position);
-		((TextView) view.findViewById(R.id.destinationText)).setText(arrival
+		Departure departure = getItem(position);
+		((TextView) view.findViewById(R.id.destinationText)).setText(departure
 				.getDestination().toString());
-		((TextView) view.findViewById(R.id.trainLengthText)).setText(arrival
+		((TextView) view.findViewById(R.id.trainLengthText)).setText(departure
 				.getTrainLengthText());
 		ImageView colorBar = (ImageView) view
 				.findViewById(R.id.destinationColorBar);
 		((GradientDrawable) colorBar.getDrawable()).setColor(Color
-				.parseColor(arrival.getDestinationColor()));
-		((TextView) view.findViewById(R.id.countdown)).setText(arrival
+				.parseColor(departure.getDestinationColor()));
+		((TextView) view.findViewById(R.id.countdown)).setText(departure
 				.getCountdownText());
-		((TextView) view.findViewById(R.id.uncertainty)).setText(arrival
+		((TextView) view.findViewById(R.id.uncertainty)).setText(departure
 				.getUncertaintyText());
-		if (arrival.isBikeAllowed()) {
+		if (departure.isBikeAllowed()) {
 			((ImageView) view.findViewById(R.id.bikeIcon))
 					.setVisibility(View.VISIBLE);
 		} else {
 			((ImageView) view.findViewById(R.id.bikeIcon))
 					.setVisibility(View.INVISIBLE);
 		}
-		if (arrival.getRequiresTransfer()) {
+		if (departure.getRequiresTransfer()) {
 			((ImageView) view.findViewById(R.id.xferIcon))
 					.setVisibility(View.VISIBLE);
 		} else {

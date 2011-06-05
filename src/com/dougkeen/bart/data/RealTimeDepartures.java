@@ -7,8 +7,8 @@ import java.util.List;
 import com.dougkeen.bart.Route;
 import com.dougkeen.bart.Station;
 
-public class RealTimeArrivals {
-	public RealTimeArrivals(Station origin, Station destination,
+public class RealTimeDepartures {
+	public RealTimeDepartures(Station origin, Station destination,
 			List<Route> routes) {
 		this.origin = origin;
 		this.destination = destination;
@@ -19,7 +19,7 @@ public class RealTimeArrivals {
 	private Station destination;
 	private long time;
 
-	private List<Arrival> arrivals;
+	private List<Departure> departures;
 
 	private List<Route> routes;
 
@@ -47,32 +47,35 @@ public class RealTimeArrivals {
 		this.time = time;
 	}
 
-	public List<Arrival> getArrivals() {
-		if (arrivals == null) {
-			arrivals = new ArrayList<Arrival>();
+	public List<Departure> getDepartures() {
+		if (departures == null) {
+			departures = new ArrayList<Departure>();
 		}
-		return arrivals;
+		return departures;
 	}
 
-	public void setArrivals(List<Arrival> arrivals) {
-		this.arrivals = arrivals;
+	public void setDepartures(List<Departure> departures) {
+		this.departures = departures;
 	}
 
-	public void addArrival(Arrival arrival) {
-		Station destination = Station.getByAbbreviation(arrival
+	public void addDeparture(Departure departure) {
+		Station destination = Station.getByAbbreviation(departure
 				.getDestinationAbbreviation());
+		if (departure.getLine() == null)
+			return;
 		for (Route route : routes) {
-			if (route.trainDestinationIsApplicable(destination, arrival.getLine())) {
-				arrival.setRequiresTransfer(route.hasTransfer());
-				getArrivals().add(arrival);
-				arrival.calculateEstimates(time);
+			if (route.trainDestinationIsApplicable(destination,
+					departure.getLine())) {
+				departure.setRequiresTransfer(route.hasTransfer());
+				getDepartures().add(departure);
+				departure.calculateEstimates(time);
 				return;
 			}
 		}
 	}
 
-	public void sortArrivals() {
-		Collections.sort(getArrivals());
+	public void sortDepartures() {
+		Collections.sort(getDepartures());
 	}
 
 	public List<Route> getRoutes() {
@@ -86,14 +89,14 @@ public class RealTimeArrivals {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("RealTimeArrivals [origin=");
+		builder.append("RealTimeDepartures [origin=");
 		builder.append(origin);
 		builder.append(", destination=");
 		builder.append(destination);
 		builder.append(", time=");
 		builder.append(time);
-		builder.append(", arrivals=");
-		builder.append(arrivals);
+		builder.append(", departures=");
+		builder.append(departures);
 		builder.append("]");
 		return builder.toString();
 	}

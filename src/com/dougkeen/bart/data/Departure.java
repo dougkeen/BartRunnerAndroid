@@ -6,12 +6,14 @@ import android.os.Parcelable;
 import com.dougkeen.bart.Line;
 import com.dougkeen.bart.Station;
 
-public class Arrival implements Parcelable, Comparable<Arrival> {
-	public Arrival() {
+public class Departure implements Parcelable, Comparable<Departure> {
+	private static final int MINIMUM_MERGE_OVERLAP_MILLIS = 10000;
+
+	public Departure() {
 		super();
 	}
 
-	public Arrival(String destinationAbbr, String destinationColor,
+	public Departure(String destinationAbbr, String destinationColor,
 			String platform, String direction, boolean bikeAllowed,
 			int trainLength, int minutes) {
 		super();
@@ -24,7 +26,7 @@ public class Arrival implements Parcelable, Comparable<Arrival> {
 		this.minutes = minutes;
 	}
 
-	public Arrival(Parcel in) {
+	public Departure(Parcel in) {
 		readFromParcel(in);
 	}
 
@@ -163,20 +165,30 @@ public class Arrival implements Parcelable, Comparable<Arrival> {
 				.currentTimeMillis()) / 1000);
 	}
 
-	public boolean hasArrived() {
+	public boolean hasDeparted() {
 		return getMinutes() == 0 || getMeanSecondsLeft() < 0;
 	}
 
 	public void calculateEstimates(long originalEstimateTime) {
-		setMinEstimate(originalEstimateTime + (getMinutes() * 60 * 1000));
-		setMaxEstimate(getMinEstimate() + (59 * 1000));
+		setMinEstimate(originalEstimateTime + (getMinutes() * 60 * 1000)
+				- (30000));
+		setMaxEstimate(getMinEstimate() + 60000);
 	}
 
-	public void mergeEstimate(Arrival arrival) {
+	public void mergeEstimate(Departure departure) {
+		if ((getMaxEstimate() - departure.getMinEstimate()) < MINIMUM_MERGE_OVERLAP_MILLIS
+				|| departure.getMaxEstimate() - getMinEstimate() < MINIMUM_MERGE_OVERLAP_MILLIS) {
+			// The estimate must have changed... just use the latest incoming
+			// values
+			setMinEstimate(departure.getMinEstimate());
+			setMaxEstimate(departure.getMaxEstimate());
+			return;
+		}
+
 		final long newMin = Math
-				.max(getMinEstimate(), arrival.getMinEstimate());
+				.max(getMinEstimate(), departure.getMinEstimate());
 		final long newMax = Math
-				.min(getMaxEstimate(), arrival.getMaxEstimate());
+				.min(getMaxEstimate(), departure.getMaxEstimate());
 		if (newMax > newMin) { // We can never have 0 or negative uncertainty
 			setMinEstimate(newMin);
 			setMaxEstimate(newMax);
@@ -184,7 +196,7 @@ public class Arrival implements Parcelable, Comparable<Arrival> {
 	}
 
 	@Override
-	public int compareTo(Arrival another) {
+	public int compareTo(Departure another) {
 		return (this.getMinutes() > another.getMinutes()) ? 1 : (
 				(this.getMinutes() == another.getMinutes()) ? 0 : -1);
 	}
@@ -197,7 +209,7 @@ public class Arrival implements Parcelable, Comparable<Arrival> {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Arrival other = (Arrival) obj;
+		Departure other = (Departure) obj;
 		if (bikeAllowed != other.bikeAllowed)
 			return false;
 		if (destination != other.destination)
@@ -227,8 +239,8 @@ public class Arrival implements Parcelable, Comparable<Arrival> {
 	public String getCountdownText() {
 		StringBuilder builder = new StringBuilder();
 		int secondsLeft = getMeanSecondsLeft();
-		if (hasArrived()) {
-			builder.append("Arrived");
+		if (hasDeparted()) {
+			builder.append("Departed");
 		} else {
 			builder.append(secondsLeft / 60);
 			builder.append("m, ");
@@ -239,7 +251,7 @@ public class Arrival implements Parcelable, Comparable<Arrival> {
 	}
 
 	public String getUncertaintyText() {
-		if (hasArrived()) {
+		if (hasDeparted()) {
 			return "";
 		} else {
 			return "(±" + getUncertaintySeconds() + "s)";
@@ -290,13 +302,13 @@ public class Arrival implements Parcelable, Comparable<Arrival> {
 		maxEstimate = in.readLong();
 	}
 
-	public static final Parcelable.Creator<Arrival> CREATOR = new Parcelable.Creator<Arrival>() {
-		public Arrival createFromParcel(Parcel in) {
-			return new Arrival(in);
+	public static final Parcelable.Creator<Departure> CREATOR = new Parcelable.Creator<Departure>() {
+		public Departure createFromParcel(Parcel in) {
+			return new Departure(in);
 		}
 
-		public Arrival[] newArray(int size) {
-			return new Arrival[size];
+		public Departure[] newArray(int size) {
+			return new Departure[size];
 		}
 	};
 }

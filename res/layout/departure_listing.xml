@@ -8,20 +8,20 @@
 		android:layout_width="fill_parent" android:layout_height="wrap_content"
 		android:layout_toRightOf="@id/destinationColorBar"
 		android:layout_alignParentTop="true">
-		<TextView android:id="@+id/destinationText" style="@style/ArrivalDestinationText"
+		<TextView android:id="@+id/destinationText" style="@style/DepartureDestinationText"
 			android:layout_weight="1" android:singleLine="true"
 			android:ellipsize="marquee" />
 		<ImageView android:id="@+id/bikeIcon" android:src="@drawable/bike"
 			style="@style/BikeIcon" />
-		<TextView android:id="@+id/countdown" style="@style/ArrivalCountdownText"
+		<TextView android:id="@+id/countdown" style="@style/DepartureCountdownText"
 			android:gravity="right" />
 	</LinearLayout>
 	<ImageView android:id="@+id/xferIcon" android:src="@drawable/xfer"
 		android:layout_below="@id/topRow" android:layout_alignParentRight="true"
 		style="@style/XferIcon" />
-	<TextView android:id="@+id/trainLengthText" style="@style/ArrivalTrainLengthText"
+	<TextView android:id="@+id/trainLengthText" style="@style/DepartureTrainLengthText"
 		android:layout_toRightOf="@id/destinationColorBar"
 		android:layout_below="@id/topRow" />
 	<TextView android:layout_alignParentRight="true" android:id="@+id/uncertainty"
-		android:layout_below="@id/topRow" style="@style/ArrivalUncertaintyText" />
+		android:layout_below="@id/topRow" style="@style/DepartureUncertaintyText" />
 </RelativeLayout>

@@ -9,13 +9,13 @@ import java.util.List;
 
 import org.xml.sax.SAXException;
 
-import com.dougkeen.bart.data.RealTimeArrivals;
+import com.dougkeen.bart.data.RealTimeDepartures;
 
 import android.os.AsyncTask;
 import android.util.Xml;
 
-public abstract class GetRealTimeArrivalsTask extends
-		AsyncTask<GetRealTimeArrivalsTask.Params, Integer, RealTimeArrivals> {
+public abstract class GetRealTimeDeparturesTask extends
+		AsyncTask<GetRealTimeDeparturesTask.Params, Integer, RealTimeDepartures> {
 
 	private static final int CONNECTION_TIMEOUT_MILLIS = 10000;
 	private final static String API_KEY = "5LD9-IAYI-TRAT-MHHW";
@@ -28,20 +28,20 @@ public abstract class GetRealTimeArrivalsTask extends
 	private List<Route> mRoutes;
 
 	@Override
-	protected RealTimeArrivals doInBackground(Params... paramsArray) {
+	protected RealTimeDepartures doInBackground(Params... paramsArray) {
 		// Always expect one param
 		Params params = paramsArray[0];
 
 		mRoutes = params.origin.getRoutesForDestination(params.destination);
 
 		if (!isCancelled()) {
-			return getArrivalsFromNetwork(params, 0);
+			return getDeparturesFromNetwork(params, 0);
 		} else {
 			return null;
 		}
 	}
 
-	private RealTimeArrivals getArrivalsFromNetwork(Params params,
+	private RealTimeDepartures getDeparturesFromNetwork(Params params,
 			int attemptNumber) {
 		try {
 			URL sourceUrl = new URL(String.format(API_URL,
@@ -57,9 +57,9 @@ public abstract class GetRealTimeArrivalsTask extends
 			Xml.parse(connection.getInputStream(),
 					Xml.findEncodingByName("UTF-8"),
 					handler);
-			final RealTimeArrivals realTimeArrivals = handler
-					.getRealTimeArrivals();
-			return realTimeArrivals;
+			final RealTimeDepartures realTimeDepartures = handler
+					.getRealTimeDepartures();
+			return realTimeDepartures;
 		} catch (MalformedURLException e) {
 			throw new RuntimeException(e);
 		} catch (UnsupportedEncodingException e) {
@@ -71,7 +71,7 @@ public abstract class GetRealTimeArrivalsTask extends
 				} catch (InterruptedException interrupt) {
 					// Ignore... just go on to next attempt
 				}
-				return getArrivalsFromNetwork(params, attemptNumber + 1);
+				return getDeparturesFromNetwork(params, attemptNumber + 1);
 			} else {
 				mIOException = e;
 				return null;
@@ -101,7 +101,7 @@ public abstract class GetRealTimeArrivalsTask extends
 	}
 
 	@Override
-	protected void onPostExecute(RealTimeArrivals result) {
+	protected void onPostExecute(RealTimeDepartures result) {
 		if (result != null) {
 			onResult(result);
 		} else {
@@ -109,7 +109,7 @@ public abstract class GetRealTimeArrivalsTask extends
 		}
 	}
 
-	public abstract void onResult(RealTimeArrivals result);
+	public abstract void onResult(RealTimeDepartures result);
 
 	public abstract void onNetworkError(IOException e);
 }

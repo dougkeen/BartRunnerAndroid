@@ -10,31 +10,33 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import android.util.Log;
 
-import com.dougkeen.bart.data.Arrival;
-import com.dougkeen.bart.data.RealTimeArrivals;
+import com.dougkeen.bart.data.Departure;
+import com.dougkeen.bart.data.RealTimeDepartures;
 
 public class EtdContentHandler extends DefaultHandler {
 	public EtdContentHandler(Station origin, Station destination,
 			List<Route> routes) {
 		super();
-		realTimeArrivals = new RealTimeArrivals(origin, destination, routes);
+		realTimeDepartures = new RealTimeDepartures(origin, destination, routes);
 	}
 
 	private final static List<String> TAGS = Arrays.asList("date", "time",
 			"abbreviation", "minutes", "platform", "direction", "length",
 			"color", "hexcolor", "bikeflag");
 
-	private RealTimeArrivals realTimeArrivals;
+	private RealTimeDepartures realTimeDepartures;
 
-	public RealTimeArrivals getRealTimeArrivals() {
-		return realTimeArrivals;
+	public RealTimeDepartures getRealTimeDepartures() {
+		return realTimeDepartures;
 	}
 
 	private String date;
 	private String currentDestination;
 	private String currentValue;
-	private Arrival currentArrival;
+	private Departure currentDeparture;
 	private boolean isParsingTag;
+
+	private boolean getDestinationFromLine;
 
 	@Override
 	public void characters(char[] ch, int start, int length)
@@ -51,9 +53,13 @@ public class EtdContentHandler extends DefaultHandler {
 			isParsingTag = true;
 		}
 		if (localName.equals("estimate")) {
-			currentArrival = new Arrival();
-			currentArrival.setDestination(Station
-					.getByAbbreviation(currentDestination));
+			currentDeparture = new Departure();
+			if (currentDestination.equalsIgnoreCase("SPCL")) {
+				getDestinationFromLine = true;
+			} else {
+				currentDeparture.setDestination(Station
+						.getByAbbreviation(currentDestination));
+			}
 		}
 	}
 
@@ -63,40 +69,60 @@ public class EtdContentHandler extends DefaultHandler {
 		if (localName.equals("date")) {
 			date = currentValue;
 		} else if (localName.equals("time")) {
-			realTimeArrivals.setTime(Date.parse(date + " " + currentValue));
+			realTimeDepartures.setTime(Date.parse(date + " " + currentValue));
 		} else if (localName.equals("abbreviation")) {
 			currentDestination = currentValue;
 		} else if (localName.equals("minutes")) {
 			if (currentValue.equalsIgnoreCase("arrived")) {
-				currentArrival.setMinutes(0);
+				currentDeparture.setMinutes(0);
 			} else {
-				currentArrival.setMinutes(Integer.parseInt(currentValue));
+				currentDeparture.setMinutes(Integer.parseInt(currentValue));
 			}
 		} else if (localName.equals("platform")) {
-			currentArrival.setPlatform(currentValue);
+			currentDeparture.setPlatform(currentValue);
 		} else if (localName.equals("direction")) {
-			currentArrival.setDirection(currentValue);
+			currentDeparture.setDirection(currentValue);
 		} else if (localName.equals("length")) {
-			currentArrival.setTrainLength(Integer.parseInt(currentValue));
+			currentDeparture.setTrainLength(Integer.parseInt(currentValue));
 		} else if (localName.equals("color")) {
 			try {
-				currentArrival.setLine(Line.valueOf(currentValue));
+				if (getDestinationFromLine) {
+					final Line line = Line.valueOf(currentValue);
+					currentDeparture.setLine(line);
+					currentDeparture.setDestination(line
+							.getUsualTerminusForDirectionAndOrigin(
+									currentDeparture.getDirection(),
+									realTimeDepartures.getOrigin()));
+				} else if (currentValue.equalsIgnoreCase("WHITE")) {
+					for (Line line : Line.values()) {
+						if (line.stations.indexOf(currentDeparture
+								.getDestination()) >= 0
+								&& line.stations.indexOf(realTimeDepartures
+										.getDestination()) >= 0) {
+							currentDeparture.setLine(line);
+							break;
+						}
+					}
+				} else {
+					currentDeparture.setLine(Line.valueOf(currentValue));
+				}
 			} catch (IllegalArgumentException e) {
-				Log.w("BartApp", "There is no line called '" + currentValue
+				Log.w(Constants.TAG, "There is no line called '" + currentValue
 						+ "'");
 			}
 		} else if (localName.equals("hexcolor")) {
-			currentArrival.setDestinationColor("#ff"
+			currentDeparture.setDestinationColor("#ff"
 					+ currentValue.substring(1));
 		} else if (localName.equals("bikeflag")) {
-			currentArrival.setBikeAllowed(currentValue.equalsIgnoreCase("1"));
+			currentDeparture.setBikeAllowed(currentValue.equalsIgnoreCase("1"));
 		} else if (localName.equals("estimate")) {
-			realTimeArrivals.addArrival(currentArrival);
-			currentArrival = null;
+			realTimeDepartures.addDeparture(currentDeparture);
+			currentDeparture = null;
+			getDestinationFromLine = false;
 		} else if (localName.equals("etd")) {
 			currentDestination = null;
 		} else if (localName.equals("station")) {
-			realTimeArrivals.sortArrivals();
+			realTimeDepartures.sortDepartures();
 		}
 		isParsingTag = false;
 		currentValue = null;

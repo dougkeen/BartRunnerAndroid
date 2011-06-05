@@ -92,4 +92,22 @@ public enum Line {
 
 		return destinations;
 	}
+
+	public Station getUsualTerminusForDirectionAndOrigin(String direction,
+			Station origin) {
+		boolean isNorth = false;
+		if (direction.toLowerCase().startsWith("s") && directionMayInvert
+				&& origin.invertDirection) {
+			isNorth = true;
+		} else if (direction.toLowerCase().startsWith("n")
+				&& !(directionMayInvert && origin.invertDirection)) {
+			isNorth = true;
+		}
+
+		if (isNorth) {
+			return stations.get(stations.size() - 1);
+		} else {
+			return stations.get(0);
+		}
+	}
 }
