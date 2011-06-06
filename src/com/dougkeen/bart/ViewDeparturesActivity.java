@@ -244,10 +244,8 @@ public class ViewDeparturesActivity extends ListActivity {
 			} else {
 				// Get more 90 seconds before next train arrives, right when
 				// next train arrives, or 3 minutes, whichever is sooner
-				final long now = System.currentTimeMillis();
-				final long nextDepartureMillis = firstDeparture
-						.getMinSecondsLeft() * 1000L;
-				final int intervalUntilNextDeparture = (int) (nextDepartureMillis - now);
+				final int intervalUntilNextDeparture = firstDeparture
+						.getMinSecondsLeft() * 1000;
 				final int alternativeInterval = 3 * 60 * 1000;
 
 				int interval = intervalUntilNextDeparture;

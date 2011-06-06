@@ -3,8 +3,7 @@
 	<string name="app_name">BART Catcher</string>
 	<string name="favorite_routes">Favorite Routes</string>
 	<string name="empty_favorites_list_message">Press the menu button and select \"Add route\" to
-		add
-		a route</string>
+		add a route</string>
 	<string name="add_route">Add a route</string>
 	<string name="origin">Origin</string>
 	<string name="destination">Destination</string>
@@ -16,7 +15,8 @@
 	<string name="departure_wait_message">Please wait while real time departure data is
 		loaded...</string>
 	<string name="no_data_message">No departure data is currently available for this
-		route. Note that there may be service advisories posted at
+		route. Note that this route may require a non-standard transfer due to
+		a temporary change in service. Check for service advisories posted at
 		http://m.bart.gov/schedules/advisories/</string>
 	<string name="view">View</string>
 	<string name="view_departures">View departures</string>

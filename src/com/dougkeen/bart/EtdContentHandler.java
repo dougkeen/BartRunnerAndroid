@@ -36,8 +36,6 @@ public class EtdContentHandler extends DefaultHandler {
 	private Departure currentDeparture;
 	private boolean isParsingTag;
 
-	private boolean getDestinationFromLine;
-
 	@Override
 	public void characters(char[] ch, int start, int length)
 			throws SAXException {
@@ -54,12 +52,8 @@ public class EtdContentHandler extends DefaultHandler {
 		}
 		if (localName.equals("estimate")) {
 			currentDeparture = new Departure();
-			if (currentDestination.equalsIgnoreCase("SPCL")) {
-				getDestinationFromLine = true;
-			} else {
-				currentDeparture.setDestination(Station
+			currentDeparture.setDestination(Station
 						.getByAbbreviation(currentDestination));
-			}
 		}
 	}
 
@@ -86,14 +80,7 @@ public class EtdContentHandler extends DefaultHandler {
 			currentDeparture.setTrainLength(Integer.parseInt(currentValue));
 		} else if (localName.equals("color")) {
 			try {
-				if (getDestinationFromLine) {
-					final Line line = Line.valueOf(currentValue);
-					currentDeparture.setLine(line);
-					currentDeparture.setDestination(line
-							.getUsualTerminusForDirectionAndOrigin(
-									currentDeparture.getDirection(),
-									realTimeDepartures.getOrigin()));
-				} else if (currentValue.equalsIgnoreCase("WHITE")) {
+				if (currentValue.equalsIgnoreCase("WHITE")) {
 					for (Line line : Line.values()) {
 						if (line.stations.indexOf(currentDeparture
 								.getDestination()) >= 0
@@ -118,7 +105,6 @@ public class EtdContentHandler extends DefaultHandler {
 		} else if (localName.equals("estimate")) {
 			realTimeDepartures.addDeparture(currentDeparture);
 			currentDeparture = null;
-			getDestinationFromLine = false;
 		} else if (localName.equals("etd")) {
 			currentDestination = null;
 		} else if (localName.equals("station")) {
