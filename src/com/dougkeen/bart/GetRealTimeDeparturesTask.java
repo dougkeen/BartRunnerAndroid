@@ -1,20 +1,34 @@
 package com.dougkeen.bart;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.conn.params.ConnManagerParams;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.xml.sax.SAXException;
+
+import android.os.AsyncTask;
+import android.util.Log;
+import android.util.Xml;
 
 import com.dougkeen.bart.data.RealTimeDepartures;
 
-import android.os.AsyncTask;
-import android.util.Xml;
-
-public abstract class GetRealTimeDeparturesTask extends
+public abstract class GetRealTimeDeparturesTask
+		extends
 		AsyncTask<GetRealTimeDeparturesTask.Params, Integer, RealTimeDepartures> {
 
 	private static final int CONNECTION_TIMEOUT_MILLIS = 10000;
@@ -23,7 +37,7 @@ public abstract class GetRealTimeDeparturesTask extends
 								+ API_KEY + "&orig=%1$s&dir=%2$s";
 	private final static int MAX_ATTEMPTS = 3;
 
-	private IOException mIOException;
+	private Exception mException;
 
 	private List<Route> mRoutes;
 
@@ -43,8 +57,9 @@ public abstract class GetRealTimeDeparturesTask extends
 
 	private RealTimeDepartures getDeparturesFromNetwork(Params params,
 			int attemptNumber) {
+		String xml = null;
 		try {
-			URL sourceUrl = new URL(String.format(API_URL,
+			HttpUriRequest request = new HttpGet(String.format(API_URL,
 					params.origin.abbreviation, mRoutes.get(0).getDirection()));
 
 			EtdContentHandler handler = new EtdContentHandler(params.origin,
@@ -52,11 +67,23 @@ public abstract class GetRealTimeDeparturesTask extends
 			if (isCancelled()) {
 				return null;
 			}
-			URLConnection connection = sourceUrl.openConnection();
-			connection.setConnectTimeout(CONNECTION_TIMEOUT_MILLIS);
-			Xml.parse(connection.getInputStream(),
-					Xml.findEncodingByName("UTF-8"),
-					handler);
+
+			HttpResponse response = executeWithRecovery(request);
+
+			if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+				throw new IOException("Server returned "
+						+ response.getStatusLine().toString());
+			}
+
+			StringWriter writer = new StringWriter();
+			IOUtils.copy(response.getEntity().getContent(), writer, "UTF-8");
+
+			xml = writer.toString();
+			if (xml.length() == 0) {
+				throw new IOException("Server returned blank xml document");
+			}
+
+			Xml.parse(xml, handler);
 			final RealTimeDepartures realTimeDepartures = handler
 					.getRealTimeDepartures();
 			return realTimeDepartures;
@@ -67,18 +94,43 @@ public abstract class GetRealTimeDeparturesTask extends
 		} catch (IOException e) {
 			if (attemptNumber < MAX_ATTEMPTS - 1) {
 				try {
+					Log.w(Constants.TAG,
+							"Attempt to contact server failed... retrying in 5s",
+							e);
 					Thread.sleep(5000);
 				} catch (InterruptedException interrupt) {
 					// Ignore... just go on to next attempt
 				}
 				return getDeparturesFromNetwork(params, attemptNumber + 1);
 			} else {
-				mIOException = e;
+				mException = new Exception("Could not contact BART system", e);
 				return null;
 			}
 		} catch (SAXException e) {
-			throw new RuntimeException(e);
+			mException = new Exception(
+					"Could not understand response from BART system: " + xml, e);
+			return null;
 		}
+	}
+
+	private static HttpResponse executeWithRecovery(final HttpUriRequest request)
+			throws IOException, ClientProtocolException {
+		try {
+			return getHttpClient().execute(request);
+		} catch (IllegalStateException e) {
+			// try again... this is a rare error
+			return getHttpClient().execute(request);
+		}
+	}
+
+	private static HttpClient getHttpClient() {
+		HttpClient client = new DefaultHttpClient();
+		final HttpParams params = client.getParams();
+		HttpConnectionParams.setConnectionTimeout(params,
+				CONNECTION_TIMEOUT_MILLIS);
+		HttpConnectionParams.setSoTimeout(params, CONNECTION_TIMEOUT_MILLIS);
+		ConnManagerParams.setTimeout(params, CONNECTION_TIMEOUT_MILLIS);
+		return client;
 	}
 
 	public static class Params {
@@ -105,11 +157,11 @@ public abstract class GetRealTimeDeparturesTask extends
 		if (result != null) {
 			onResult(result);
 		} else {
-			onNetworkError(mIOException);
+			onError(mException);
 		}
 	}
 
 	public abstract void onResult(RealTimeDepartures result);
 
-	public abstract void onNetworkError(IOException e);
+	public abstract void onError(Exception exception);
 }

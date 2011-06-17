@@ -166,7 +166,7 @@ public class Departure implements Parcelable, Comparable<Departure> {
 	}
 
 	public boolean hasDeparted() {
-		return getMinutes() == 0 || getMeanSecondsLeft() < 0;
+		return getMeanSecondsLeft() < 0;
 	}
 
 	public void calculateEstimates(long originalEstimateTime) {

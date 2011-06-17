@@ -1,6 +1,5 @@
 package com.dougkeen.bart;
 
-import java.io.IOException;
 import java.util.List;
 
 import android.app.ListActivity;
@@ -53,7 +52,7 @@ public class ViewDeparturesActivity extends ListActivity {
 
 	private PowerManager.WakeLock mWakeLock;
 
-	private boolean mFetchDeparturesOnNextFocus;
+	private boolean mDataFetchIsPending;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -96,14 +95,13 @@ public class ViewDeparturesActivity extends ListActivity {
 			}
 		}
 		setListAdapter(mDeparturesAdapter);
-
-		mFetchDeparturesOnNextFocus = true;
 	}
 
 	@Override
 	protected void onDestroy() {
 		if (mGetDeparturesTask != null) {
 			mGetDeparturesTask.cancel(true);
+			mDataFetchIsPending = false;
 		}
 		super.onDestroy();
 	}
@@ -122,9 +120,8 @@ public class ViewDeparturesActivity extends ListActivity {
 	public void onWindowFocusChanged(boolean hasFocus) {
 		super.onWindowFocusChanged(hasFocus);
 		if (hasFocus) {
-			if (mFetchDeparturesOnNextFocus) {
+			if (!mDataFetchIsPending) {
 				fetchLatestDepartures();
-				mFetchDeparturesOnNextFocus = false;
 			}
 			PowerManager powerManaer = (PowerManager) getSystemService(Context.POWER_SERVICE);
 			mWakeLock = powerManaer
@@ -154,20 +151,21 @@ public class ViewDeparturesActivity extends ListActivity {
 		mGetDeparturesTask = new GetRealTimeDeparturesTask() {
 			@Override
 			public void onResult(RealTimeDepartures result) {
+				mDataFetchIsPending = false;
 				Log.i(Constants.TAG, "Processing data from server");
 				processLatestDepartures(result);
 				Log.i(Constants.TAG, "Done processing data from server");
 			}
 
 			@Override
-			public void onNetworkError(IOException e) {
-				Log.w(Constants.TAG, e.getMessage());
+			public void onError(Exception e) {
+				mDataFetchIsPending = false;
+				Log.w(Constants.TAG, e.getMessage(), e);
 				Toast.makeText(ViewDeparturesActivity.this,
 						R.string.could_not_connect,
 						Toast.LENGTH_LONG).show();
 				((TextView) findViewById(android.R.id.empty))
 						.setText(R.string.could_not_connect);
-
 			}
 		};
 		Log.i(Constants.TAG, "Fetching data from server");
@@ -234,13 +232,7 @@ public class ViewDeparturesActivity extends ListActivity {
 			if (needsBetterAccuracy
 					|| firstDeparture.hasDeparted()) {
 				// Get more data in 20s
-				mListTitleView.postDelayed(new Runnable() {
-					@Override
-					public void run() {
-						fetchLatestDepartures();
-					}
-				}, 20000);
-				Log.i(Constants.TAG, "Scheduled another data fetch in 20s");
+				scheduleDataFetch(20000);
 			} else {
 				// Get more 90 seconds before next train arrives, right when
 				// next train arrives, or 3 minutes, whichever is sooner
@@ -255,21 +247,32 @@ public class ViewDeparturesActivity extends ListActivity {
 				} else if (intervalUntilNextDeparture > alternativeInterval) {
 					interval = alternativeInterval;
 				}
-				mListTitleView.postDelayed(new Runnable() {
-					@Override
-					public void run() {
-						fetchLatestDepartures();
-					}
-				}, interval);
-				Log.i(Constants.TAG, "Scheduled another data fetch in "
-						+ interval / 1000
-						+ "s");
+
+				if (interval < 0) {
+					interval = 20000;
+				}
+
+				scheduleDataFetch(interval);
 			}
 			if (!mIsAutoUpdating) {
 				mIsAutoUpdating = true;
 			}
 		} else {
 			mIsAutoUpdating = false;
+		}
+	}
+
+	private void scheduleDataFetch(int millisUntilExecute) {
+		if (!mDataFetchIsPending) {
+			mListTitleView.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					fetchLatestDepartures();
+				}
+			}, millisUntilExecute);
+			mDataFetchIsPending = true;
+			Log.i(Constants.TAG, "Scheduled another data fetch in "
+					+ millisUntilExecute / 1000 + "s");
 		}
 	}
 
@@ -303,7 +306,6 @@ public class ViewDeparturesActivity extends ListActivity {
 							+ mOrigin.abbreviation
 							+ "&dest="
 							+ mDestination.abbreviation)));
-			mFetchDeparturesOnNextFocus = true;
 			return true;
 		} else {
 			return super.onOptionsItemSelected(item);
