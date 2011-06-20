@@ -98,12 +98,22 @@ public class ViewDeparturesActivity extends ListActivity {
 	}
 
 	@Override
+	protected void onPause() {
+		cancelDataFetch();
+		super.onPause();
+	}
+
+	@Override
 	protected void onDestroy() {
+		cancelDataFetch();
+		super.onDestroy();
+	}
+
+	private void cancelDataFetch() {
 		if (mGetDeparturesTask != null) {
 			mGetDeparturesTask.cancel(true);
 			mDataFetchIsPending = false;
 		}
-		super.onDestroy();
 	}
 
 	@Override
@@ -123,8 +133,8 @@ public class ViewDeparturesActivity extends ListActivity {
 			if (!mDataFetchIsPending) {
 				fetchLatestDepartures();
 			}
-			PowerManager powerManaer = (PowerManager) getSystemService(Context.POWER_SERVICE);
-			mWakeLock = powerManaer
+			PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+			mWakeLock = powerManager
 					.newWakeLock(
 							PowerManager.SCREEN_DIM_WAKE_LOCK,
 							"ViewDeparturesActivity");

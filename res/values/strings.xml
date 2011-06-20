@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<string name="app_name">BART Catcher</string>
+	<string name="app_name">BART Runner</string>
 	<string name="favorite_routes">Favorite Routes</string>
 	<string name="empty_favorites_list_message">Press the menu button and select \"Add route\" to
 		add a route</string>

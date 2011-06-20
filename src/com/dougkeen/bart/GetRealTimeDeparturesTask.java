@@ -33,7 +33,7 @@ public abstract class GetRealTimeDeparturesTask
 	private final static String API_KEY = "5LD9-IAYI-TRAT-MHHW";
 	private final static String API_URL = "http://api.bart.gov/api/etd.aspx?cmd=etd&key="
 								+ API_KEY + "&orig=%1$s&dir=%2$s";
-	private final static int MAX_ATTEMPTS = 3;
+	private final static int MAX_ATTEMPTS = 5;
 
 	private Exception mException;
 
@@ -93,9 +93,9 @@ public abstract class GetRealTimeDeparturesTask
 			if (attemptNumber < MAX_ATTEMPTS - 1) {
 				try {
 					Log.w(Constants.TAG,
-							"Attempt to contact server failed... retrying in 5s",
+							"Attempt to contact server failed... retrying in 3s",
 							e);
-					Thread.sleep(5000);
+					Thread.sleep(3000);
 				} catch (InterruptedException interrupt) {
 					// Ignore... just go on to next attempt
 				}
