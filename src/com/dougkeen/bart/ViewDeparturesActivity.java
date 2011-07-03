@@ -176,6 +176,8 @@ public class ViewDeparturesActivity extends ListActivity {
 						Toast.LENGTH_LONG).show();
 				((TextView) findViewById(android.R.id.empty))
 						.setText(R.string.could_not_connect);
+				// Try again in 60s
+				scheduleDataFetch(60000);
 			}
 		};
 		Log.i(Constants.TAG, "Fetching data from server");
