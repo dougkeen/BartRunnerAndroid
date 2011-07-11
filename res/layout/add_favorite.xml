@@ -19,8 +19,11 @@
 	<Spinner android:id="@+id/destination_spinner"
 		android:layout_below="@id/destination_label" android:layout_height="wrap_content"
 		android:layout_width="fill_parent" />
+	<CheckBox android:id="@+id/return_checkbox"
+		android:layout_below="@id/destination_spinner" android:layout_height="wrap_content"
+		android:layout_width="fill_parent" android:text="@string/also_add_return_route" />
 	<LinearLayout android:layout_height="wrap_content"
-		android:layout_width="fill_parent" android:layout_below="@id/destination_spinner"
+		android:layout_width="fill_parent" android:layout_below="@id/return_checkbox"
 		style="@style/ButtonBar" android:id="@+id/buttonBar"
 		android:orientation="horizontal">
 		<Button android:text="@string/save" android:layout_weight="1"

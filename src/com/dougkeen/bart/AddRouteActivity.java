@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import android.widget.Toast;
@@ -24,13 +25,12 @@ public class AddRouteActivity extends Activity {
 		setContentView(R.layout.add_favorite);
 
 		SpinnerAdapter originSpinnerAdapter = new ArrayAdapter<Station>(this,
-				R.layout.simple_spinner_item, Station.values());
+				R.layout.simple_spinner_item, Station.getStationList());
 		((Spinner) findViewById(R.id.origin_spinner))
 				.setAdapter(originSpinnerAdapter);
 
 		SpinnerAdapter destinationSpinnerAdapter = new ArrayAdapter<Station>(
-				this,
-				R.layout.simple_spinner_item, Station.values());
+				this, R.layout.simple_spinner_item, Station.getStationList());
 		((Spinner) findViewById(R.id.destination_spinner))
 				.setAdapter(destinationSpinnerAdapter);
 
@@ -85,6 +85,16 @@ public class AddRouteActivity extends Activity {
 
 		Uri newUri = getContentResolver().insert(
 				Constants.FAVORITE_CONTENT_URI, values);
+
+		if (((CheckBox) findViewById(R.id.return_checkbox)).isChecked()) {
+			values = new ContentValues();
+			values.put(RoutesColumns.FROM_STATION.string,
+					destination.abbreviation);
+			values.put(RoutesColumns.TO_STATION.string, origin.abbreviation);
+
+			getContentResolver().insert(Constants.FAVORITE_CONTENT_URI, values);
+		}
+
 		setResult(RESULT_OK, (new Intent()).setAction(newUri.toString()));
 		finish();
 	}
