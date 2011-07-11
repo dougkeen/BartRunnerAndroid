@@ -168,6 +168,16 @@ public enum Station {
 		return returnList;
 	}
 
+	static public List<Station> getStationList() {
+		List<Station> list = new ArrayList<Station>();
+		for (Station station : values()) {
+			if (!station.equals(Station.SPCL)) {
+				list.add(station);
+			}
+		}
+		return list;
+	}
+
 	public String toString() {
 		return name;
 	}
