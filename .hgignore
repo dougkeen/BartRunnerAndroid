@@ -6,3 +6,9 @@ syntax: regexp
 ^colorscheme\.jpg$
 ^release-builds\/.*$
 ^gen\/.*$
+syntax: regexp
+^Screenshot\.add\.png$
+syntax: regexp
+^Screenshot\.departures\.png$
+syntax: regexp
+^Screenshot\.list\.png$

@@ -2,4 +2,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 	<item android:title="@string/view_on_bart_site" android:icon="@android:drawable/ic_menu_view"
 		android:id="@+id/view_on_bart_site_button"></item>
+	<item android:title="@string/view_system_map" android:icon="@android:drawable/ic_menu_mapmode"
+		android:id="@+id/view_system_map_button"></item>
 </menu>

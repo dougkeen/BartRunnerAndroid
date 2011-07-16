@@ -27,4 +27,5 @@
 	<string name="could_not_connect">Could not connect to BART services. Please try
 		again later.</string>
 	<string name="also_add_return_route">Also add return route</string>
+	<string name="view_system_map">View system map</string>
 </resources>

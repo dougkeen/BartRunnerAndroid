@@ -92,6 +92,11 @@ public class RoutesListActivity extends ListActivity {
 			startActivity(new Intent(Intent.ACTION_INSERT,
 					Constants.FAVORITE_CONTENT_URI));
 			return true;
+		} else if (itemId == R.id.view_system_map_button) {
+			startActivity(new Intent(
+					Intent.ACTION_VIEW,
+					Uri.parse(Constants.MAP_URL)));
+			return true;
 		} else {
 			return super.onOptionsItemSelected(item);
 		}

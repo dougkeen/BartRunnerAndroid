@@ -319,6 +319,11 @@ public class ViewDeparturesActivity extends ListActivity {
 							+ "&dest="
 							+ mDestination.abbreviation)));
 			return true;
+		} else if (itemId == R.id.view_system_map_button) {
+			startActivity(new Intent(
+					Intent.ACTION_VIEW,
+					Uri.parse(Constants.MAP_URL)));
+			return true;
 		} else {
 			return super.onOptionsItemSelected(item);
 		}
