@@ -195,7 +195,6 @@ public class Departure implements Parcelable, Comparable<Departure> {
 		}
 	}
 
-	@Override
 	public int compareTo(Departure another) {
 		return (this.getMinutes() > another.getMinutes()) ? 1 : (
 				(this.getMinutes() == another.getMinutes()) ? 0 : -1);
@@ -270,12 +269,10 @@ public class Departure implements Parcelable, Comparable<Departure> {
 		return builder.toString();
 	}
 
-	@Override
 	public int describeContents() {
 		return 0;
 	}
 
-	@Override
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeString(destination.abbreviation);
 		dest.writeString(destinationColor);

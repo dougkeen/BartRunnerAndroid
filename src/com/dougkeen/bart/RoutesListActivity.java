@@ -42,20 +42,16 @@ public class RoutesListActivity extends ListActivity {
 		setContentView(R.layout.main);
 
 		mQuery = managedQuery(Constants.FAVORITE_CONTENT_URI, new String[] {
-				RoutesColumns._ID.string,
-				RoutesColumns.FROM_STATION.string,
+				RoutesColumns._ID.string, RoutesColumns.FROM_STATION.string,
 				RoutesColumns.TO_STATION.string }, null, null,
 				RoutesColumns._ID.string);
 
 		SimpleCursorAdapter adapter = new SimpleCursorAdapter(this,
-				R.layout.favorite_listing,
-				mQuery,
-				new String[] { RoutesColumns.FROM_STATION.string,
-								RoutesColumns.TO_STATION.string },
-				new int[] { R.id.originText,
-							R.id.destinationText });
+				R.layout.favorite_listing, mQuery, new String[] {
+						RoutesColumns.FROM_STATION.string,
+						RoutesColumns.TO_STATION.string }, new int[] {
+						R.id.originText, R.id.destinationText });
 		adapter.setViewBinder(new ViewBinder() {
-			@Override
 			public boolean setViewValue(View view, Cursor cursor,
 					int columnIndex) {
 				((TextView) view).setText(Station.getByAbbreviation(cursor
@@ -93,9 +89,7 @@ public class RoutesListActivity extends ListActivity {
 					Constants.FAVORITE_CONTENT_URI));
 			return true;
 		} else if (itemId == R.id.view_system_map_button) {
-			startActivity(new Intent(
-					Intent.ACTION_VIEW,
-					Uri.parse(Constants.MAP_URL)));
+			startActivity(new Intent(this, ViewMapActivity.class));
 			return true;
 		} else {
 			return super.onOptionsItemSelected(item);
@@ -132,8 +126,7 @@ public class RoutesListActivity extends ListActivity {
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
 				.getMenuInfo();
 		mCurrentlySelectedUri = ContentUris.withAppendedId(
-				Constants.FAVORITE_CONTENT_URI,
-				info.id);
+				Constants.FAVORITE_CONTENT_URI, info.id);
 
 		if (item.getItemId() == R.id.view) {
 			startActivity(new Intent(Intent.ACTION_VIEW, mCurrentlySelectedUri));
@@ -154,7 +147,6 @@ public class RoutesListActivity extends ListActivity {
 			builder.setMessage("Are you sure you want to delete this route?");
 			builder.setPositiveButton(R.string.yes,
 					new DialogInterface.OnClickListener() {
-						@Override
 						public void onClick(DialogInterface dialog, int which) {
 							getContentResolver().delete(mCurrentlySelectedUri,
 									null, null);
@@ -165,7 +157,6 @@ public class RoutesListActivity extends ListActivity {
 					});
 			builder.setNegativeButton(R.string.cancel,
 					new DialogInterface.OnClickListener() {
-						@Override
 						public void onClick(DialogInterface dialog, int which) {
 							mCurrentlySelectedUri = null;
 							mCurrentlySelectedRouteName = null;

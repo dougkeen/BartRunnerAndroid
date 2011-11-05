@@ -36,7 +36,6 @@ public class AddRouteActivity extends Activity {
 
 		Button saveButton = (Button) findViewById(R.id.saveButton);
 		saveButton.setOnClickListener(new View.OnClickListener() {
-			@Override
 			public void onClick(View v) {
 				onSaveButtonClick();
 			}
@@ -45,7 +44,6 @@ public class AddRouteActivity extends Activity {
 
 		Button cancelButton = (Button) findViewById(R.id.cancelButton);
 		cancelButton.setOnClickListener(new View.OnClickListener() {
-			@Override
 			public void onClick(View v) {
 				setResult(RESULT_CANCELED);
 				finish();

@@ -13,7 +13,7 @@
 	<string name="error_null_destination">You must select a destination station</string>
 	<string name="error_null_origin">You must select an origin station</string>
 	<string name="departure_wait_message">Please wait while real time departure data is
-		loaded...</string>
+		loaded</string>
 	<string name="no_data_message">No departure data is currently available for this
 		route. Note that this route may require a non-standard transfer due to
 		a temporary change in service. Check for service advisories posted at

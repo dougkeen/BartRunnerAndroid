@@ -44,7 +44,6 @@ public class ViewDeparturesActivity extends ListActivity {
 	private boolean mIsAutoUpdating = false;
 
 	private final Runnable AUTO_UPDATE_RUNNABLE = new Runnable() {
-		@Override
 		public void run() {
 			runAutoUpdate();
 		}
@@ -135,8 +134,7 @@ public class ViewDeparturesActivity extends ListActivity {
 			}
 			PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
 			mWakeLock = powerManager
-					.newWakeLock(
-							PowerManager.SCREEN_DIM_WAKE_LOCK,
+					.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK,
 							"ViewDeparturesActivity");
 			mWakeLock.acquire();
 			if (mDeparturesAdapter != null && !mDeparturesAdapter.isEmpty()) {
@@ -152,8 +150,8 @@ public class ViewDeparturesActivity extends ListActivity {
 		if (!hasWindowFocus())
 			return;
 		if (mGetDeparturesTask != null
-				&& mGetDeparturesTask.getStatus()
-						.equals(AsyncTask.Status.RUNNING)) {
+				&& mGetDeparturesTask.getStatus().equals(
+						AsyncTask.Status.RUNNING)) {
 			// Don't overlap fetches
 			return;
 		}
@@ -172,8 +170,7 @@ public class ViewDeparturesActivity extends ListActivity {
 				mDataFetchIsPending = false;
 				Log.w(Constants.TAG, e.getMessage(), e);
 				Toast.makeText(ViewDeparturesActivity.this,
-						R.string.could_not_connect,
-						Toast.LENGTH_LONG).show();
+						R.string.could_not_connect, Toast.LENGTH_LONG).show();
 				((TextView) findViewById(android.R.id.empty))
 						.setText(R.string.could_not_connect);
 				// Try again in 60s
@@ -182,8 +179,7 @@ public class ViewDeparturesActivity extends ListActivity {
 		};
 		Log.i(Constants.TAG, "Fetching data from server");
 		mGetDeparturesTask.execute(new GetRealTimeDeparturesTask.Params(
-				mOrigin,
-				mDestination));
+				mOrigin, mDestination));
 	}
 
 	protected void processLatestDepartures(RealTimeDepartures result) {
@@ -241,8 +237,7 @@ public class ViewDeparturesActivity extends ListActivity {
 		mDeparturesAdapter.notifyDataSetChanged();
 
 		if (hasWindowFocus() && firstDeparture != null) {
-			if (needsBetterAccuracy
-					|| firstDeparture.hasDeparted()) {
+			if (needsBetterAccuracy || firstDeparture.hasDeparted()) {
 				// Get more data in 20s
 				scheduleDataFetch(20000);
 			} else {
@@ -277,7 +272,6 @@ public class ViewDeparturesActivity extends ListActivity {
 	private void scheduleDataFetch(int millisUntilExecute) {
 		if (!mDataFetchIsPending) {
 			mListTitleView.postDelayed(new Runnable() {
-				@Override
 				public void run() {
 					fetchLatestDepartures();
 				}
@@ -314,15 +308,14 @@ public class ViewDeparturesActivity extends ListActivity {
 					Intent.ACTION_VIEW,
 					Uri.parse("http://m.bart.gov/schedules/qp_results.aspx?type=departure&date=today&time="
 							+ DateFormat.format("h:mmaa",
-									System.currentTimeMillis()) + "&orig="
+									System.currentTimeMillis())
+							+ "&orig="
 							+ mOrigin.abbreviation
 							+ "&dest="
 							+ mDestination.abbreviation)));
 			return true;
 		} else if (itemId == R.id.view_system_map_button) {
-			startActivity(new Intent(
-					Intent.ACTION_VIEW,
-					Uri.parse(Constants.MAP_URL)));
+			startActivity(new Intent(this, ViewMapActivity.class));
 			return true;
 		} else {
 			return super.onOptionsItemSelected(item);
