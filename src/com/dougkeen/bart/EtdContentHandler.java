@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -53,7 +54,7 @@ public class EtdContentHandler extends DefaultHandler {
 		if (localName.equals("estimate")) {
 			currentDeparture = new Departure();
 			currentDeparture.setDestination(Station
-						.getByAbbreviation(currentDestination));
+					.getByAbbreviation(currentDestination));
 		}
 	}
 
@@ -67,17 +68,17 @@ public class EtdContentHandler extends DefaultHandler {
 		} else if (localName.equals("abbreviation")) {
 			currentDestination = currentValue;
 		} else if (localName.equals("minutes")) {
-			if (currentValue.equalsIgnoreCase("arrived")) {
-				currentDeparture.setMinutes(0);
-			} else {
+			if (StringUtils.isNumeric(currentValue)) {
 				currentDeparture.setMinutes(Integer.parseInt(currentValue));
+			} else {
+				currentDeparture.setMinutes(0);
 			}
 		} else if (localName.equals("platform")) {
 			currentDeparture.setPlatform(currentValue);
 		} else if (localName.equals("direction")) {
 			currentDeparture.setDirection(currentValue);
 		} else if (localName.equals("length")) {
-			currentDeparture.setTrainLength(Integer.parseInt(currentValue));
+			currentDeparture.setTrainLength(currentValue);
 		} else if (localName.equals("color")) {
 			try {
 				if (currentValue.equalsIgnoreCase("WHITE")) {

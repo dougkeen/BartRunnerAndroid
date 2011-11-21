@@ -15,7 +15,7 @@ public class Departure implements Parcelable, Comparable<Departure> {
 
 	public Departure(String destinationAbbr, String destinationColor,
 			String platform, String direction, boolean bikeAllowed,
-			int trainLength, int minutes) {
+			String trainLength, int minutes) {
 		super();
 		this.destination = Station.getByAbbreviation(destinationAbbr);
 		this.destinationColor = destinationColor;
@@ -36,7 +36,7 @@ public class Departure implements Parcelable, Comparable<Departure> {
 	private String platform;
 	private String direction;
 	private boolean bikeAllowed;
-	private int trainLength;
+	private String trainLength;
 	private boolean requiresTransfer;
 
 	private int minutes;
@@ -104,11 +104,11 @@ public class Departure implements Parcelable, Comparable<Departure> {
 		this.bikeAllowed = bikeAllowed;
 	}
 
-	public int getTrainLength() {
+	public String getTrainLength() {
 		return trainLength;
 	}
 
-	public void setTrainLength(int trainLength) {
+	public void setTrainLength(String trainLength) {
 		this.trainLength = trainLength;
 	}
 
@@ -185,10 +185,10 @@ public class Departure implements Parcelable, Comparable<Departure> {
 			return;
 		}
 
-		final long newMin = Math
-				.max(getMinEstimate(), departure.getMinEstimate());
-		final long newMax = Math
-				.min(getMaxEstimate(), departure.getMaxEstimate());
+		final long newMin = Math.max(getMinEstimate(),
+				departure.getMinEstimate());
+		final long newMax = Math.min(getMaxEstimate(),
+				departure.getMaxEstimate());
 		if (newMax > newMin) { // We can never have 0 or negative uncertainty
 			setMinEstimate(newMin);
 			setMaxEstimate(newMax);
@@ -196,8 +196,32 @@ public class Departure implements Parcelable, Comparable<Departure> {
 	}
 
 	public int compareTo(Departure another) {
-		return (this.getMinutes() > another.getMinutes()) ? 1 : (
-				(this.getMinutes() == another.getMinutes()) ? 0 : -1);
+		return (this.getMinutes() > another.getMinutes()) ? 1 : ((this
+				.getMinutes() == another.getMinutes()) ? 0 : -1);
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (bikeAllowed ? 1231 : 1237);
+		result = prime * result
+				+ ((destination == null) ? 0 : destination.hashCode());
+		result = prime
+				* result
+				+ ((destinationColor == null) ? 0 : destinationColor.hashCode());
+		result = prime * result
+				+ ((direction == null) ? 0 : direction.hashCode());
+		result = prime * result + ((line == null) ? 0 : line.hashCode());
+		result = prime * result + (int) (maxEstimate ^ (maxEstimate >>> 32));
+		result = prime * result + (int) (minEstimate ^ (minEstimate >>> 32));
+		result = prime * result + minutes;
+		result = prime * result
+				+ ((platform == null) ? 0 : platform.hashCode());
+		result = prime * result + (requiresTransfer ? 1231 : 1237);
+		result = prime * result
+				+ ((trainLength == null) ? 0 : trainLength.hashCode());
+		return result;
 	}
 
 	@Override
@@ -223,16 +247,27 @@ public class Departure implements Parcelable, Comparable<Departure> {
 				return false;
 		} else if (!direction.equals(other.direction))
 			return false;
+		if (line != other.line)
+			return false;
+		if (maxEstimate != other.maxEstimate)
+			return false;
+		if (minEstimate != other.minEstimate)
+			return false;
+		if (minutes != other.minutes)
+			return false;
 		if (platform == null) {
 			if (other.platform != null)
 				return false;
 		} else if (!platform.equals(other.platform))
 			return false;
-		if (trainLength != other.trainLength)
+		if (requiresTransfer != other.requiresTransfer)
 			return false;
-
-		long delta = (getMinEstimate() - other.getMinEstimate());
-		return delta > -60000 && delta < 60000;
+		if (trainLength == null) {
+			if (other.trainLength != null)
+				return false;
+		} else if (!trainLength.equals(other.trainLength))
+			return false;
+		return true;
 	}
 
 	public String getCountdownText() {
@@ -279,7 +314,7 @@ public class Departure implements Parcelable, Comparable<Departure> {
 		dest.writeString(platform);
 		dest.writeString(direction);
 		dest.writeByte((byte) (bikeAllowed ? 1 : 0));
-		dest.writeInt(trainLength);
+		dest.writeString(trainLength);
 		dest.writeByte((byte) (requiresTransfer ? 1 : 0));
 		dest.writeInt(minutes);
 		dest.writeLong(minEstimate);
@@ -292,7 +327,7 @@ public class Departure implements Parcelable, Comparable<Departure> {
 		platform = in.readString();
 		direction = in.readString();
 		bikeAllowed = in.readByte() != 0;
-		trainLength = in.readInt();
+		trainLength = in.readString();
 		requiresTransfer = in.readByte() != 0;
 		minutes = in.readInt();
 		minEstimate = in.readLong();
