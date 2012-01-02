@@ -41,6 +41,10 @@ public class BartContentProvider extends ContentProvider {
 				RoutesColumns.FROM_STATION.string);
 		sFavoritesProjectionMap.put(RoutesColumns.TO_STATION.string,
 				RoutesColumns.TO_STATION.string);
+		sFavoritesProjectionMap.put(RoutesColumns.FARE.string,
+				RoutesColumns.FARE.string);
+		sFavoritesProjectionMap.put(RoutesColumns.FARE_LAST_UPDATED.string,
+				RoutesColumns.FARE_LAST_UPDATED.string);
 	}
 
 	private DatabaseHelper mDatabaseHelper;
@@ -65,8 +69,7 @@ public class BartContentProvider extends ContentProvider {
 
 	@Override
 	public Cursor query(Uri uri, String[] projection, String selection,
-			String[] selectionArgs,
-			String sortOrder) {
+			String[] selectionArgs, String sortOrder) {
 		SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
 
 		SQLiteDatabase db = mDatabaseHelper.getReadableDatabase();
@@ -104,8 +107,6 @@ public class BartContentProvider extends ContentProvider {
 
 	@Override
 	public Uri insert(Uri uri, ContentValues initialValues) {
-		// TODO: Hook this up to the REST service?
-
 		ContentValues values;
 		if (initialValues != null) {
 			values = new ContentValues(initialValues);
@@ -127,9 +128,7 @@ public class BartContentProvider extends ContentProvider {
 							new String[] {
 									values.getAsString(RoutesColumns.FROM_STATION.string),
 									values.getAsString(RoutesColumns.TO_STATION.string) },
-							null,
-							null,
-							null);
+							null, null, null);
 			try {
 				if (cursor.moveToFirst()) {
 					rowId = cursor.getLong(0);
@@ -158,8 +157,24 @@ public class BartContentProvider extends ContentProvider {
 	@Override
 	public int update(Uri uri, ContentValues values, String where,
 			String[] whereArgs) {
+		SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
+
+		// Validate the requested uri
+		int match = sUriMatcher.match(uri);
+		if (match == FAVORITE_ID) {
+			String favoriteId = uri.getPathSegments().get(1);
+			int count = db.update(
+					DatabaseHelper.FAVORITES_TABLE_NAME,
+					values,
+					RoutesColumns._ID
+							+ " = "
+							+ favoriteId
+							+ (!TextUtils.isEmpty(where) ? " AND (" + where
+									+ ')' : ""), whereArgs);
+			getContext().getContentResolver().notifyChange(uri, null);
+			return count;
+		}
 		return 0;
-		// No updating supported yet
 	}
 
 	@Override
@@ -173,8 +188,10 @@ public class BartContentProvider extends ContentProvider {
 					whereArgs);
 		} else if (match == FAVORITE_ID) {
 			String favoriteId = uri.getPathSegments().get(1);
-			count = db.delete(DatabaseHelper.FAVORITES_TABLE_NAME,
-					RoutesColumns._ID + " = "
+			count = db.delete(
+					DatabaseHelper.FAVORITES_TABLE_NAME,
+					RoutesColumns._ID
+							+ " = "
 							+ favoriteId
 							+ (!TextUtils.isEmpty(where) ? " AND (" + where
 									+ ')' : ""), whereArgs);

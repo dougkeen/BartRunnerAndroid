@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -17,43 +16,37 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.util.Xml;
 
-import com.dougkeen.bart.data.RealTimeDepartures;
+public abstract class GetRouteFareTask extends
+		AsyncTask<GetRouteFareTask.Params, Integer, String> {
 
-public abstract class GetRealTimeDeparturesTask
-		extends
-		AsyncTask<GetRealTimeDeparturesTask.Params, Integer, RealTimeDepartures> {
-
-	private final static String ETD_URL = "http://api.bart.gov/api/etd.aspx?cmd=etd&key="
-			+ Constants.API_KEY + "&orig=%1$s&dir=%2$s";
 	private final static int MAX_ATTEMPTS = 5;
+	private final static String FARE_URL = "http://api.bart.gov/api/sched.aspx?cmd=fare&date=today&key="
+			+ Constants.API_KEY + "&orig=%1$s&dest=%2$s";
 
 	private Exception mException;
 
-	private List<Route> mRoutes;
+	private String fare;
 
 	@Override
-	protected RealTimeDepartures doInBackground(Params... paramsArray) {
-		// Always expect one param
+	protected String doInBackground(Params... paramsArray) {
 		Params params = paramsArray[0];
 
-		mRoutes = params.origin.getRoutesForDestination(params.destination);
-
 		if (!isCancelled()) {
-			return getDeparturesFromNetwork(params, 0);
+			return getFareFromNetwork(params, 0);
 		} else {
 			return null;
 		}
 	}
 
-	private RealTimeDepartures getDeparturesFromNetwork(Params params,
-			int attemptNumber) {
+	private String getFareFromNetwork(Params params, int attemptNumber) {
 		String xml = null;
-		try {
-			HttpUriRequest request = new HttpGet(String.format(ETD_URL,
-					params.origin.abbreviation, mRoutes.get(0).getDirection()));
 
-			EtdContentHandler handler = new EtdContentHandler(params.origin,
-					params.destination, mRoutes);
+		try {
+			HttpUriRequest request = new HttpGet(
+					String.format(FARE_URL, params.origin.abbreviation,
+							params.destination.abbreviation));
+
+			FareContentHandler handler = new FareContentHandler();
 			if (isCancelled()) {
 				return null;
 			}
@@ -74,9 +67,8 @@ public abstract class GetRealTimeDeparturesTask
 			}
 
 			Xml.parse(xml, handler);
-			final RealTimeDepartures realTimeDepartures = handler
-					.getRealTimeDepartures();
-			return realTimeDepartures;
+			fare = handler.getFare();
+			return fare;
 		} catch (MalformedURLException e) {
 			throw new RuntimeException(e);
 		} catch (UnsupportedEncodingException e) {
@@ -91,7 +83,7 @@ public abstract class GetRealTimeDeparturesTask
 				} catch (InterruptedException interrupt) {
 					// Ignore... just go on to next attempt
 				}
-				return getDeparturesFromNetwork(params, attemptNumber + 1);
+				return getFareFromNetwork(params, attemptNumber + 1);
 			} else {
 				mException = new Exception("Could not contact BART system", e);
 				return null;
@@ -110,28 +102,21 @@ public abstract class GetRealTimeDeparturesTask
 			this.destination = destination;
 		}
 
-		private Station origin;
-		private Station destination;
-
-		public Station getOrigin() {
-			return origin;
-		}
-
-		public Station getDestination() {
-			return destination;
-		}
+		public final Station origin;
+		public final Station destination;
 	}
 
 	@Override
-	protected void onPostExecute(RealTimeDepartures result) {
+	protected void onPostExecute(String result) {
 		if (result != null) {
-			onResult(result);
+			onResult(fare);
 		} else {
 			onError(mException);
 		}
 	}
 
-	public abstract void onResult(RealTimeDepartures result);
+	public abstract void onResult(String fare);
 
 	public abstract void onError(Exception exception);
+
 }

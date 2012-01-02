@@ -1,10 +1,14 @@
 package com.dougkeen.bart;
 
+import java.util.Calendar;
+import java.util.TimeZone;
+
 import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.app.ListActivity;
-import android.app.AlertDialog.Builder;
 import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -27,6 +31,9 @@ import com.dougkeen.bart.data.CursorUtils;
 import com.dougkeen.bart.data.RoutesColumns;
 
 public class RoutesListActivity extends ListActivity {
+	private static final TimeZone PACIFIC_TIME = TimeZone
+			.getTimeZone("America/Los_Angeles");
+
 	private static final int DIALOG_DELETE_EVENT = 0;
 
 	protected Cursor mQuery;
@@ -43,19 +50,31 @@ public class RoutesListActivity extends ListActivity {
 
 		mQuery = managedQuery(Constants.FAVORITE_CONTENT_URI, new String[] {
 				RoutesColumns._ID.string, RoutesColumns.FROM_STATION.string,
-				RoutesColumns.TO_STATION.string }, null, null,
+				RoutesColumns.TO_STATION.string, RoutesColumns.FARE.string,
+				RoutesColumns.FARE_LAST_UPDATED.string }, null, null,
 				RoutesColumns._ID.string);
+
+		refreshFares();
 
 		SimpleCursorAdapter adapter = new SimpleCursorAdapter(this,
 				R.layout.favorite_listing, mQuery, new String[] {
 						RoutesColumns.FROM_STATION.string,
-						RoutesColumns.TO_STATION.string }, new int[] {
-						R.id.originText, R.id.destinationText });
+						RoutesColumns.TO_STATION.string,
+						RoutesColumns.FARE.string }, new int[] {
+						R.id.originText, R.id.destinationText, R.id.fareText });
 		adapter.setViewBinder(new ViewBinder() {
 			public boolean setViewValue(View view, Cursor cursor,
 					int columnIndex) {
-				((TextView) view).setText(Station.getByAbbreviation(cursor
-						.getString(columnIndex)).name);
+				if (view.getId() == R.id.fareText) {
+					String fare = cursor.getString(columnIndex);
+					if (fare != null) {
+						((TextView) view).setSingleLine(false);
+						((TextView) view).setText("Fare:\n" + fare);
+					}
+				} else {
+					((TextView) view).setText(Station.getByAbbreviation(cursor
+							.getString(columnIndex)).name);
+				}
 				return true;
 			}
 		});
@@ -65,6 +84,52 @@ public class RoutesListActivity extends ListActivity {
 		registerForContextMenu(getListView());
 	}
 
+	private void refreshFares() {
+		if (mQuery.moveToFirst()) {
+			do {
+				final Station orig = Station.getByAbbreviation(CursorUtils
+						.getString(mQuery, RoutesColumns.FROM_STATION));
+				final Station dest = Station.getByAbbreviation(CursorUtils
+						.getString(mQuery, RoutesColumns.TO_STATION));
+				final Long id = CursorUtils.getLong(mQuery, RoutesColumns._ID);
+				final Long lastUpdateMillis = CursorUtils.getLong(mQuery,
+						RoutesColumns.FARE_LAST_UPDATED);
+
+				Calendar now = Calendar.getInstance();
+				Calendar lastUpdate = Calendar.getInstance();
+				lastUpdate.setTimeInMillis(lastUpdateMillis);
+
+				now.setTimeZone(PACIFIC_TIME);
+				lastUpdate.setTimeZone(PACIFIC_TIME);
+
+				// Update every day
+				if (now.get(Calendar.DAY_OF_YEAR) != lastUpdate
+						.get(Calendar.DAY_OF_YEAR)) {
+					GetRouteFareTask fareTask = new GetRouteFareTask() {
+						@Override
+						public void onResult(String fare) {
+							ContentValues values = new ContentValues();
+							values.put(RoutesColumns.FARE.string, fare);
+							values.put(RoutesColumns.FARE_LAST_UPDATED.string,
+									System.currentTimeMillis());
+
+							getContentResolver()
+									.update(ContentUris.withAppendedId(
+											Constants.FAVORITE_CONTENT_URI, id),
+											values, null, null);
+						}
+
+						@Override
+						public void onError(Exception exception) {
+							// Ignore... we can do this later
+						}
+					};
+					fareTask.execute(new GetRouteFareTask.Params(orig, dest));
+				}
+			} while (mQuery.moveToNext());
+		}
+	}
+
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -72,6 +137,7 @@ public class RoutesListActivity extends ListActivity {
 				.setText(R.string.favorite_routes);
 		((TextView) findViewById(android.R.id.empty))
 				.setText(R.string.empty_favorites_list_message);
+		refreshFares();
 	}
 
 	@Override

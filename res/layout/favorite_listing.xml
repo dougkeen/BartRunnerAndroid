@@ -1,13 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="fill_parent" android:layout_height="fill_parent"
-	android:paddingLeft="5dp" android:paddingRight="5dp">
-	<TextView android:id="@+id/originText" style="@style/FavoriteListingTextView"
-		android:layout_alignParentTop="true" android:text="Origin" />
-	<TextView style="@style/FavoriteListingTextView" android:text="to"
-		android:layout_below="@id/originText" android:paddingLeft="15dp"
-		android:paddingRight="8dp" android:id="@+id/to" />
-	<TextView android:id="@+id/destinationText" style="@style/FavoriteListingTextView"
-		android:layout_below="@id/originText" android:layout_toRightOf="@id/to"
-		android:text="Destination" />
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:paddingLeft="5dp"
+    android:paddingRight="5dp" >
+
+    <TextView
+        android:id="@+id/fareText"
+        style="@style/FareTextView"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:maxLines="3" />
+
+    <TextView
+        android:id="@+id/originText"
+        style="@style/FavoriteListingTextView"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@id/fareText"
+        android:text="Origin" />
+
+    <TextView
+        android:id="@+id/to"
+        style="@style/FavoriteListingTextView"
+        android:layout_below="@id/originText"
+        android:paddingLeft="15dp"
+        android:paddingRight="8dp"
+        android:text="to" />
+
+    <TextView
+        android:id="@+id/destinationText"
+        style="@style/FavoriteListingTextView"
+        android:layout_below="@id/originText"
+        android:layout_toLeftOf="@id/fareText"
+        android:layout_toRightOf="@id/to"
+        android:text="Destination" />
+
 </RelativeLayout>

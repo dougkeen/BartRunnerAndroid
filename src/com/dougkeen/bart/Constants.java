@@ -9,6 +9,7 @@ public class Constants {
 	public static final Uri FAVORITE_CONTENT_URI = Uri.parse("content://"
 			+ AUTHORITY + "/favorites");
 	public static final String MAP_URL = "http://m.bart.gov/images/global/system-map29.gif";
-	
+
 	public static final String TAG = "BartCatcher";
+	public static final String API_KEY = "5LD9-IAYI-TRAT-MHHW";
 }

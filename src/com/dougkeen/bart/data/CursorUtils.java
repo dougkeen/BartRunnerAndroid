@@ -17,4 +17,7 @@ public final class CursorUtils {
 		return cursor.getString(cursor.getColumnIndex(column.string));
 	}
 
+	public static final Long getLong(Cursor cursor, RoutesColumns column) {
+		return cursor.getLong(cursor.getColumnIndex(column.string));
+	}
 }
