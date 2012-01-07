@@ -7,6 +7,7 @@ import com.dougkeen.bart.Line;
 import com.dougkeen.bart.Station;
 
 public class Departure implements Parcelable, Comparable<Departure> {
+	private static final int ESTIMATE_EQUALS_TOLERANCE_MILLIS = 59999;
 	private static final int MINIMUM_MERGE_OVERLAP_MILLIS = 10000;
 
 	public Departure() {
@@ -249,11 +250,7 @@ public class Departure implements Parcelable, Comparable<Departure> {
 			return false;
 		if (line != other.line)
 			return false;
-		if (maxEstimate != other.maxEstimate)
-			return false;
-		if (minEstimate != other.minEstimate)
-			return false;
-		if (minutes != other.minutes)
+		if (Math.abs(maxEstimate - other.maxEstimate) > ESTIMATE_EQUALS_TOLERANCE_MILLIS)
 			return false;
 		if (platform == null) {
 			if (other.platform != null)
