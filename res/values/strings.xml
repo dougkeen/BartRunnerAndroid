@@ -20,6 +20,7 @@
 		http://m.bart.gov/schedules/advisories/</string>
 	<string name="view">View</string>
 	<string name="view_departures">View departures</string>
+	<string name="missing_departure">Missing departure? Inaccurate time? Please report to bartrunner@dougkeen.com</string>
 	<string name="delete">Delete</string>
 	<string name="yes">Yes</string>
 	<string name="cancel">Cancel</string>

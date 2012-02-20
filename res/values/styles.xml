@@ -56,6 +56,13 @@
 		<item name="android:textSize">16dp</item>
 		<item name="android:singleLine">true</item>
 	</style>
+	<style name="MissingDepartureText">
+		<item name="android:layout_width">wrap_content</item>
+		<item name="android:layout_height">wrap_content</item>
+		<item name="android:textSize">12dp</item>
+		<item name="android:singleLine">true</item>
+		<item name="android:gravity">center</item>
+	</style>
 	<style name="BikeIcon">
 		<item name="android:layout_width">wrap_content</item>
 		<item name="android:layout_height">wrap_content</item>

@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.opengl.Visibility;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -17,6 +18,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -94,6 +96,8 @@ public class ViewDeparturesActivity extends ListActivity {
 			}
 		}
 		setListAdapter(mDeparturesAdapter);
+
+		findViewById(R.id.missingDepartureText).setVisibility(View.VISIBLE);
 	}
 
 	@Override

@@ -2,6 +2,7 @@ syntax: glob
 bin/*
 .settings/org.eclipse.jdt.core.prefs
 project.properties
+dist/*
 syntax: regexp
 ^app_icon\.psd$
 ^bart-train\.jpg$

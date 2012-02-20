@@ -1,27 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="fill_parent" android:layout_height="fill_parent">
-	<ImageView android:id="@+id/destinationColorBar" android:src="@drawable/basic_rectangle"
-		android:layout_width="wrap_content" android:layout_height="wrap_content"
-		android:layout_alignParentLeft="true" android:layout_centerVertical="true" />
-	<LinearLayout android:id="@+id/topRow"
-		android:layout_width="fill_parent" android:layout_height="wrap_content"
-		android:layout_toRightOf="@id/destinationColorBar"
-		android:layout_alignParentTop="true">
-		<TextView android:id="@+id/destinationText" style="@style/DepartureDestinationText"
-			android:layout_weight="1" android:singleLine="true"
-			android:ellipsize="marquee" />
-		<ImageView android:id="@+id/bikeIcon" android:src="@drawable/bike"
-			style="@style/BikeIcon" />
-		<TextView android:id="@+id/countdown" style="@style/DepartureCountdownText"
-			android:gravity="right" />
-	</LinearLayout>
-	<ImageView android:id="@+id/xferIcon" android:src="@drawable/xfer"
-		android:layout_below="@id/topRow" android:layout_alignParentRight="true"
-		style="@style/XferIcon" />
-	<TextView android:id="@+id/trainLengthText" style="@style/DepartureTrainLengthText"
-		android:layout_toRightOf="@id/destinationColorBar"
-		android:layout_below="@id/topRow" />
-	<TextView android:layout_alignParentRight="true" android:id="@+id/uncertainty"
-		android:layout_below="@id/topRow" style="@style/DepartureUncertaintyText" />
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+    <ImageView
+        android:id="@+id/destinationColorBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:src="@drawable/basic_rectangle" />
+
+    <LinearLayout
+        android:id="@+id/topRow"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@id/destinationColorBar" >
+
+        <TextView
+            android:id="@+id/destinationText"
+            style="@style/DepartureDestinationText"
+            android:layout_weight="1"
+            android:ellipsize="marquee"
+            android:singleLine="true" />
+
+        <ImageView
+            android:id="@+id/bikeIcon"
+            style="@style/BikeIcon"
+            android:src="@drawable/bike" />
+
+        <TextView
+            android:id="@+id/countdown"
+            style="@style/DepartureCountdownText"
+            android:gravity="right" />
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/xferIcon"
+        style="@style/XferIcon"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/topRow"
+        android:src="@drawable/xfer" />
+
+    <TextView
+        android:id="@+id/trainLengthText"
+        style="@style/DepartureTrainLengthText"
+        android:layout_below="@id/topRow"
+        android:layout_toRightOf="@id/destinationColorBar" />
+
+    <TextView
+        android:id="@+id/uncertainty"
+        style="@style/DepartureUncertaintyText"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/topRow" />
+
 </RelativeLayout>
