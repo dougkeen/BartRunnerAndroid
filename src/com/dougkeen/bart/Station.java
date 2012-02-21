@@ -4,82 +4,86 @@ import java.util.ArrayList;
 import java.util.List;
 
 public enum Station {
-	_12TH("12th", "12th St./Oakland City Center", false, "bayf"),
-	_16TH("16th", "16th St. Mission", false),
-	_19TH("19th", "19th St./Oakland", false, "bayf"),
-	_24TH("24th", "24th St. Mission", false),
-	ASHB("ashb", "Ashby", false, "mcar"),
-	BALB("balb", "Balboa Park", false),
-	BAYF("bayf", "Bay Fair", true, "mcar"),
-	CAST("cast", "Castro Valley", false, "bayf"),
-	CIVC("civc", "Civic Center", false),
-	COLS("cols", "Coliseum/Oakland Airport", true, "mcar"),
-	COLM("colm", "Colma", false, "balb", "balb"),
-	CONC("conc", "Concord", false, "mcar"),
-	DALY("daly", "Daly City", false),
-	DBRK("dbrk", "Downtown Berkeley", false, "mcar"),
-	DUBL("dubl", "Dublin/Pleasanton", false, "bayf"),
-	DELN("deln", "El Cerrito del Norte", false, "mcar"),
-	PLZA("plza", "El Cerrito Plaza", false, "mcar"),
-	EMBR("embr", "Embarcadero", false),
-	FRMT("frmt", "Fremont", true, "bayf"),
-	FTVL("ftvl", "Fruitvale", true, "mcar"),
-	GLEN("glen", "Glen Park", false),
-	HAYW("hayw", "Hayward", true, "bayf"),
-	LAFY("lafy", "Lafayette", false, "mcar"),
-	LAKE("lake", "Lake Merritt", true, "mcar"),
-	MCAR("mcar", "MacArthur", false, "bayf"),
-	MLBR("mlbr", "Millbrae", false, "balb", "balb"),
-	MONT("mont", "Montgomery St.", false),
-	NBRK("nbrk", "North Berkeley", false, "mcar"),
-	NCON("ncon", "North Concord/Martinez", false, "mcar"),
-	ORIN("orin", "Orinda", false, "mcar"),
-	PITT("pitt", "Pittsburg/Bay Point", false, "mcar"),
-	PHIL("phil", "Pleasant Hill", false, "mcar"),
-	POWL("powl", "Powell St.", false),
-	RICH("rich", "Richmond", false, "mcar"),
-	ROCK("rock", "Rockridge", false, "mcar"),
-	SBRN("sbrn", "San Bruno", false, "balb", "balb"),
-	SANL("sanl", "San Leandro", true, "mcar"),
-	SFIA("sfia", "SFO Airport", false, "sbrn", "balb"),
-	SHAY("shay", "South Hayward", true, "bayf"),
-	SSAN("ssan", "South San Francisco", false, "balb", "balb"),
-	UCTY("ucty", "Union City", true, "bayf"),
-	WCRK("wcrk", "Walnut Creek", false, "mcar"),
-	WDUB("wdub", "West Dublin/Pleasanton", false, "bayf"),
-	WOAK("woak", "West Oakland", false),
-	SPCL("spcl", "Special", false);
+	_12TH("12th", "12th St./Oakland City Center", false, false, "bayf"),
+	_16TH("16th", "16th St. Mission", false, false),
+	_19TH("19th", "19th St./Oakland", false, false, "bayf"),
+	_24TH("24th", "24th St. Mission", false, false),
+	ASHB("ashb", "Ashby", false, false, "mcar"),
+	BALB("balb", "Balboa Park", false, false),
+	BAYF("bayf", "Bay Fair", true, false, "mcar"),
+	CAST("cast", "Castro Valley", false, false, "bayf"),
+	CIVC("civc", "Civic Center", false, false),
+	COLS("cols", "Coliseum/Oakland Airport", true, false, "mcar"),
+	COLM("colm", "Colma", false, false, "balb", "balb"),
+	CONC("conc", "Concord", false, false, "mcar"),
+	DALY("daly", "Daly City", false, false),
+	DBRK("dbrk", "Downtown Berkeley", false, false, "mcar"),
+	DUBL("dubl", "Dublin/Pleasanton", false, true, "bayf"),
+	DELN("deln", "El Cerrito del Norte", false, false, "mcar"),
+	PLZA("plza", "El Cerrito Plaza", false, false, "mcar"),
+	EMBR("embr", "Embarcadero", false, false),
+	FRMT("frmt", "Fremont", true, false, "bayf"),
+	FTVL("ftvl", "Fruitvale", true, false, "mcar"),
+	GLEN("glen", "Glen Park", false, false),
+	HAYW("hayw", "Hayward", true, false, "bayf"),
+	LAFY("lafy", "Lafayette", false, false, "mcar"),
+	LAKE("lake", "Lake Merritt", true, false, "mcar"),
+	MCAR("mcar", "MacArthur", false, false, "bayf"),
+	MLBR("mlbr", "Millbrae", false, true, "balb", "balb"),
+	MONT("mont", "Montgomery St.", false, false),
+	NBRK("nbrk", "North Berkeley", false, false, "mcar"),
+	NCON("ncon", "North Concord/Martinez", false, false, "mcar"),
+	ORIN("orin", "Orinda", false, false, "mcar"),
+	PITT("pitt", "Pittsburg/Bay Point", false, true, "mcar"),
+	PHIL("phil", "Pleasant Hill", false, false, "mcar"),
+	POWL("powl", "Powell St.", false, false),
+	RICH("rich", "Richmond", false, true, "mcar"),
+	ROCK("rock", "Rockridge", false, false, "mcar"),
+	SBRN("sbrn", "San Bruno", false, false, "balb", "balb"),
+	SANL("sanl", "San Leandro", true, false, "mcar"),
+	SFIA("sfia", "SFO Airport", false, false, "sbrn", "balb"),
+	SHAY("shay", "South Hayward", true, false, "bayf"),
+	SSAN("ssan", "South San Francisco", false, false, "balb", "balb"),
+	UCTY("ucty", "Union City", true, false, "bayf"),
+	WCRK("wcrk", "Walnut Creek", false, false, "mcar"),
+	WDUB("wdub", "West Dublin/Pleasanton", false, false, "bayf"),
+	WOAK("woak", "West Oakland", false, false),
+	SPCL("spcl", "Special", false, false);
 
 	public final String abbreviation;
 	public final String name;
 	public final boolean invertDirection;
 	protected final String inboundTransferStation;
 	protected final String outboundTransferStation;
+	public final boolean endOfLine;
 
-	private Station(String abbreviation, String name, boolean invertDirection) {
+	private Station(String abbreviation, String name, boolean invertDirection, boolean endOfLine) {
 		this.abbreviation = abbreviation;
 		this.name = name;
 		this.invertDirection = invertDirection;
 		this.inboundTransferStation = null;
 		this.outboundTransferStation = null;
+		this.endOfLine = endOfLine;
 	}
 
-	private Station(String abbreviation, String name, boolean invertDirection,
+	private Station(String abbreviation, String name, boolean invertDirection, boolean endOfLine,
 			String transferStation) {
 		this.abbreviation = abbreviation;
 		this.name = name;
 		this.invertDirection = invertDirection;
 		this.inboundTransferStation = transferStation;
 		this.outboundTransferStation = null;
+		this.endOfLine = endOfLine;
 	}
 
-	private Station(String abbreviation, String name, boolean invertDirection,
+	private Station(String abbreviation, String name, boolean invertDirection, boolean endOfLine,
 			String inboundTransferStation, String outboundTransferStation) {
 		this.abbreviation = abbreviation;
 		this.name = name;
 		this.invertDirection = invertDirection;
 		this.inboundTransferStation = inboundTransferStation;
 		this.outboundTransferStation = outboundTransferStation;
+		this.endOfLine = endOfLine;
 	}
 
 	public static Station getByAbbreviation(String abbr) {

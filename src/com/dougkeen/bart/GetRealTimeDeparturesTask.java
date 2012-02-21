@@ -25,6 +25,8 @@ public abstract class GetRealTimeDeparturesTask
 
 	private final static String ETD_URL = "http://api.bart.gov/api/etd.aspx?cmd=etd&key="
 			+ Constants.API_KEY + "&orig=%1$s&dir=%2$s";
+	private final static String ETD_URL_NO_DIRECTION = "http://api.bart.gov/api/etd.aspx?cmd=etd&key="
+			+ Constants.API_KEY + "&orig=%1$s";
 	private final static int MAX_ATTEMPTS = 5;
 
 	private Exception mException;
@@ -49,8 +51,16 @@ public abstract class GetRealTimeDeparturesTask
 			int attemptNumber) {
 		String xml = null;
 		try {
-			HttpUriRequest request = new HttpGet(String.format(ETD_URL,
-					params.origin.abbreviation, mRoutes.get(0).getDirection()));
+			String url;
+			if (params.origin.endOfLine) {
+				url = String.format(ETD_URL_NO_DIRECTION,
+						params.origin.abbreviation);
+			} else {
+				url = String.format(ETD_URL, params.origin.abbreviation,
+						mRoutes.get(0).getDirection());
+			}
+
+			HttpUriRequest request = new HttpGet(url);
 
 			EtdContentHandler handler = new EtdContentHandler(params.origin,
 					params.destination, mRoutes);
