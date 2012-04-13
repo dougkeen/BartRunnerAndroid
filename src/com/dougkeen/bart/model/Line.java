@@ -41,6 +41,12 @@ public enum Line {
 			Station.DALY, Station.BALB, Station.GLEN, Station._24TH,
 			Station._16TH, Station.CIVC, Station.POWL, Station.MONT,
 			Station.EMBR, Station.WOAK, Station.ASHB, Station.DBRK,
+			Station.NBRK, Station.PLZA, Station.DELN, Station.RICH),
+	YELLOW_RED_SCHEDULED_TRANSFER(YELLOW, RED, Station.MLBR,
+			Station.SFIA, Station.SBRN, Station.SSAN, Station.COLM,
+			Station.DALY, Station.BALB, Station.GLEN, Station._24TH,
+			Station._16TH, Station.CIVC, Station.POWL, Station.MONT,
+			Station.EMBR, Station.WOAK, Station.ASHB, Station.DBRK,
 			Station.NBRK, Station.PLZA, Station.DELN, Station.RICH);
 
 	public final List<Station> stations;

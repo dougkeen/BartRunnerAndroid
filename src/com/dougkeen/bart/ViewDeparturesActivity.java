@@ -430,6 +430,7 @@ public class ViewDeparturesActivity extends ListActivity {
 
 	private void runAutoUpdate() {
 		if (mIsAutoUpdating && mDeparturesAdapter != null) {
+			DepartureArrayAdapter.refreshCounter++; 
 			mDeparturesAdapter.notifyDataSetChanged();
 		}
 		if (hasWindowFocus()) {

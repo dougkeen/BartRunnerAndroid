@@ -2,6 +2,8 @@ package com.dougkeen.bart;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
@@ -19,6 +21,8 @@ import android.widget.ViewSwitcher.ViewFactory;
 import com.dougkeen.bart.model.Departure;
 
 public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
+
+	public static int refreshCounter = 0;
 
 	public DepartureArrayAdapter(Context context, int textViewResourceId,
 			Departure[] objects) {
@@ -49,8 +53,6 @@ public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
 		super(context, textViewResourceId);
 	}
 
-	private String currentViewSwitcherText;
-
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View view;
@@ -69,20 +71,23 @@ public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
 				.findViewById(R.id.trainLengthText);
 		initTextSwitcher(textSwitcher);
 
-		if (System.currentTimeMillis() % 6000 > 3000) {
+		final String estimatedArrivalTimeText = departure
+				.getEstimatedArrivalTimeText(getContext());
+		String arrivalText = "Est. arrival " + estimatedArrivalTimeText;
+		if (StringUtils.isBlank(estimatedArrivalTimeText)) {
+			textSwitcher.setCurrentText(departure.getTrainLengthText());
+		} else if (refreshCounter % 6 < 3) {
 			String trainLengthText = departure.getTrainLengthText();
-			if (currentViewSwitcherText == null
-					|| !currentViewSwitcherText.equals(trainLengthText)) {
+			if (refreshCounter % 6 == 0) {
 				textSwitcher.setText(trainLengthText);
-				currentViewSwitcherText = trainLengthText;
+			} else {
+				textSwitcher.setCurrentText(trainLengthText);
 			}
 		} else {
-			String arrivalText = "Est. arrival "
-					+ departure.getEstimatedArrivalTimeText(getContext());
-			if (currentViewSwitcherText == null
-					|| !currentViewSwitcherText.equals(arrivalText)) {
+			if (refreshCounter % 6 == 3) {
 				textSwitcher.setText(arrivalText);
-				currentViewSwitcherText = arrivalText;
+			} else {
+				textSwitcher.setCurrentText(arrivalText);
 			}
 		}
 		ImageView colorBar = (ImageView) view
@@ -121,9 +126,7 @@ public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
 			});
 
 			textSwitcher.setInAnimation(AnimationUtils.loadAnimation(
-					getContext(), android.R.anim.slide_in_left));
-			textSwitcher.setOutAnimation(AnimationUtils.loadAnimation(
-					getContext(), android.R.anim.slide_out_right));
+					getContext(), android.R.anim.fade_in));
 		}
 	}
 }

@@ -9,6 +9,7 @@ import android.text.format.DateFormat;
 
 public class Departure implements Parcelable, Comparable<Departure> {
 	private static final int ESTIMATE_EQUALS_TOLERANCE_MILLIS = 59999;
+	private static final int ESTIMATE_EQUALS_TOLERANCE_LONG_LINGER_MILLIS = 719999;
 	private static final int MINIMUM_MERGE_OVERLAP_MILLIS = 10000;
 
 	public Departure() {
@@ -32,6 +33,7 @@ public class Departure implements Parcelable, Comparable<Departure> {
 		readFromParcel(in);
 	}
 
+	private Station origin;
 	private Station destination;
 	private Line line;
 	private String destinationColor;
@@ -47,6 +49,18 @@ public class Departure implements Parcelable, Comparable<Departure> {
 	private long maxEstimate;
 
 	private int estimatedTripTime;
+
+	private boolean beganAsDeparted;
+
+	private long arrivalTimeOverride;
+
+	public Station getOrigin() {
+		return origin;
+	}
+
+	public void setOrigin(Station origin) {
+		this.origin = origin;
+	}
 
 	public Station getDestination() {
 		return destination;
@@ -134,6 +148,9 @@ public class Departure implements Parcelable, Comparable<Departure> {
 
 	public void setMinutes(int minutes) {
 		this.minutes = minutes;
+		if (minutes == 0) {
+			beganAsDeparted = true;
+		}
 	}
 
 	public long getMinEstimate() {
@@ -185,6 +202,9 @@ public class Departure implements Parcelable, Comparable<Departure> {
 	}
 
 	public long getEstimatedArrivalTime() {
+		if (arrivalTimeOverride > 0) {
+			return arrivalTimeOverride;
+		}
 		return getMeanEstimate() + getEstimatedTripTime();
 	}
 
@@ -208,6 +228,13 @@ public class Departure implements Parcelable, Comparable<Departure> {
 	}
 
 	public void mergeEstimate(Departure departure) {
+		if (departure.hasDeparted() && origin.longStationLinger
+				&& getMinEstimate() > 0 && !beganAsDeparted) {
+			// This is probably not a true departure, but an indication that
+			// the train is in the station. Don't update the estimates.
+			return;
+		}
+
 		if ((getMaxEstimate() - departure.getMinEstimate()) < MINIMUM_MERGE_OVERLAP_MILLIS
 				|| departure.getMaxEstimate() - getMinEstimate() < MINIMUM_MERGE_OVERLAP_MILLIS) {
 			// The estimate must have changed... just use the latest incoming
@@ -281,7 +308,7 @@ public class Departure implements Parcelable, Comparable<Departure> {
 			return false;
 		if (line != other.line)
 			return false;
-		if (Math.abs(maxEstimate - other.maxEstimate) > ESTIMATE_EQUALS_TOLERANCE_MILLIS)
+		if (Math.abs(maxEstimate - other.maxEstimate) > getEqualsTolerance())
 			return false;
 		if (platform == null) {
 			if (other.platform != null)
@@ -298,11 +325,23 @@ public class Departure implements Parcelable, Comparable<Departure> {
 		return true;
 	}
 
+	private int getEqualsTolerance() {
+		if (origin.longStationLinger && hasDeparted()) {
+			return ESTIMATE_EQUALS_TOLERANCE_LONG_LINGER_MILLIS;
+		} else {
+			return ESTIMATE_EQUALS_TOLERANCE_MILLIS;
+		}
+	}
+
 	public String getCountdownText() {
 		StringBuilder builder = new StringBuilder();
 		int secondsLeft = getMeanSecondsLeft();
 		if (hasDeparted()) {
-			builder.append("Departed");
+			if (origin.longStationLinger && beganAsDeparted) {
+				builder.append("At station");
+			} else {
+				builder.append("Departed");
+			}
 		} else {
 			builder.append(secondsLeft / 60);
 			builder.append("m, ");

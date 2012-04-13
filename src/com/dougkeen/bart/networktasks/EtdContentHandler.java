@@ -59,6 +59,7 @@ public class EtdContentHandler extends DefaultHandler {
 			currentDeparture = new Departure();
 			currentDeparture.setDestination(Station
 					.getByAbbreviation(currentDestination));
+			currentDeparture.setOrigin(realTimeDepartures.getOrigin());
 		}
 	}
 
