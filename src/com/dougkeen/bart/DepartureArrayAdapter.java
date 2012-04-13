@@ -22,7 +22,7 @@ import com.dougkeen.bart.model.Departure;
 
 public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
 
-	public static int refreshCounter = 0;
+	private int refreshCounter = 1;
 
 	public DepartureArrayAdapter(Context context, int textViewResourceId,
 			Departure[] objects) {
@@ -51,6 +51,10 @@ public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
 
 	public DepartureArrayAdapter(Context context, int textViewResourceId) {
 		super(context, textViewResourceId);
+	}
+	
+	public void incrementRefreshCounter() {
+		refreshCounter++;
 	}
 
 	@Override

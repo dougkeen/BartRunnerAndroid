@@ -4,11 +4,9 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
-import org.apache.commons.lang3.StringUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -16,10 +14,6 @@ import org.xml.sax.helpers.DefaultHandler;
 import android.util.Log;
 
 import com.dougkeen.bart.model.Constants;
-import com.dougkeen.bart.model.Departure;
-import com.dougkeen.bart.model.Line;
-import com.dougkeen.bart.model.RealTimeDepartures;
-import com.dougkeen.bart.model.Route;
 import com.dougkeen.bart.model.ScheduleInformation;
 import com.dougkeen.bart.model.ScheduleItem;
 import com.dougkeen.bart.model.Station;

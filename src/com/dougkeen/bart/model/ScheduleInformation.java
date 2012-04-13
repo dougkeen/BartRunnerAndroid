@@ -3,8 +3,6 @@ package com.dougkeen.bart.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.R.integer;
-
 public class ScheduleInformation {
 
 	public ScheduleInformation(Station origin, Station destination) {

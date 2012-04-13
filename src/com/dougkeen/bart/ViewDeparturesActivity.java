@@ -19,18 +19,17 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dougkeen.bart.data.RoutesColumns;
 import com.dougkeen.bart.model.Constants;
 import com.dougkeen.bart.model.Departure;
+import com.dougkeen.bart.model.RealTimeDepartures;
 import com.dougkeen.bart.model.ScheduleInformation;
 import com.dougkeen.bart.model.ScheduleItem;
-import com.dougkeen.bart.model.StationPair;
-import com.dougkeen.bart.model.RealTimeDepartures;
 import com.dougkeen.bart.model.Station;
+import com.dougkeen.bart.model.StationPair;
 import com.dougkeen.bart.networktasks.GetRealTimeDeparturesTask;
 import com.dougkeen.bart.networktasks.GetScheduleInformationTask;
 
@@ -45,7 +44,7 @@ public class ViewDeparturesActivity extends ListActivity {
 	private int mAverageTripLength;
 	private int mAverageTripSampleCount;
 
-	private ArrayAdapter<Departure> mDeparturesAdapter;
+	private DepartureArrayAdapter mDeparturesAdapter;
 
 	private ScheduleInformation mLatestScheduleInfo;
 
@@ -430,7 +429,7 @@ public class ViewDeparturesActivity extends ListActivity {
 
 	private void runAutoUpdate() {
 		if (mIsAutoUpdating && mDeparturesAdapter != null) {
-			DepartureArrayAdapter.refreshCounter++; 
+			mDeparturesAdapter.incrementRefreshCounter();
 			mDeparturesAdapter.notifyDataSetChanged();
 		}
 		if (hasWindowFocus()) {
