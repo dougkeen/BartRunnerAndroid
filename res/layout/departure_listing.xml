@@ -43,9 +43,10 @@
         android:layout_below="@id/topRow"
         android:src="@drawable/xfer" />
 
-    <TextView
+    <TextSwitcher
         android:id="@+id/trainLengthText"
-        style="@style/DepartureTrainLengthText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_below="@id/topRow"
         android:layout_toRightOf="@id/destinationColorBar" />
 

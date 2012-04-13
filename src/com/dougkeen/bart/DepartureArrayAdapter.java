@@ -2,20 +2,27 @@ package com.dougkeen.bart;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextSwitcher;
 import android.widget.TextView;
+import android.widget.ViewSwitcher.ViewFactory;
 
-import com.dougkeen.bart.data.Departure;
+import com.dougkeen.bart.model.Departure;
 
 public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
+
+	public static int refreshCounter = 0;
 
 	public DepartureArrayAdapter(Context context, int textViewResourceId,
 			Departure[] objects) {
@@ -59,8 +66,30 @@ public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
 		Departure departure = getItem(position);
 		((TextView) view.findViewById(R.id.destinationText)).setText(departure
 				.getDestination().toString());
-		((TextView) view.findViewById(R.id.trainLengthText)).setText(departure
-				.getTrainLengthText());
+
+		TextSwitcher textSwitcher = (TextSwitcher) view
+				.findViewById(R.id.trainLengthText);
+		initTextSwitcher(textSwitcher);
+
+		final String estimatedArrivalTimeText = departure
+				.getEstimatedArrivalTimeText(getContext());
+		String arrivalText = "Est. arrival " + estimatedArrivalTimeText;
+		if (StringUtils.isBlank(estimatedArrivalTimeText)) {
+			textSwitcher.setCurrentText(departure.getTrainLengthText());
+		} else if (refreshCounter % 6 < 3) {
+			String trainLengthText = departure.getTrainLengthText();
+			if (refreshCounter % 6 == 0) {
+				textSwitcher.setText(trainLengthText);
+			} else {
+				textSwitcher.setCurrentText(trainLengthText);
+			}
+		} else {
+			if (refreshCounter % 6 == 3) {
+				textSwitcher.setText(arrivalText);
+			} else {
+				textSwitcher.setCurrentText(arrivalText);
+			}
+		}
 		ImageView colorBar = (ImageView) view
 				.findViewById(R.id.destinationColorBar);
 		((GradientDrawable) colorBar.getDrawable()).setColor(Color
@@ -87,4 +116,17 @@ public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
 		return view;
 	}
 
+	private void initTextSwitcher(TextSwitcher textSwitcher) {
+		if (textSwitcher.getInAnimation() == null) {
+			textSwitcher.setFactory(new ViewFactory() {
+				public View makeView() {
+					return LayoutInflater.from(getContext()).inflate(
+							R.layout.train_length_arrival_textview, null);
+				}
+			});
+
+			textSwitcher.setInAnimation(AnimationUtils.loadAnimation(
+					getContext(), android.R.anim.fade_in));
+		}
+	}
 }

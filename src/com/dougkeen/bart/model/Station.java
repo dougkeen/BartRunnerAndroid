@@ -1,7 +1,9 @@
-package com.dougkeen.bart;
+package com.dougkeen.bart.model;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import android.util.Log;
 
 public enum Station {
 	_12TH("12th", "12th St./Oakland City Center", false, false, "bayf"),
@@ -41,7 +43,7 @@ public enum Station {
 	ROCK("rock", "Rockridge", false, false, "mcar"),
 	SBRN("sbrn", "San Bruno", false, false, "balb", "balb"),
 	SANL("sanl", "San Leandro", true, false, "mcar"),
-	SFIA("sfia", "SFO Airport", false, false, "sbrn", "balb"),
+	SFIA("sfia", "SFO Airport", false, false, "sbrn", "balb", true),
 	SHAY("shay", "South Hayward", true, false, "bayf"),
 	SSAN("ssan", "South San Francisco", false, false, "balb", "balb"),
 	UCTY("ucty", "Union City", true, false, "bayf"),
@@ -56,43 +58,50 @@ public enum Station {
 	protected final String inboundTransferStation;
 	protected final String outboundTransferStation;
 	public final boolean endOfLine;
+	public final boolean longStationLinger;
 
-	private Station(String abbreviation, String name, boolean invertDirection, boolean endOfLine) {
-		this.abbreviation = abbreviation;
-		this.name = name;
-		this.invertDirection = invertDirection;
-		this.inboundTransferStation = null;
-		this.outboundTransferStation = null;
-		this.endOfLine = endOfLine;
+	private Station(String abbreviation, String name, boolean invertDirection,
+			boolean endOfLine) {
+		this(abbreviation, name, invertDirection, endOfLine, null, null, false);
 	}
 
-	private Station(String abbreviation, String name, boolean invertDirection, boolean endOfLine,
-			String transferStation) {
-		this.abbreviation = abbreviation;
-		this.name = name;
-		this.invertDirection = invertDirection;
-		this.inboundTransferStation = transferStation;
-		this.outboundTransferStation = null;
-		this.endOfLine = endOfLine;
+	private Station(String abbreviation, String name, boolean invertDirection,
+			boolean endOfLine, String transferStation) {
+		this(abbreviation, name, invertDirection, endOfLine, transferStation,
+				null, false);
 	}
 
-	private Station(String abbreviation, String name, boolean invertDirection, boolean endOfLine,
-			String inboundTransferStation, String outboundTransferStation) {
+	private Station(String abbreviation, String name, boolean invertDirection,
+			boolean endOfLine, String inboundTransferStation,
+			String outboundTransferStation) {
+		this(abbreviation, name, invertDirection, endOfLine,
+				inboundTransferStation, outboundTransferStation, false);
+	}
+
+	private Station(String abbreviation, String name, boolean invertDirection,
+			boolean endOfLine, String inboundTransferStation,
+			String outboundTransferStation, boolean longStationLinger) {
 		this.abbreviation = abbreviation;
 		this.name = name;
 		this.invertDirection = invertDirection;
 		this.inboundTransferStation = inboundTransferStation;
 		this.outboundTransferStation = outboundTransferStation;
 		this.endOfLine = endOfLine;
+		this.longStationLinger = longStationLinger;
 	}
 
 	public static Station getByAbbreviation(String abbr) {
-		if (abbr == null) {
+		try {
+			if (abbr == null) {
+				return null;
+			} else if (Character.isDigit(abbr.charAt(0))) {
+				return Station.valueOf("_" + abbr.toUpperCase());
+			} else {
+				return Station.valueOf(abbr.toUpperCase());
+			}
+		} catch (IllegalArgumentException e) {
+			Log.e(Constants.TAG, "Could not find station for '" + abbr + "'", e);
 			return null;
-		} else if (Character.isDigit(abbr.charAt(0))) {
-			return Station.valueOf("_" + abbr.toUpperCase());
-		} else {
-			return Station.valueOf(abbr.toUpperCase());
 		}
 	}
 
@@ -155,10 +164,9 @@ public enum Station {
 		}
 		if (isNorth == null) {
 			if (outboundTransferStation != null) {
-				returnList
-						.addAll(getOutboundTransferStation()
-								.getRoutesForDestination(dest,
-										getOutboundTransferStation()));
+				returnList.addAll(getOutboundTransferStation()
+						.getRoutesForDestination(dest,
+								getOutboundTransferStation()));
 			} else if (dest.getInboundTransferStation() != null) {
 				final List<Route> routesForDestination = getRoutesForDestination(
 						dest.getInboundTransferStation(),

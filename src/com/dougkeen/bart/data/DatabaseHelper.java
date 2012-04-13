@@ -15,7 +15,7 @@ import android.util.Log;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
 	private static final String DATABASE_NAME = "bart.dougkeen.db";
-	private static final int DATABASE_VERSION = 2;
+	private static final int DATABASE_VERSION = 4;
 
 	public static final String FAVORITES_TABLE_NAME = "Favorites";
 
@@ -34,7 +34,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 				+ RoutesColumns.FROM_STATION.getColumnDef() + ", "
 				+ RoutesColumns.TO_STATION.getColumnDef() + ", "
 				+ RoutesColumns.FARE.getColumnDef() + ", "
-				+ RoutesColumns.FARE_LAST_UPDATED.getColumnDef() + ");");
+				+ RoutesColumns.FARE_LAST_UPDATED.getColumnDef() + ", "
+				+ RoutesColumns.AVERAGE_TRIP_SAMPLE_COUNT.getColumnDef() + ", "
+				+ RoutesColumns.AVERAGE_TRIP_LENGTH.getColumnDef() + ");");
 	}
 
 	@Override

@@ -1,4 +1,4 @@
-package com.dougkeen.bart;
+package com.dougkeen.bart.model;
 
 public class Route {
 	private Station origin;

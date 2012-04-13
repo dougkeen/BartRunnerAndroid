@@ -1,4 +1,4 @@
-package com.dougkeen.bart;
+package com.dougkeen.bart.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,6 +37,12 @@ public enum Line {
 			Station.COLS, Station.SANL, Station.BAYF, Station.HAYW,
 			Station.SHAY, Station.UCTY, Station.FRMT),
 	YELLOW_ORANGE_SCHEDULED_TRANSFER(YELLOW, ORANGE, Station.MLBR,
+			Station.SFIA, Station.SBRN, Station.SSAN, Station.COLM,
+			Station.DALY, Station.BALB, Station.GLEN, Station._24TH,
+			Station._16TH, Station.CIVC, Station.POWL, Station.MONT,
+			Station.EMBR, Station.WOAK, Station.ASHB, Station.DBRK,
+			Station.NBRK, Station.PLZA, Station.DELN, Station.RICH),
+	YELLOW_RED_SCHEDULED_TRANSFER(YELLOW, RED, Station.MLBR,
 			Station.SFIA, Station.SBRN, Station.SSAN, Station.COLM,
 			Station.DALY, Station.BALB, Station.GLEN, Station._24TH,
 			Station._16TH, Station.CIVC, Station.POWL, Station.MONT,

@@ -3,6 +3,7 @@ package com.dougkeen.bart;
 import java.util.List;
 
 import android.app.ListActivity;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -22,10 +23,16 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.dougkeen.bart.GetRealTimeDeparturesTask.Params;
-import com.dougkeen.bart.data.Departure;
-import com.dougkeen.bart.data.RealTimeDepartures;
 import com.dougkeen.bart.data.RoutesColumns;
+import com.dougkeen.bart.model.Constants;
+import com.dougkeen.bart.model.Departure;
+import com.dougkeen.bart.model.ScheduleInformation;
+import com.dougkeen.bart.model.ScheduleItem;
+import com.dougkeen.bart.model.StationPair;
+import com.dougkeen.bart.model.RealTimeDepartures;
+import com.dougkeen.bart.model.Station;
+import com.dougkeen.bart.networktasks.GetRealTimeDeparturesTask;
+import com.dougkeen.bart.networktasks.GetScheduleInformationTask;
 
 public class ViewDeparturesActivity extends ListActivity {
 
@@ -35,12 +42,17 @@ public class ViewDeparturesActivity extends ListActivity {
 
 	private Station mOrigin;
 	private Station mDestination;
+	private int mAverageTripLength;
+	private int mAverageTripSampleCount;
 
 	private ArrayAdapter<Departure> mDeparturesAdapter;
 
+	private ScheduleInformation mLatestScheduleInfo;
+
 	private TextView mListTitleView;
 
-	private AsyncTask<Params, Integer, RealTimeDepartures> mGetDeparturesTask;
+	private AsyncTask<StationPair, Integer, RealTimeDepartures> mGetDeparturesTask;
+	private AsyncTask<StationPair, Integer, ScheduleInformation> mGetScheduleInformationTask;
 
 	private boolean mIsAutoUpdating = false;
 
@@ -52,7 +64,8 @@ public class ViewDeparturesActivity extends ListActivity {
 
 	private PowerManager.WakeLock mWakeLock;
 
-	private boolean mDataFetchIsPending;
+	private boolean mDepartureFetchIsPending;
+	private boolean mScheduleFetchIsPending;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -69,13 +82,18 @@ public class ViewDeparturesActivity extends ListActivity {
 
 		Cursor cursor = managedQuery(mUri, new String[] {
 				RoutesColumns.FROM_STATION.string,
-				RoutesColumns.TO_STATION.string }, null, null, null);
+				RoutesColumns.TO_STATION.string,
+				RoutesColumns.AVERAGE_TRIP_LENGTH.string,
+				RoutesColumns.AVERAGE_TRIP_SAMPLE_COUNT.string }, null, null,
+				null);
 
 		if (!cursor.moveToFirst()) {
 			throw new IllegalStateException("URI not found: " + mUri.toString());
 		}
 		mOrigin = Station.getByAbbreviation(cursor.getString(0));
 		mDestination = Station.getByAbbreviation(cursor.getString(1));
+		mAverageTripLength = cursor.getInt(2);
+		mAverageTripSampleCount = cursor.getInt(3);
 
 		String header = "Departures:\n" + mOrigin.name + " to "
 				+ mDestination.name;
@@ -114,7 +132,11 @@ public class ViewDeparturesActivity extends ListActivity {
 	private void cancelDataFetch() {
 		if (mGetDeparturesTask != null) {
 			mGetDeparturesTask.cancel(true);
-			mDataFetchIsPending = false;
+			mDepartureFetchIsPending = false;
+		}
+		if (mGetScheduleInformationTask != null) {
+			mGetScheduleInformationTask.cancel(true);
+			mScheduleFetchIsPending = false;
 		}
 	}
 
@@ -132,7 +154,7 @@ public class ViewDeparturesActivity extends ListActivity {
 	public void onWindowFocusChanged(boolean hasFocus) {
 		super.onWindowFocusChanged(hasFocus);
 		if (hasFocus) {
-			if (!mDataFetchIsPending) {
+			if (!mDepartureFetchIsPending) {
 				fetchLatestDepartures();
 			}
 			PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
@@ -162,7 +184,7 @@ public class ViewDeparturesActivity extends ListActivity {
 		mGetDeparturesTask = new GetRealTimeDeparturesTask() {
 			@Override
 			public void onResult(RealTimeDepartures result) {
-				mDataFetchIsPending = false;
+				mDepartureFetchIsPending = false;
 				Log.i(Constants.TAG, "Processing data from server");
 				processLatestDepartures(result);
 				Log.i(Constants.TAG, "Done processing data from server");
@@ -170,19 +192,55 @@ public class ViewDeparturesActivity extends ListActivity {
 
 			@Override
 			public void onError(Exception e) {
-				mDataFetchIsPending = false;
+				mDepartureFetchIsPending = false;
 				Log.w(Constants.TAG, e.getMessage(), e);
 				Toast.makeText(ViewDeparturesActivity.this,
 						R.string.could_not_connect, Toast.LENGTH_LONG).show();
 				((TextView) findViewById(android.R.id.empty))
 						.setText(R.string.could_not_connect);
 				// Try again in 60s
-				scheduleDataFetch(60000);
+				scheduleDepartureFetch(60000);
 			}
 		};
 		Log.i(Constants.TAG, "Fetching data from server");
-		mGetDeparturesTask.execute(new GetRealTimeDeparturesTask.Params(
-				mOrigin, mDestination));
+		mGetDeparturesTask.execute(new StationPair(mOrigin, mDestination));
+	}
+
+	private void fetchLatestSchedule() {
+		if (!hasWindowFocus())
+			return;
+		if (mGetScheduleInformationTask != null
+				&& mGetScheduleInformationTask.getStatus().equals(
+						AsyncTask.Status.RUNNING)) {
+			// Don't overlap fetches
+			return;
+		}
+
+		mGetScheduleInformationTask = new GetScheduleInformationTask() {
+			@Override
+			public void onResult(ScheduleInformation result) {
+				mScheduleFetchIsPending = false;
+				Log.i(Constants.TAG, "Processing data from server");
+				mLatestScheduleInfo = result;
+				applyScheduleInformation();
+				Log.i(Constants.TAG, "Done processing data from server");
+			}
+
+			@Override
+			public void onError(Exception e) {
+				mScheduleFetchIsPending = false;
+				Log.w(Constants.TAG, e.getMessage(), e);
+				Toast.makeText(ViewDeparturesActivity.this,
+						R.string.could_not_connect, Toast.LENGTH_LONG).show();
+				((TextView) findViewById(android.R.id.empty))
+						.setText(R.string.could_not_connect);
+				// Try again in 60s
+				scheduleScheduleInfoFetch(60000);
+			}
+		};
+		Log.i(Constants.TAG, "Fetching data from server");
+		mGetScheduleInformationTask.execute(new StationPair(mOrigin,
+				mDestination));
 	}
 
 	protected void processLatestDepartures(RealTimeDepartures result) {
@@ -238,11 +296,12 @@ public class ViewDeparturesActivity extends ListActivity {
 			needsBetterAccuracy = true;
 		}
 		mDeparturesAdapter.notifyDataSetChanged();
+		requestScheduleIfNecessary();
 
 		if (hasWindowFocus() && firstDeparture != null) {
 			if (needsBetterAccuracy || firstDeparture.hasDeparted()) {
 				// Get more data in 20s
-				scheduleDataFetch(20000);
+				scheduleDepartureFetch(20000);
 			} else {
 				// Get more 90 seconds before next train arrives, right when
 				// next train arrives, or 3 minutes, whichever is sooner
@@ -262,7 +321,7 @@ public class ViewDeparturesActivity extends ListActivity {
 					interval = 20000;
 				}
 
-				scheduleDataFetch(interval);
+				scheduleDepartureFetch(interval);
 			}
 			if (!mIsAutoUpdating) {
 				mIsAutoUpdating = true;
@@ -272,21 +331,106 @@ public class ViewDeparturesActivity extends ListActivity {
 		}
 	}
 
-	private void scheduleDataFetch(int millisUntilExecute) {
-		if (!mDataFetchIsPending) {
+	private void requestScheduleIfNecessary() {
+		if (mDeparturesAdapter.getCount() == 0) {
+			return;
+		}
+
+		if (mLatestScheduleInfo == null) {
+			fetchLatestSchedule();
+			return;
+		}
+
+		Departure lastDeparture = mDeparturesAdapter.getItem(mDeparturesAdapter
+				.getCount() - 1);
+		if (mLatestScheduleInfo.getLatestDepartureTime() < lastDeparture
+				.getMeanEstimate()) {
+			fetchLatestSchedule();
+			return;
+		}
+	}
+
+	private void applyScheduleInformation() {
+		int localAverageLength = mLatestScheduleInfo.getAverageTripLength();
+
+		int departuresCount = mDeparturesAdapter.getCount();
+		int lastSearchIndex = 0;
+		int tripCount = mLatestScheduleInfo.getTrips().size();
+		boolean departureUpdated = false;
+		for (int departureIndex = 0; departureIndex < departuresCount; departureIndex++) {
+			Departure departure = mDeparturesAdapter.getItem(departureIndex);
+			for (int i = lastSearchIndex; i < tripCount; i++) {
+				ScheduleItem trip = mLatestScheduleInfo.getTrips().get(i);
+				long departTimeDiff = Math.abs(trip.getDepartureTime()
+						- departure.getMeanEstimate());
+				if (departTimeDiff <= (60000 + departure
+						.getUncertaintySeconds() * 1000)
+						&& departure.getEstimatedTripTime() != trip
+								.getTripLength()) {
+					departure.setEstimatedTripTime(trip.getTripLength());
+					lastSearchIndex = i;
+					departureUpdated = true;
+					break;
+				}
+			}
+			if (!departure.hasEstimatedTripTime() && localAverageLength > 0) {
+				departure.setEstimatedTripTime(localAverageLength);
+			} else if (!departure.hasEstimatedTripTime()) {
+				departure.setEstimatedTripTime(mAverageTripLength);
+			}
+		}
+
+		if (departureUpdated) {
+			mDeparturesAdapter.notifyDataSetChanged();
+		}
+
+		// Update global average
+		if (mLatestScheduleInfo.getTripCountForAverage() > 0) {
+			int newAverageSampleCount = mAverageTripSampleCount
+					+ mLatestScheduleInfo.getTripCountForAverage();
+			int newAverage = (mAverageTripLength * mAverageTripSampleCount + localAverageLength
+					* mLatestScheduleInfo.getTripCountForAverage())
+					/ newAverageSampleCount;
+
+			ContentValues contentValues = new ContentValues();
+			contentValues.put(RoutesColumns.AVERAGE_TRIP_LENGTH.string,
+					newAverage);
+			contentValues.put(RoutesColumns.AVERAGE_TRIP_SAMPLE_COUNT.string,
+					newAverageSampleCount);
+
+			getContentResolver().update(mUri, contentValues, null, null);
+		}
+	}
+
+	private void scheduleDepartureFetch(int millisUntilExecute) {
+		if (!mDepartureFetchIsPending) {
 			mListTitleView.postDelayed(new Runnable() {
 				public void run() {
 					fetchLatestDepartures();
 				}
 			}, millisUntilExecute);
-			mDataFetchIsPending = true;
-			Log.i(Constants.TAG, "Scheduled another data fetch in "
+			mDepartureFetchIsPending = true;
+			Log.i(Constants.TAG, "Scheduled another departure fetch in "
+					+ millisUntilExecute / 1000 + "s");
+		}
+	}
+
+	private void scheduleScheduleInfoFetch(int millisUntilExecute) {
+		if (!mScheduleFetchIsPending) {
+			mListTitleView.postDelayed(new Runnable() {
+				public void run() {
+					fetchLatestSchedule();
+				}
+			}, millisUntilExecute);
+			mScheduleFetchIsPending = true;
+			Log.i(Constants.TAG, "Scheduled another schedule fetch in "
 					+ millisUntilExecute / 1000 + "s");
 		}
 	}
 
 	private void runAutoUpdate() {
 		if (mIsAutoUpdating && mDeparturesAdapter != null) {
+			DepartureArrayAdapter.refreshCounter++; 
 			mDeparturesAdapter.notifyDataSetChanged();
 		}
 		if (hasWindowFocus()) {

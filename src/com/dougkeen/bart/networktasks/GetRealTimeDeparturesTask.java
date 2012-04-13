@@ -1,9 +1,10 @@
-package com.dougkeen.bart;
+package com.dougkeen.bart.networktasks;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -16,37 +17,56 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.util.Xml;
 
-public abstract class GetRouteFareTask extends
-		AsyncTask<GetRouteFareTask.Params, Integer, String> {
+import com.dougkeen.bart.model.Constants;
+import com.dougkeen.bart.model.StationPair;
+import com.dougkeen.bart.model.RealTimeDepartures;
+import com.dougkeen.bart.model.Route;
 
+public abstract class GetRealTimeDeparturesTask extends
+		AsyncTask<StationPair, Integer, RealTimeDepartures> {
+
+	private final static String ETD_URL = "http://api.bart.gov/api/etd.aspx?cmd=etd&key="
+			+ Constants.API_KEY + "&orig=%1$s&dir=%2$s";
+	private final static String ETD_URL_NO_DIRECTION = "http://api.bart.gov/api/etd.aspx?cmd=etd&key="
+			+ Constants.API_KEY + "&orig=%1$s";
 	private final static int MAX_ATTEMPTS = 5;
-	private final static String FARE_URL = "http://api.bart.gov/api/sched.aspx?cmd=fare&date=today&key="
-			+ Constants.API_KEY + "&orig=%1$s&dest=%2$s";
 
 	private Exception mException;
 
-	private String fare;
+	private List<Route> mRoutes;
 
 	@Override
-	protected String doInBackground(Params... paramsArray) {
-		Params params = paramsArray[0];
+	protected RealTimeDepartures doInBackground(StationPair... paramsArray) {
+		// Always expect one param
+		StationPair params = paramsArray[0];
+
+		mRoutes = params.getOrigin().getRoutesForDestination(
+				params.getDestination());
 
 		if (!isCancelled()) {
-			return getFareFromNetwork(params, 0);
+			return getDeparturesFromNetwork(params, 0);
 		} else {
 			return null;
 		}
 	}
 
-	private String getFareFromNetwork(Params params, int attemptNumber) {
+	private RealTimeDepartures getDeparturesFromNetwork(StationPair params,
+			int attemptNumber) {
 		String xml = null;
-
 		try {
-			HttpUriRequest request = new HttpGet(
-					String.format(FARE_URL, params.origin.abbreviation,
-							params.destination.abbreviation));
+			String url;
+			if (params.getOrigin().endOfLine) {
+				url = String.format(ETD_URL_NO_DIRECTION,
+						params.getOrigin().abbreviation);
+			} else {
+				url = String.format(ETD_URL, params.getOrigin().abbreviation,
+						mRoutes.get(0).getDirection());
+			}
 
-			FareContentHandler handler = new FareContentHandler();
+			HttpUriRequest request = new HttpGet(url);
+
+			EtdContentHandler handler = new EtdContentHandler(
+					params.getOrigin(), params.getDestination(), mRoutes);
 			if (isCancelled()) {
 				return null;
 			}
@@ -67,8 +87,9 @@ public abstract class GetRouteFareTask extends
 			}
 
 			Xml.parse(xml, handler);
-			fare = handler.getFare();
-			return fare;
+			final RealTimeDepartures realTimeDepartures = handler
+					.getRealTimeDepartures();
+			return realTimeDepartures;
 		} catch (MalformedURLException e) {
 			throw new RuntimeException(e);
 		} catch (UnsupportedEncodingException e) {
@@ -83,7 +104,7 @@ public abstract class GetRouteFareTask extends
 				} catch (InterruptedException interrupt) {
 					// Ignore... just go on to next attempt
 				}
-				return getFareFromNetwork(params, attemptNumber + 1);
+				return getDeparturesFromNetwork(params, attemptNumber + 1);
 			} else {
 				mException = new Exception("Could not contact BART system", e);
 				return null;
@@ -95,28 +116,16 @@ public abstract class GetRouteFareTask extends
 		}
 	}
 
-	public static class Params {
-		public Params(Station origin, Station destination) {
-			super();
-			this.origin = origin;
-			this.destination = destination;
-		}
-
-		public final Station origin;
-		public final Station destination;
-	}
-
 	@Override
-	protected void onPostExecute(String result) {
+	protected void onPostExecute(RealTimeDepartures result) {
 		if (result != null) {
-			onResult(fare);
+			onResult(result);
 		} else {
 			onError(mException);
 		}
 	}
 
-	public abstract void onResult(String fare);
+	public abstract void onResult(RealTimeDepartures result);
 
 	public abstract void onError(Exception exception);
-
 }

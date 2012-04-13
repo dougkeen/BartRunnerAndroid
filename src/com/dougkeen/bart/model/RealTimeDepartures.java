@@ -1,11 +1,9 @@
-package com.dougkeen.bart.data;
+package com.dougkeen.bart.model;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.dougkeen.bart.Route;
-import com.dougkeen.bart.Station;
 
 public class RealTimeDepartures {
 	public RealTimeDepartures(Station origin, Station destination,

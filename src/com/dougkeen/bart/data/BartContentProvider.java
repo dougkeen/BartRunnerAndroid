@@ -2,7 +2,7 @@ package com.dougkeen.bart.data;
 
 import java.util.HashMap;
 
-import com.dougkeen.bart.Constants;
+import com.dougkeen.bart.model.Constants;
 
 import android.content.ContentProvider;
 import android.content.ContentUris;
@@ -45,6 +45,10 @@ public class BartContentProvider extends ContentProvider {
 				RoutesColumns.FARE.string);
 		sFavoritesProjectionMap.put(RoutesColumns.FARE_LAST_UPDATED.string,
 				RoutesColumns.FARE_LAST_UPDATED.string);
+		sFavoritesProjectionMap.put(RoutesColumns.AVERAGE_TRIP_SAMPLE_COUNT.string,
+				RoutesColumns.AVERAGE_TRIP_SAMPLE_COUNT.string);
+		sFavoritesProjectionMap.put(RoutesColumns.AVERAGE_TRIP_LENGTH.string,
+				RoutesColumns.AVERAGE_TRIP_LENGTH.string);
 	}
 
 	private DatabaseHelper mDatabaseHelper;
