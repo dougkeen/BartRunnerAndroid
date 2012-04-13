@@ -6,85 +6,89 @@ import java.util.List;
 import android.util.Log;
 
 public enum Station {
-	_12TH("12th", "12th St./Oakland City Center", false, false, "bayf"),
-	_16TH("16th", "16th St. Mission", false, false),
-	_19TH("19th", "19th St./Oakland", false, false, "bayf"),
-	_24TH("24th", "24th St. Mission", false, false),
-	ASHB("ashb", "Ashby", false, false, "mcar"),
-	BALB("balb", "Balboa Park", false, false),
-	BAYF("bayf", "Bay Fair", true, false, "mcar"),
-	CAST("cast", "Castro Valley", false, false, "bayf"),
-	CIVC("civc", "Civic Center", false, false),
-	COLS("cols", "Coliseum/Oakland Airport", true, false, "mcar"),
-	COLM("colm", "Colma", false, false, "balb", "balb"),
-	CONC("conc", "Concord", false, false, "mcar"),
-	DALY("daly", "Daly City", false, false),
-	DBRK("dbrk", "Downtown Berkeley", false, false, "mcar"),
-	DUBL("dubl", "Dublin/Pleasanton", false, true, "bayf"),
-	DELN("deln", "El Cerrito del Norte", false, false, "mcar"),
-	PLZA("plza", "El Cerrito Plaza", false, false, "mcar"),
-	EMBR("embr", "Embarcadero", false, false),
-	FRMT("frmt", "Fremont", true, false, "bayf"),
-	FTVL("ftvl", "Fruitvale", true, false, "mcar"),
-	GLEN("glen", "Glen Park", false, false),
-	HAYW("hayw", "Hayward", true, false, "bayf"),
-	LAFY("lafy", "Lafayette", false, false, "mcar"),
-	LAKE("lake", "Lake Merritt", true, false, "mcar"),
-	MCAR("mcar", "MacArthur", false, false, "bayf"),
-	MLBR("mlbr", "Millbrae", false, true, "balb", "balb"),
-	MONT("mont", "Montgomery St.", false, false),
-	NBRK("nbrk", "North Berkeley", false, false, "mcar"),
-	NCON("ncon", "North Concord/Martinez", false, false, "mcar"),
-	ORIN("orin", "Orinda", false, false, "mcar"),
-	PITT("pitt", "Pittsburg/Bay Point", false, true, "mcar"),
-	PHIL("phil", "Pleasant Hill", false, false, "mcar"),
-	POWL("powl", "Powell St.", false, false),
-	RICH("rich", "Richmond", false, true, "mcar"),
-	ROCK("rock", "Rockridge", false, false, "mcar"),
-	SBRN("sbrn", "San Bruno", false, false, "balb", "balb"),
-	SANL("sanl", "San Leandro", true, false, "mcar"),
-	SFIA("sfia", "SFO Airport", false, false, "sbrn", "balb", true),
-	SHAY("shay", "South Hayward", true, false, "bayf"),
-	SSAN("ssan", "South San Francisco", false, false, "balb", "balb"),
-	UCTY("ucty", "Union City", true, false, "bayf"),
-	WCRK("wcrk", "Walnut Creek", false, false, "mcar"),
-	WDUB("wdub", "West Dublin/Pleasanton", false, false, "bayf"),
-	WOAK("woak", "West Oakland", false, false),
-	SPCL("spcl", "Special", false, false);
+	_12TH("12th", "12th St./Oakland City Center", true, false, false, "bayf"),
+	_16TH("16th", "16th St. Mission", false, false, false),
+	_19TH("19th", "19th St./Oakland", true, false, false, "bayf"),
+	_24TH("24th", "24th St. Mission", false, false, false),
+	ASHB("ashb", "Ashby", true, false, false, "mcar"),
+	BALB("balb", "Balboa Park", false, false, false),
+	BAYF("bayf", "Bay Fair", true, true, false, "mcar"),
+	CAST("cast", "Castro Valley", true, false, false, "bayf"),
+	CIVC("civc", "Civic Center", false, false, false),
+	COLS("cols", "Coliseum/Oakland Airport", true, true, false, "mcar"),
+	COLM("colm", "Colma", true, false, false, "balb", "balb"),
+	CONC("conc", "Concord", true, false, false, "mcar"),
+	DALY("daly", "Daly City", false, false, false),
+	DBRK("dbrk", "Downtown Berkeley", true, false, false, "mcar"),
+	DUBL("dubl", "Dublin/Pleasanton", true, false, true, "bayf"),
+	DELN("deln", "El Cerrito del Norte", true, false, false, "mcar"),
+	PLZA("plza", "El Cerrito Plaza", true, false, false, "mcar"),
+	EMBR("embr", "Embarcadero", false, false, false),
+	FRMT("frmt", "Fremont", true, true, false, "bayf"),
+	FTVL("ftvl", "Fruitvale", true, true, false, "mcar"),
+	GLEN("glen", "Glen Park", false, false, false),
+	HAYW("hayw", "Hayward", true, true, false, "bayf"),
+	LAFY("lafy", "Lafayette", true, false, false, "mcar"),
+	LAKE("lake", "Lake Merritt", true, true, false, "mcar"),
+	MCAR("mcar", "MacArthur", true, false, false, "bayf"),
+	MLBR("mlbr", "Millbrae", true, false, true, "balb", "balb"),
+	MONT("mont", "Montgomery St.", false, false, false),
+	NBRK("nbrk", "North Berkeley", true, false, false, "mcar"),
+	NCON("ncon", "North Concord/Martinez", true, false, false, "mcar"),
+	ORIN("orin", "Orinda", true, false, false, "mcar"),
+	PITT("pitt", "Pittsburg/Bay Point", true, false, true, "mcar"),
+	PHIL("phil", "Pleasant Hill", true, false, false, "mcar"),
+	POWL("powl", "Powell St.", false, false, false),
+	RICH("rich", "Richmond", true, false, true, "mcar"),
+	ROCK("rock", "Rockridge", true, false, false, "mcar"),
+	SBRN("sbrn", "San Bruno", true, false, false, "balb", "balb"),
+	SANL("sanl", "San Leandro", true, true, false, "mcar"),
+	SFIA("sfia", "SFO Airport", true, false, false, "sbrn", "balb", true),
+	SHAY("shay", "South Hayward", true, true, false, "bayf"),
+	SSAN("ssan", "South San Francisco", true, false, false, "balb", "balb"),
+	UCTY("ucty", "Union City", true, true, false, "bayf"),
+	WCRK("wcrk", "Walnut Creek", true, false, false, "mcar"),
+	WDUB("wdub", "West Dublin/Pleasanton", true, false, false, "bayf"),
+	WOAK("woak", "West Oakland", false, false, false),
+	SPCL("spcl", "Special", false, false, false);
 
 	public final String abbreviation;
 	public final String name;
+	public final boolean transferFriendly;
 	public final boolean invertDirection;
 	protected final String inboundTransferStation;
 	protected final String outboundTransferStation;
 	public final boolean endOfLine;
 	public final boolean longStationLinger;
 
-	private Station(String abbreviation, String name, boolean invertDirection,
-			boolean endOfLine) {
-		this(abbreviation, name, invertDirection, endOfLine, null, null, false);
+	private Station(String abbreviation, String name, boolean transferFriendly,
+			boolean invertDirection, boolean endOfLine) {
+		this(abbreviation, name, transferFriendly, invertDirection, endOfLine,
+				null, null, false);
 	}
 
-	private Station(String abbreviation, String name, boolean invertDirection,
-			boolean endOfLine, String transferStation) {
-		this(abbreviation, name, invertDirection, endOfLine, transferStation,
-				null, false);
+	private Station(String abbreviation, String name, boolean transferFriendly,
+			boolean invertDirection, boolean endOfLine, String transferStation) {
+		this(abbreviation, name, transferFriendly, invertDirection, endOfLine,
+				transferStation, null, false);
 	}
 
-	private Station(String abbreviation, String name, boolean invertDirection,
-			boolean endOfLine, String inboundTransferStation,
-			String outboundTransferStation) {
-		this(abbreviation, name, invertDirection, endOfLine,
+	private Station(String abbreviation, String name, boolean transferFriendly,
+			boolean invertDirection, boolean endOfLine,
+			String inboundTransferStation, String outboundTransferStation) {
+		this(abbreviation, name, transferFriendly, invertDirection, endOfLine,
 				inboundTransferStation, outboundTransferStation, false);
 	}
 
-	private Station(String abbreviation, String name, boolean invertDirection,
-			boolean endOfLine, String inboundTransferStation,
-			String outboundTransferStation, boolean longStationLinger) {
+	private Station(String abbreviation, String name, boolean transferFriendly,
+			boolean invertDirection, boolean endOfLine,
+			String inboundTransferStation, String outboundTransferStation,
+			boolean longStationLinger) {
 		this.abbreviation = abbreviation;
 		this.name = name;
 		this.invertDirection = invertDirection;
 		this.inboundTransferStation = inboundTransferStation;
+		this.transferFriendly = transferFriendly;
 		this.outboundTransferStation = outboundTransferStation;
 		this.endOfLine = endOfLine;
 		this.longStationLinger = longStationLinger;
@@ -160,6 +164,12 @@ public enum Station {
 			} else {
 				route.setTransfer(false);
 			}
+
+			if (route.hasTransfer() && !transferFriendly
+					&& !Line.YELLOW_ORANGE_SCHEDULED_TRANSFER.equals(line)) {
+				continue;
+			}
+
 			returnList.add(route);
 		}
 		if (isNorth == null) {

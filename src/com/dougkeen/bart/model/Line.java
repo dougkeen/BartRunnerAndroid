@@ -14,18 +14,18 @@ public enum Line {
 			Station.EMBR, Station.WOAK, Station._12TH, Station._19TH,
 			Station.MCAR, Station.ASHB, Station.DBRK, Station.NBRK,
 			Station.PLZA, Station.DELN, Station.RICH),
-	ORANGE(false, Station.FRMT, Station.UCTY, Station.SHAY,
-			Station.HAYW, Station.BAYF, Station.SANL, Station.COLS,
-			Station.FTVL, Station.LAKE, Station._12TH, Station._19TH,
-			Station.MCAR, Station.ASHB, Station.DBRK, Station.NBRK,
-			Station.PLZA, Station.DELN, Station.RICH),
-	YELLOW(false, Station.MLBR, Station.SFIA, Station.SBRN,
-			Station.SSAN, Station.COLM, Station.DALY, Station.BALB,
-			Station.GLEN, Station._24TH, Station._16TH, Station.CIVC,
-			Station.POWL, Station.MONT, Station.EMBR, Station.WOAK,
-			Station._12TH, Station._19TH, Station.MCAR, Station.ROCK,
-			Station.ORIN, Station.LAFY, Station.WCRK, Station.PHIL,
-			Station.CONC, Station.NCON, Station.PITT),
+	ORANGE(false, Station.FRMT, Station.UCTY, Station.SHAY, Station.HAYW,
+			Station.BAYF, Station.SANL, Station.COLS, Station.FTVL,
+			Station.LAKE, Station._12TH, Station._19TH, Station.MCAR,
+			Station.ASHB, Station.DBRK, Station.NBRK, Station.PLZA,
+			Station.DELN, Station.RICH),
+	YELLOW(false, Station.MLBR, Station.SFIA, Station.SBRN, Station.SSAN,
+			Station.COLM, Station.DALY, Station.BALB, Station.GLEN,
+			Station._24TH, Station._16TH, Station.CIVC, Station.POWL,
+			Station.MONT, Station.EMBR, Station.WOAK, Station._12TH,
+			Station._19TH, Station.MCAR, Station.ROCK, Station.ORIN,
+			Station.LAFY, Station.WCRK, Station.PHIL, Station.CONC,
+			Station.NCON, Station.PITT),
 	BLUE(true, Station.DALY, Station.BALB, Station.GLEN, Station._24TH,
 			Station._16TH, Station.CIVC, Station.POWL, Station.MONT,
 			Station.EMBR, Station.WOAK, Station.LAKE, Station.FTVL,
@@ -42,12 +42,26 @@ public enum Line {
 			Station._16TH, Station.CIVC, Station.POWL, Station.MONT,
 			Station.EMBR, Station.WOAK, Station.ASHB, Station.DBRK,
 			Station.NBRK, Station.PLZA, Station.DELN, Station.RICH),
-	YELLOW_RED_SCHEDULED_TRANSFER(YELLOW, RED, Station.MLBR,
+	YELLOW_GREEN_SCHEDULED_TRANSFER(true, YELLOW, GREEN, Station.MLBR,
 			Station.SFIA, Station.SBRN, Station.SSAN, Station.COLM,
 			Station.DALY, Station.BALB, Station.GLEN, Station._24TH,
 			Station._16TH, Station.CIVC, Station.POWL, Station.MONT,
-			Station.EMBR, Station.WOAK, Station.ASHB, Station.DBRK,
-			Station.NBRK, Station.PLZA, Station.DELN, Station.RICH);
+			Station.EMBR, Station.WOAK, Station.LAKE, Station.FTVL,
+			Station.COLS, Station.SANL, Station.BAYF, Station.HAYW,
+			Station.SHAY, Station.UCTY, Station.FRMT),
+	YELLOW_BLUE_SCHEDULED_TRANSFER(true, YELLOW, BLUE, Station.MLBR,
+			Station.SFIA, Station.SBRN, Station.SSAN, Station.COLM,
+			Station.DALY, Station.BALB, Station.GLEN, Station._24TH,
+			Station._16TH, Station.CIVC, Station.POWL, Station.MONT,
+			Station.EMBR, Station.WOAK, Station.LAKE, Station.FTVL,
+			Station.COLS, Station.SANL, Station.BAYF, Station.CAST,
+			Station.WDUB, Station.DUBL),
+	YELLOW_RED_SCHEDULED_TRANSFER(YELLOW, RED, Station.MLBR, Station.SFIA,
+			Station.SBRN, Station.SSAN, Station.COLM, Station.DALY,
+			Station.BALB, Station.GLEN, Station._24TH, Station._16TH,
+			Station.CIVC, Station.POWL, Station.MONT, Station.EMBR,
+			Station.WOAK, Station.ASHB, Station.DBRK, Station.NBRK,
+			Station.PLZA, Station.DELN, Station.RICH);
 
 	public final List<Station> stations;
 
@@ -59,8 +73,7 @@ public enum Line {
 
 	protected final Line transferLine2;
 
-	private Line(boolean directionMayInvert,
-			Station... stationArray) {
+	private Line(boolean directionMayInvert, Station... stationArray) {
 		this.requiresTransfer = false;
 		this.directionMayInvert = directionMayInvert;
 		stations = Arrays.asList(stationArray);
@@ -72,6 +85,15 @@ public enum Line {
 			Station... stationArray) {
 		this.requiresTransfer = true;
 		this.directionMayInvert = false;
+		stations = Arrays.asList(stationArray);
+		this.transferLine1 = transferLine1;
+		this.transferLine2 = transferLine2;
+	}
+
+	private Line(boolean directionMayInvert, Line transferLine1,
+			Line transferLine2, Station... stationArray) {
+		this.requiresTransfer = true;
+		this.directionMayInvert = directionMayInvert;
 		stations = Arrays.asList(stationArray);
 		this.transferLine1 = transferLine1;
 		this.transferLine2 = transferLine2;
