@@ -29,6 +29,9 @@ import android.widget.TextView;
 
 import com.dougkeen.bart.data.CursorUtils;
 import com.dougkeen.bart.data.RoutesColumns;
+import com.dougkeen.bart.model.Constants;
+import com.dougkeen.bart.model.Station;
+import com.dougkeen.bart.networktasks.GetRouteFareTask;
 
 public class RoutesListActivity extends ListActivity {
 	private static final TimeZone PACIFIC_TIME = TimeZone
@@ -51,7 +54,9 @@ public class RoutesListActivity extends ListActivity {
 		mQuery = managedQuery(Constants.FAVORITE_CONTENT_URI, new String[] {
 				RoutesColumns._ID.string, RoutesColumns.FROM_STATION.string,
 				RoutesColumns.TO_STATION.string, RoutesColumns.FARE.string,
-				RoutesColumns.FARE_LAST_UPDATED.string }, null, null,
+				RoutesColumns.FARE_LAST_UPDATED.string,
+				RoutesColumns.AVERAGE_TRIP_SAMPLE_COUNT.string,
+				RoutesColumns.AVERAGE_TRIP_LENGTH.string }, null, null,
 				RoutesColumns._ID.string);
 
 		refreshFares();

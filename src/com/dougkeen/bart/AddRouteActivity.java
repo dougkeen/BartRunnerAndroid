@@ -1,6 +1,8 @@
 package com.dougkeen.bart;
 
 import com.dougkeen.bart.data.RoutesColumns;
+import com.dougkeen.bart.model.Constants;
+import com.dougkeen.bart.model.Station;
 
 import android.app.Activity;
 import android.content.ContentValues;

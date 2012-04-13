@@ -1,4 +1,4 @@
-package com.dougkeen.bart;
+package com.dougkeen.bart.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;

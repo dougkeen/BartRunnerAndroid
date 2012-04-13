@@ -1,4 +1,4 @@
-package com.dougkeen.bart;
+package com.dougkeen.bart.networktasks;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -11,8 +11,12 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import android.util.Log;
 
-import com.dougkeen.bart.data.Departure;
-import com.dougkeen.bart.data.RealTimeDepartures;
+import com.dougkeen.bart.model.Constants;
+import com.dougkeen.bart.model.Departure;
+import com.dougkeen.bart.model.Line;
+import com.dougkeen.bart.model.RealTimeDepartures;
+import com.dougkeen.bart.model.Route;
+import com.dougkeen.bart.model.Station;
 
 public class EtdContentHandler extends DefaultHandler {
 	public EtdContentHandler(Station origin, Station destination,

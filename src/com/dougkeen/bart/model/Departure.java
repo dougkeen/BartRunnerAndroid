@@ -1,10 +1,11 @@
-package com.dougkeen.bart.data;
+package com.dougkeen.bart.model;
 
+import java.util.Date;
+
+import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import com.dougkeen.bart.Line;
-import com.dougkeen.bart.Station;
+import android.text.format.DateFormat;
 
 public class Departure implements Parcelable, Comparable<Departure> {
 	private static final int ESTIMATE_EQUALS_TOLERANCE_MILLIS = 59999;
@@ -44,6 +45,8 @@ public class Departure implements Parcelable, Comparable<Departure> {
 
 	private long minEstimate;
 	private long maxEstimate;
+
+	private int estimatedTripTime;
 
 	public Station getDestination() {
 		return destination;
@@ -149,6 +152,18 @@ public class Departure implements Parcelable, Comparable<Departure> {
 		this.maxEstimate = maxEstimate;
 	}
 
+	public int getEstimatedTripTime() {
+		return estimatedTripTime;
+	}
+
+	public void setEstimatedTripTime(int estimatedTripTime) {
+		this.estimatedTripTime = estimatedTripTime;
+	}
+
+	public boolean hasEstimatedTripTime() {
+		return this.estimatedTripTime > 0;
+	}
+
 	public int getUncertaintySeconds() {
 		return (int) (maxEstimate - minEstimate + 1000) / 2000;
 	}
@@ -162,8 +177,24 @@ public class Departure implements Parcelable, Comparable<Departure> {
 	}
 
 	public int getMeanSecondsLeft() {
-		return (int) (((getMinEstimate() + getMaxEstimate()) / 2 - System
-				.currentTimeMillis()) / 1000);
+		return (int) ((getMeanEstimate() - System.currentTimeMillis()) / 1000);
+	}
+
+	public long getMeanEstimate() {
+		return (getMinEstimate() + getMaxEstimate()) / 2;
+	}
+
+	public long getEstimatedArrivalTime() {
+		return getMeanEstimate() + getEstimatedTripTime();
+	}
+
+	public String getEstimatedArrivalTimeText(Context context) {
+		if (getEstimatedTripTime() > 0) {
+			return DateFormat.getTimeFormat(context).format(
+					new Date(getEstimatedArrivalTime()));
+		} else {
+			return "";
+		}
 	}
 
 	public boolean hasDeparted() {
