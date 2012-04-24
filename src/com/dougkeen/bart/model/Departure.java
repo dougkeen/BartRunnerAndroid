@@ -326,7 +326,7 @@ public class Departure implements Parcelable, Comparable<Departure> {
 	}
 
 	private int getEqualsTolerance() {
-		if (origin.longStationLinger && hasDeparted()) {
+		if (origin != null && origin.longStationLinger && hasDeparted()) {
 			return ESTIMATE_EQUALS_TOLERANCE_LONG_LINGER_MILLIS;
 		} else {
 			return ESTIMATE_EQUALS_TOLERANCE_MILLIS;
@@ -337,7 +337,7 @@ public class Departure implements Parcelable, Comparable<Departure> {
 		StringBuilder builder = new StringBuilder();
 		int secondsLeft = getMeanSecondsLeft();
 		if (hasDeparted()) {
-			if (origin.longStationLinger && beganAsDeparted) {
+			if (origin != null && origin.longStationLinger && beganAsDeparted) {
 				builder.append("At station");
 			} else {
 				builder.append("Departed");
