@@ -8,8 +8,6 @@ import android.os.Parcelable;
 import android.text.format.DateFormat;
 
 public class Departure implements Parcelable, Comparable<Departure> {
-	private static final int ESTIMATE_EQUALS_TOLERANCE_MILLIS = 59999;
-	private static final int ESTIMATE_EQUALS_TOLERANCE_LONG_LINGER_MILLIS = 719999;
 	private static final int MINIMUM_MERGE_OVERLAP_MILLIS = 10000;
 
 	public Departure() {
@@ -201,6 +199,14 @@ public class Departure implements Parcelable, Comparable<Departure> {
 		return (getMinEstimate() + getMaxEstimate()) / 2;
 	}
 
+	public long getArrivalTimeOverride() {
+		return arrivalTimeOverride;
+	}
+
+	public void setArrivalTimeOverride(long arrivalTimeOverride) {
+		this.arrivalTimeOverride = arrivalTimeOverride;
+	}
+
 	public long getEstimatedArrivalTime() {
 		if (arrivalTimeOverride > 0) {
 			return arrivalTimeOverride;
@@ -209,7 +215,7 @@ public class Departure implements Parcelable, Comparable<Departure> {
 	}
 
 	public String getEstimatedArrivalTimeText(Context context) {
-		if (getEstimatedTripTime() > 0) {
+		if (getEstimatedTripTime() > 0 || arrivalTimeOverride > 0) {
 			return DateFormat.getTimeFormat(context).format(
 					new Date(getEstimatedArrivalTime()));
 		} else {
@@ -326,10 +332,10 @@ public class Departure implements Parcelable, Comparable<Departure> {
 	}
 
 	private int getEqualsTolerance() {
-		if (origin != null && origin.longStationLinger && hasDeparted()) {
-			return ESTIMATE_EQUALS_TOLERANCE_LONG_LINGER_MILLIS;
+		if (origin != null) {
+			return origin.departureEqualityTolerance;
 		} else {
-			return ESTIMATE_EQUALS_TOLERANCE_MILLIS;
+			return Station.DEFAULT_DEPARTURE_EQUALITY_TOLERANCE;
 		}
 	}
 

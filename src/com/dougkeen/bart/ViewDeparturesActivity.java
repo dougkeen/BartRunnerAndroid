@@ -360,9 +360,28 @@ public class ViewDeparturesActivity extends ListActivity {
 			Departure departure = mDeparturesAdapter.getItem(departureIndex);
 			for (int i = lastSearchIndex; i < tripCount; i++) {
 				ScheduleItem trip = mLatestScheduleInfo.getTrips().get(i);
+				if (!departure.getDestination().abbreviation.equals(trip
+						.getTrainHeadStation())) {
+					continue;
+				}
+
 				long departTimeDiff = Math.abs(trip.getDepartureTime()
 						- departure.getMeanEstimate());
-				if (departTimeDiff <= (60000 + departure
+				final long millisUntilTripDeparture = trip.getDepartureTime()
+						- System.currentTimeMillis();
+				final int equalityTolerance = (departure.getOrigin() != null) ? departure
+						.getOrigin().departureEqualityTolerance
+						: Station.DEFAULT_DEPARTURE_EQUALITY_TOLERANCE;
+				if (departure.getOrigin() != null
+						&& departure.getOrigin().longStationLinger
+						&& departure.hasDeparted()
+						&& millisUntilTripDeparture > 0
+						&& millisUntilTripDeparture < equalityTolerance) {
+					departure.setArrivalTimeOverride(trip.getArrivalTime());
+					lastSearchIndex = i;
+					departureUpdated = true;
+					break;
+				} else if (departTimeDiff <= (equalityTolerance + departure
 						.getUncertaintySeconds() * 1000)
 						&& departure.getEstimatedTripTime() != trip
 								.getTripLength()) {
@@ -427,11 +446,18 @@ public class ViewDeparturesActivity extends ListActivity {
 		}
 	}
 
+	private long mLastAutoUpdate = 0;
+
 	private void runAutoUpdate() {
+		long now = System.currentTimeMillis();
+		if (now - mLastAutoUpdate < 950) {
+			return;
+		}
 		if (mIsAutoUpdating && mDeparturesAdapter != null) {
 			mDeparturesAdapter.incrementRefreshCounter();
 			mDeparturesAdapter.notifyDataSetChanged();
 		}
+		mLastAutoUpdate = now;
 		if (hasWindowFocus()) {
 			mListTitleView.postDelayed(AUTO_UPDATE_RUNNABLE, 1000);
 		} else {

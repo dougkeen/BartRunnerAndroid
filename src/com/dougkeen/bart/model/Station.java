@@ -20,30 +20,33 @@ public enum Station {
 	CONC("conc", "Concord", true, false, false, "mcar"),
 	DALY("daly", "Daly City", false, false, false),
 	DBRK("dbrk", "Downtown Berkeley", true, false, false, "mcar"),
-	DUBL("dubl", "Dublin/Pleasanton", true, false, true, "bayf"),
+	DUBL("dubl", "Dublin/Pleasanton", true, false, true, "bayf", "bayf", true,
+			719999),
 	DELN("deln", "El Cerrito del Norte", true, false, false, "mcar"),
 	PLZA("plza", "El Cerrito Plaza", true, false, false, "mcar"),
 	EMBR("embr", "Embarcadero", false, false, false),
-	FRMT("frmt", "Fremont", true, true, false, "bayf"),
+	FRMT("frmt", "Fremont", true, true, true, "bayf", "bayf", true, 299999),
 	FTVL("ftvl", "Fruitvale", true, true, false, "mcar"),
 	GLEN("glen", "Glen Park", false, false, false),
 	HAYW("hayw", "Hayward", true, true, false, "bayf"),
 	LAFY("lafy", "Lafayette", true, false, false, "mcar"),
 	LAKE("lake", "Lake Merritt", true, true, false, "mcar"),
 	MCAR("mcar", "MacArthur", true, false, false, "bayf"),
-	MLBR("mlbr", "Millbrae", true, false, true, "balb", "balb"),
+	MLBR("mlbr", "Millbrae", true, false, true, "balb", "balb", true, 719999),
 	MONT("mont", "Montgomery St.", false, false, false),
 	NBRK("nbrk", "North Berkeley", true, false, false, "mcar"),
 	NCON("ncon", "North Concord/Martinez", true, false, false, "mcar"),
 	ORIN("orin", "Orinda", true, false, false, "mcar"),
-	PITT("pitt", "Pittsburg/Bay Point", true, false, true, "mcar"),
+	PITT("pitt", "Pittsburg/Bay Point", true, false, true, "mcar", "mcar",
+			true, 719999),
 	PHIL("phil", "Pleasant Hill", true, false, false, "mcar"),
 	POWL("powl", "Powell St.", false, false, false),
-	RICH("rich", "Richmond", true, false, true, "mcar"),
+	RICH("rich", "Richmond", true, false, true, "mcar", "mcar", true, 299999),
 	ROCK("rock", "Rockridge", true, false, false, "mcar"),
 	SBRN("sbrn", "San Bruno", true, false, false, "balb", "balb"),
 	SANL("sanl", "San Leandro", true, true, false, "mcar"),
-	SFIA("sfia", "SFO Airport", true, false, false, "sbrn", "balb", true),
+	SFIA("sfia", "SFO Airport", true, false, false, "sbrn", "balb", true,
+			719999),
 	SHAY("shay", "South Hayward", true, true, false, "bayf"),
 	SSAN("ssan", "South San Francisco", true, false, false, "balb", "balb"),
 	UCTY("ucty", "Union City", true, true, false, "bayf"),
@@ -60,30 +63,35 @@ public enum Station {
 	protected final String outboundTransferStation;
 	public final boolean endOfLine;
 	public final boolean longStationLinger;
+	public final int departureEqualityTolerance;
+
+	public final static int DEFAULT_DEPARTURE_EQUALITY_TOLERANCE = 59999;
 
 	private Station(String abbreviation, String name, boolean transferFriendly,
 			boolean invertDirection, boolean endOfLine) {
 		this(abbreviation, name, transferFriendly, invertDirection, endOfLine,
-				null, null, false);
+				null, null, false, DEFAULT_DEPARTURE_EQUALITY_TOLERANCE);
 	}
 
 	private Station(String abbreviation, String name, boolean transferFriendly,
 			boolean invertDirection, boolean endOfLine, String transferStation) {
 		this(abbreviation, name, transferFriendly, invertDirection, endOfLine,
-				transferStation, null, false);
+				transferStation, null, false,
+				DEFAULT_DEPARTURE_EQUALITY_TOLERANCE);
 	}
 
 	private Station(String abbreviation, String name, boolean transferFriendly,
 			boolean invertDirection, boolean endOfLine,
 			String inboundTransferStation, String outboundTransferStation) {
 		this(abbreviation, name, transferFriendly, invertDirection, endOfLine,
-				inboundTransferStation, outboundTransferStation, false);
+				inboundTransferStation, outboundTransferStation, false,
+				DEFAULT_DEPARTURE_EQUALITY_TOLERANCE);
 	}
 
 	private Station(String abbreviation, String name, boolean transferFriendly,
 			boolean invertDirection, boolean endOfLine,
 			String inboundTransferStation, String outboundTransferStation,
-			boolean longStationLinger) {
+			boolean longStationLinger, int departureEqualityTolerance) {
 		this.abbreviation = abbreviation;
 		this.name = name;
 		this.invertDirection = invertDirection;
@@ -92,6 +100,7 @@ public enum Station {
 		this.outboundTransferStation = outboundTransferStation;
 		this.endOfLine = endOfLine;
 		this.longStationLinger = longStationLinger;
+		this.departureEqualityTolerance = departureEqualityTolerance;
 	}
 
 	public static Station getByAbbreviation(String abbr) {

@@ -25,7 +25,7 @@ public class ScheduleContentHandler extends DefaultHandler {
 	}
 
 	private final static List<String> TAGS = Arrays.asList("date", "time",
-			"trip");
+			"trip", "leg");
 
 	private final static DateFormat TRIP_DATE_FORMAT;
 	private final static DateFormat REQUEST_DATE_FORMAT;
@@ -53,6 +53,8 @@ public class ScheduleContentHandler extends DefaultHandler {
 	private String requestDate;
 	private String requestTime;
 
+	private ScheduleItem currentTrip;
+
 	@Override
 	public void characters(char[] ch, int start, int length)
 			throws SAXException {
@@ -67,22 +69,23 @@ public class ScheduleContentHandler extends DefaultHandler {
 		if (TAGS.contains(localName)) {
 			isParsingTag = true;
 		}
+		final int numberOfAttributes = attributes.getLength();
 		if (localName.equals("trip")) {
-			ScheduleItem trip = new ScheduleItem();
+			currentTrip = new ScheduleItem();
 			String originDate = null;
 			String originTime = null;
 			String destinationDate = null;
 			String destinationTime = null;
-			for (int i = attributes.getLength() - 1; i >= 0; i--) {
+			for (int i = 0; i < numberOfAttributes; i++) {
 				if (attributes.getLocalName(i).equalsIgnoreCase("origin")) {
-					trip.setOrigin(Station.getByAbbreviation(attributes
+					currentTrip.setOrigin(Station.getByAbbreviation(attributes
 							.getValue(i)));
 				} else if (attributes.getLocalName(i).equalsIgnoreCase(
 						"destination")) {
-					trip.setDestination(Station.getByAbbreviation(attributes
-							.getValue(i)));
+					currentTrip.setDestination(Station
+							.getByAbbreviation(attributes.getValue(i)));
 				} else if (attributes.getLocalName(i).equalsIgnoreCase("fare")) {
-					trip.setFare(attributes.getValue(i));
+					currentTrip.setFare(attributes.getValue(i));
 				} else if (attributes.getLocalName(i).equalsIgnoreCase(
 						"origTimeMin")) {
 					originTime = attributes.getValue(i);
@@ -97,24 +100,34 @@ public class ScheduleContentHandler extends DefaultHandler {
 					destinationDate = attributes.getValue(i);
 				} else if (attributes.getLocalName(i).equalsIgnoreCase(
 						"bikeFlag")) {
-					trip.setBikesAllowed(attributes.getValue(i).equals("1"));
-				} else if (attributes.getLocalName(i).equalsIgnoreCase(
-						"trainHeadStation")) {
-					trip.setTrainHeadStation(attributes.getValue(i));
+					currentTrip.setBikesAllowed(attributes.getValue(i).equals(
+							"1"));
 				}
 			}
 
 			long departTime = parseDate(TRIP_DATE_FORMAT, originDate,
 					originTime);
 			if (departTime > 0)
-				trip.setDepartureTime(departTime);
+				currentTrip.setDepartureTime(departTime);
 
 			long arriveTime = parseDate(TRIP_DATE_FORMAT, destinationDate,
 					destinationTime);
 			if (arriveTime > 0)
-				trip.setArrivalTime(arriveTime);
+				currentTrip.setArrivalTime(arriveTime);
 
-			schedule.addTrip(trip);
+			schedule.addTrip(currentTrip);
+		}
+		if (localName.equals("leg")) {
+			String legNumber = null;
+			for (int i = 0; i < numberOfAttributes; i++) {
+				if (attributes.getLocalName(i).equals("order")) {
+					legNumber = attributes.getValue(i);
+				} else if (attributes.getLocalName(i)
+						.equals("trainHeadStation") && "1".equals(legNumber)) {
+					currentTrip.setTrainHeadStation(attributes.getValue(i)
+							.toLowerCase());
+				}
+			}
 		}
 	}
 
