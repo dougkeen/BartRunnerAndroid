@@ -24,7 +24,7 @@ public abstract class GetScheduleInformationTask extends
 		AsyncTask<StationPair, Integer, ScheduleInformation> {
 
 	private final static String SCHED_URL = "http://api.bart.gov/api/sched.aspx?cmd=depart&key="
-			+ Constants.API_KEY + "&orig=%1$s&dest=%2$s&b=1&a=5";
+			+ Constants.API_KEY + "&orig=%1$s&dest=%2$s&b=1&a=4";
 
 	private final static int MAX_ATTEMPTS = 5;
 

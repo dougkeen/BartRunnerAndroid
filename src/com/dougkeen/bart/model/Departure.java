@@ -1,5 +1,6 @@
 package com.dougkeen.bart.model;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import android.content.Context;
@@ -177,6 +178,10 @@ public class Departure implements Parcelable, Comparable<Departure> {
 
 	public boolean hasEstimatedTripTime() {
 		return this.estimatedTripTime > 0;
+	}
+
+	public boolean hasAnyArrivalEstimate() {
+		return this.estimatedTripTime > 0 || this.arrivalTimeOverride > 0;
 	}
 
 	public int getUncertaintySeconds() {
@@ -367,6 +372,7 @@ public class Departure implements Parcelable, Comparable<Departure> {
 
 	@Override
 	public String toString() {
+		java.text.DateFormat format = SimpleDateFormat.getTimeInstance();
 		StringBuilder builder = new StringBuilder();
 		builder.append(destination);
 		if (requiresTransfer) {
@@ -374,6 +380,8 @@ public class Departure implements Parcelable, Comparable<Departure> {
 		}
 		builder.append(", ");
 		builder.append(getCountdownText());
+		builder.append(", ");
+		builder.append(format.format(new Date(getMeanEstimate())));
 		return builder.toString();
 	}
 

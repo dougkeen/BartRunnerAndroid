@@ -40,8 +40,13 @@ public abstract class GetRealTimeDeparturesTask extends
 		// Always expect one param
 		StationPair params = paramsArray[0];
 
-		mRoutes = params.getOrigin().getRoutesForDestination(
+		mRoutes = params.getOrigin().getDirectRoutesForDestination(
 				params.getDestination());
+
+		if (mRoutes.isEmpty() || params.getOrigin().transferFriendly) {
+			mRoutes.addAll(params.getOrigin().getTransferRoutes(
+					params.getDestination()));
+		}
 
 		if (!isCancelled()) {
 			return getDeparturesFromNetwork(params, 0);

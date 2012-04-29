@@ -1,9 +1,12 @@
 package com.dougkeen.bart.model;
 
+import java.util.Collection;
+
 public class Route {
 	private Station origin;
 	private Station destination;
-	private Line line;
+	private Line directLine;
+	private Collection<Line> transferLines;
 	private boolean requiresTransfer;
 	private Station transferStation;
 	private String direction;
@@ -26,12 +29,20 @@ public class Route {
 		this.destination = destination;
 	}
 
-	public Line getLine() {
-		return line;
+	public Line getDirectLine() {
+		return directLine;
 	}
 
-	public void setLine(Line line) {
-		this.line = line;
+	public void setDirectLine(Line line) {
+		this.directLine = line;
+	}
+
+	public Collection<Line> getTransferLines() {
+		return transferLines;
+	}
+
+	public void setTransferLines(Collection<Line> transferLines) {
+		this.transferLines = transferLines;
 	}
 
 	public boolean hasTransfer() {
@@ -82,7 +93,7 @@ public class Route {
 		builder.append(", destination=");
 		builder.append(destination);
 		builder.append(", line=");
-		builder.append(line);
+		builder.append(directLine);
 		builder.append(", requiresTransfer=");
 		builder.append(requiresTransfer);
 		builder.append(", transferStation=");
@@ -99,13 +110,15 @@ public class Route {
 
 	public boolean trainDestinationIsApplicable(Station lineDestination,
 			Line viaLine) {
-		Line routeLine = getLine();
+		Line routeLine = getDirectLine();
 		if (routeLine.transferLine1 != null
 				&& viaLine.equals(routeLine.transferLine1)) {
 			return true;
 		} else if (routeLine.transferLine2 != null
 				&& viaLine.equals(routeLine.transferLine2)) {
 			return true;
+		} else if (requiresTransfer && transferLines != null && !transferLines.isEmpty()) {
+			return transferLines.contains(viaLine);
 		} else {
 			int originIndex = viaLine.stations.indexOf(origin);
 			int routeDestinationIndex = viaLine.stations.indexOf(destination);

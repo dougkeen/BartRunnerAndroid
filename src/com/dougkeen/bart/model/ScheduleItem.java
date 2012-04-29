@@ -1,5 +1,9 @@
 package com.dougkeen.bart.model;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class ScheduleItem {
 
 	public ScheduleItem() {
@@ -11,6 +15,8 @@ public class ScheduleItem {
 		this.origin = origin;
 		this.destination = destination;
 	}
+
+	public static final int SCHEDULE_ITEM_DEPARTURE_EQUALS_TOLERANCE = 120000;
 
 	private Station origin;
 	private Station destination;
@@ -83,4 +89,27 @@ public class ScheduleItem {
 	public void setTrainHeadStation(String trainHeadStation) {
 		this.trainHeadStation = trainHeadStation;
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		DateFormat format = SimpleDateFormat.getTimeInstance();
+		builder.append("ScheduleItem [origin=");
+		builder.append(origin);
+		builder.append(", destination=");
+		builder.append(destination);
+		builder.append(", fare=");
+		builder.append(fare);
+		builder.append(", departureTime=");
+		builder.append(format.format(new Date(departureTime)));
+		builder.append(", arrivalTime=");
+		builder.append(format.format(new Date(arrivalTime)));
+		builder.append(", bikesAllowed=");
+		builder.append(bikesAllowed);
+		builder.append(", trainHeadStation=");
+		builder.append(trainHeadStation);
+		builder.append("]");
+		return builder.toString();
+	}
+
 }

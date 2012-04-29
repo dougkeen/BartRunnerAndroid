@@ -41,30 +41,7 @@ public enum Line {
 			Station.DALY, Station.BALB, Station.GLEN, Station._24TH,
 			Station._16TH, Station.CIVC, Station.POWL, Station.MONT,
 			Station.EMBR, Station.WOAK, Station.ASHB, Station.DBRK,
-			Station.NBRK, Station.PLZA, Station.DELN, Station.RICH),
-	YELLOW_GREEN_SCHEDULED_TRANSFER(true, YELLOW, GREEN, Station.MLBR,
-			Station.SFIA, Station.SBRN, Station.SSAN, Station.COLM,
-			Station.DALY, Station.BALB, Station.GLEN, Station._24TH,
-			Station._16TH, Station.CIVC, Station.POWL, Station.MONT,
-			Station.EMBR, Station.WOAK, Station.LAKE, Station.FTVL,
-			Station.COLS, Station.SANL, Station.BAYF, Station.HAYW,
-			Station.SHAY, Station.UCTY, Station.FRMT),
-	YELLOW_BLUE_SCHEDULED_TRANSFER(true, YELLOW, BLUE, Station.MLBR,
-			Station.SFIA, Station.SBRN, Station.SSAN, Station.COLM,
-			Station.DALY, Station.BALB, Station.GLEN, Station._24TH,
-			Station._16TH, Station.CIVC, Station.POWL, Station.MONT,
-			Station.EMBR, Station.WOAK, Station.LAKE, Station.FTVL,
-			Station.COLS, Station.SANL, Station.BAYF, Station.CAST,
-			Station.WDUB, Station.DUBL),
-	YELLOW_RED_SCHEDULED_TRANSFER(YELLOW, RED, Station.MLBR, Station.SFIA,
-			Station.SBRN, Station.SSAN, Station.COLM, Station.DALY,
-			Station.BALB, Station.GLEN, Station._24TH, Station._16TH,
-			Station.CIVC, Station.POWL, Station.MONT, Station.EMBR,
-			Station.WOAK, Station.ASHB, Station.DBRK, Station.NBRK,
-			Station.PLZA, Station.DELN, Station.RICH),
-	ORANGE_BLUE_SCHEDULED_TRANSFER(true, ORANGE, BLUE, Station.FRMT,
-			Station.UCTY, Station.SHAY, Station.HAYW, Station.BAYF,
-			Station.CAST, Station.WDUB, Station.DUBL);
+			Station.NBRK, Station.PLZA, Station.DELN, Station.RICH);
 
 	public final List<Station> stations;
 
@@ -106,6 +83,16 @@ public enum Line {
 		Collection<Line> lines = new ArrayList<Line>();
 		for (Line line : Line.values()) {
 			if (line.stations.contains(station)) {
+				lines.add(line);
+			}
+		}
+		return lines;
+	}
+
+	public static Collection<Line> getLinesWithStations(Station station1, Station station2) {
+		Collection<Line> lines = new ArrayList<Line>();
+		for (Line line : Line.values()) {
+			if (line.stations.contains(station1) && line.stations.contains(station2)) {
 				lines.add(line);
 			}
 		}

@@ -1,59 +1,58 @@
 package com.dougkeen.bart.model;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import android.util.Log;
 
 public enum Station {
-	_12TH("12th", "12th St./Oakland City Center", true, false, false, "bayf"),
-	_16TH("16th", "16th St. Mission", false, false, false),
-	_19TH("19th", "19th St./Oakland", true, false, false, "bayf"),
-	_24TH("24th", "24th St. Mission", false, false, false),
-	ASHB("ashb", "Ashby", true, false, false, "mcar"),
-	BALB("balb", "Balboa Park", false, false, false),
-	BAYF("bayf", "Bay Fair", true, true, false, "mcar"),
-	CAST("cast", "Castro Valley", true, false, false, "bayf"),
-	CIVC("civc", "Civic Center", false, false, false),
-	COLS("cols", "Coliseum/Oakland Airport", true, true, false, "mcar"),
-	COLM("colm", "Colma", true, false, false, "balb", "balb"),
-	CONC("conc", "Concord", true, false, false, "mcar"),
-	DALY("daly", "Daly City", false, false, false),
-	DBRK("dbrk", "Downtown Berkeley", true, false, false, "mcar"),
-	DUBL("dubl", "Dublin/Pleasanton", true, false, true, "bayf", "bayf", true,
+	_12TH("12th", "12th St./Oakland City Center", false, false, "bayf", "bayf"),
+	_16TH("16th", "16th St. Mission", false, false),
+	_19TH("19th", "19th St./Oakland", false, false, "bayf", "bayf"),
+	_24TH("24th", "24th St. Mission", false, false),
+	ASHB("ashb", "Ashby", false, false, "mcar", "mcar"),
+	BALB("balb", "Balboa Park", false, false),
+	BAYF("bayf", "Bay Fair", true, false, "mcar", "mcar"),
+	CAST("cast", "Castro Valley", false, false, "bayf", "bayf"),
+	CIVC("civc", "Civic Center", false, false),
+	COLS("cols", "Coliseum/Oakland Airport", true, false, "mcar", "mcar"),
+	COLM("colm", "Colma", false, false, "balb", "balb"),
+	CONC("conc", "Concord", false, false, "mcar", "mcar"),
+	DALY("daly", "Daly City", false, false),
+	DBRK("dbrk", "Downtown Berkeley", false, false, "mcar", "mcar"),
+	DUBL("dubl", "Dublin/Pleasanton", false, true, "bayf", "bayf", true, 719999),
+	DELN("deln", "El Cerrito del Norte", false, false, "mcar", "mcar"),
+	PLZA("plza", "El Cerrito Plaza", false, false, "mcar", "mcar"),
+	EMBR("embr", "Embarcadero", false, false),
+	FRMT("frmt", "Fremont", true, true, "bayf", "bayf", true, 299999),
+	FTVL("ftvl", "Fruitvale", true, false, "mcar", "mcar"),
+	GLEN("glen", "Glen Park", false, false),
+	HAYW("hayw", "Hayward", true, false, "bayf", "bayf"),
+	LAFY("lafy", "Lafayette", false, false, "mcar", "mcar"),
+	LAKE("lake", "Lake Merritt", true, false, "mcar", "mcar"),
+	MCAR("mcar", "MacArthur", false, false, "bayf", "bayf"),
+	MLBR("mlbr", "Millbrae", false, true, "balb", "balb", true, 719999),
+	MONT("mont", "Montgomery St.", false, false),
+	NBRK("nbrk", "North Berkeley", false, false, "mcar", "mcar"),
+	NCON("ncon", "North Concord/Martinez", false, false, "mcar", "mcar"),
+	ORIN("orin", "Orinda", false, false, "mcar", "mcar"),
+	PITT("pitt", "Pittsburg/Bay Point", false, true, "mcar", "mcar", true,
 			719999),
-	DELN("deln", "El Cerrito del Norte", true, false, false, "mcar"),
-	PLZA("plza", "El Cerrito Plaza", true, false, false, "mcar"),
-	EMBR("embr", "Embarcadero", false, false, false),
-	FRMT("frmt", "Fremont", true, true, true, "bayf", "bayf", true, 299999),
-	FTVL("ftvl", "Fruitvale", true, true, false, "mcar"),
-	GLEN("glen", "Glen Park", false, false, false),
-	HAYW("hayw", "Hayward", true, true, false, "bayf"),
-	LAFY("lafy", "Lafayette", true, false, false, "mcar"),
-	LAKE("lake", "Lake Merritt", true, true, false, "mcar"),
-	MCAR("mcar", "MacArthur", true, false, false, "bayf"),
-	MLBR("mlbr", "Millbrae", true, false, true, "balb", "balb", true, 719999),
-	MONT("mont", "Montgomery St.", false, false, false),
-	NBRK("nbrk", "North Berkeley", true, false, false, "mcar"),
-	NCON("ncon", "North Concord/Martinez", true, false, false, "mcar"),
-	ORIN("orin", "Orinda", true, false, false, "mcar"),
-	PITT("pitt", "Pittsburg/Bay Point", true, false, true, "mcar", "mcar",
-			true, 719999),
-	PHIL("phil", "Pleasant Hill", true, false, false, "mcar"),
-	POWL("powl", "Powell St.", false, false, false),
-	RICH("rich", "Richmond", true, false, true, "mcar", "mcar", true, 299999),
-	ROCK("rock", "Rockridge", true, false, false, "mcar"),
-	SBRN("sbrn", "San Bruno", true, false, false, "balb", "balb"),
-	SANL("sanl", "San Leandro", true, true, false, "mcar"),
-	SFIA("sfia", "SFO Airport", true, false, false, "sbrn", "balb", true,
-			719999),
-	SHAY("shay", "South Hayward", true, true, false, "bayf"),
-	SSAN("ssan", "South San Francisco", true, false, false, "balb", "balb"),
-	UCTY("ucty", "Union City", true, true, false, "bayf"),
-	WCRK("wcrk", "Walnut Creek", true, false, false, "mcar"),
-	WDUB("wdub", "West Dublin/Pleasanton", true, false, false, "bayf"),
-	WOAK("woak", "West Oakland", false, false, false),
-	SPCL("spcl", "Special", false, false, false);
+	PHIL("phil", "Pleasant Hill", false, false, "mcar", "mcar"),
+	POWL("powl", "Powell St.", false, false),
+	RICH("rich", "Richmond", false, true, "mcar", "mcar", true, 299999),
+	ROCK("rock", "Rockridge", false, false, "mcar", "mcar"),
+	SBRN("sbrn", "San Bruno", false, false, "balb", "balb"),
+	SANL("sanl", "San Leandro", true, false, "mcar", "mcar"),
+	SFIA("sfia", "SFO Airport", false, false, "balb", "balb", true, 719999),
+	SHAY("shay", "South Hayward", true, false, "bayf", "bayf"),
+	SSAN("ssan", "South San Francisco", false, false, "balb", "balb"),
+	UCTY("ucty", "Union City", true, false, "bayf", "bayf"),
+	WCRK("wcrk", "Walnut Creek", false, false, "mcar", "mcar"),
+	WDUB("wdub", "West Dublin/Pleasanton", false, false, "bayf", "bayf"),
+	WOAK("woak", "West Oakland", false, false),
+	SPCL("spcl", "Special", false, false);
 
 	public final String abbreviation;
 	public final String name;
@@ -67,36 +66,35 @@ public enum Station {
 
 	public final static int DEFAULT_DEPARTURE_EQUALITY_TOLERANCE = 59999;
 
-	private Station(String abbreviation, String name, boolean transferFriendly,
-			boolean invertDirection, boolean endOfLine) {
-		this(abbreviation, name, transferFriendly, invertDirection, endOfLine,
-				null, null, false, DEFAULT_DEPARTURE_EQUALITY_TOLERANCE);
-	}
-
-	private Station(String abbreviation, String name, boolean transferFriendly,
-			boolean invertDirection, boolean endOfLine, String transferStation) {
-		this(abbreviation, name, transferFriendly, invertDirection, endOfLine,
-				transferStation, null, false,
+	private Station(String abbreviation, String name, boolean invertDirection,
+			boolean endOfLine) {
+		this(abbreviation, name, invertDirection, endOfLine, null, null, false,
 				DEFAULT_DEPARTURE_EQUALITY_TOLERANCE);
 	}
 
-	private Station(String abbreviation, String name, boolean transferFriendly,
-			boolean invertDirection, boolean endOfLine,
-			String inboundTransferStation, String outboundTransferStation) {
-		this(abbreviation, name, transferFriendly, invertDirection, endOfLine,
+	private Station(String abbreviation, String name, boolean invertDirection,
+			boolean endOfLine, String transferStation) {
+		this(abbreviation, name, invertDirection, endOfLine, transferStation,
+				null, false, DEFAULT_DEPARTURE_EQUALITY_TOLERANCE);
+	}
+
+	private Station(String abbreviation, String name, boolean invertDirection,
+			boolean endOfLine, String inboundTransferStation,
+			String outboundTransferStation) {
+		this(abbreviation, name, invertDirection, endOfLine,
 				inboundTransferStation, outboundTransferStation, false,
 				DEFAULT_DEPARTURE_EQUALITY_TOLERANCE);
 	}
 
-	private Station(String abbreviation, String name, boolean transferFriendly,
-			boolean invertDirection, boolean endOfLine,
-			String inboundTransferStation, String outboundTransferStation,
-			boolean longStationLinger, int departureEqualityTolerance) {
+	private Station(String abbreviation, String name, boolean invertDirection,
+			boolean endOfLine, String inboundTransferStation,
+			String outboundTransferStation, boolean longStationLinger,
+			int departureEqualityTolerance) {
 		this.abbreviation = abbreviation;
 		this.name = name;
 		this.invertDirection = invertDirection;
 		this.inboundTransferStation = inboundTransferStation;
-		this.transferFriendly = transferFriendly;
+		this.transferFriendly = outboundTransferStation != null;
 		this.outboundTransferStation = outboundTransferStation;
 		this.endOfLine = endOfLine;
 		this.longStationLinger = longStationLinger;
@@ -141,62 +139,93 @@ public enum Station {
 		return false;
 	}
 
-	public List<Route> getRoutesForDestination(Station dest) {
-		return getRoutesForDestination(dest, null);
+	public List<Route> getDirectRoutesForDestination(Station dest) {
+		return getDirectRoutesForDestination(this, dest, null, null);
 	}
 
-	public List<Route> getRoutesForDestination(Station dest,
-			Station transferStation) {
+	public List<Route> getDirectRoutesForDestination(Station origin,
+			Station dest, Station transferStation,
+			Collection<Line> transferLines) {
 		if (dest == null)
 			return null;
 		Boolean isNorth = null;
 		List<Route> returnList = new ArrayList<Route>();
-		for (Line line : Line.values()) {
+		final Collection<Line> applicableLines = Line.getLinesWithStations(
+				this, dest);
+		for (Line line : applicableLines) {
 			int origIndex = line.stations.indexOf(this);
-			if (origIndex < 0)
-				continue;
 			int destIndex = line.stations.indexOf(dest);
-			if (destIndex < 0)
-				continue;
 
 			isNorth = (origIndex < destIndex);
 			if (line.directionMayInvert && this.invertDirection) {
 				isNorth = !isNorth;
 			}
 			Route route = new Route();
-			route.setOrigin(this);
-			route.setDestination(dest);
+			route.setOrigin(origin);
+			route.setDirectLine(line);
+			if (this.equals(origin)) {
+				route.setDestination(dest);
+			} else {
+				// This must be the outbound transfer station
+				route.setDestination(origin.getOutboundTransferStation());
+				route.setTransferLines(transferLines);
+			}
 			route.setDirection(isNorth ? "n" : "s");
-			route.setLine(line);
 			if (transferStation != null || line.requiresTransfer) {
 				route.setTransfer(true);
 			} else {
 				route.setTransfer(false);
 			}
 
-			if (route.hasTransfer() && !transferFriendly
-					&& !Line.YELLOW_ORANGE_SCHEDULED_TRANSFER.equals(line)) {
-				continue;
-			}
-
 			returnList.add(route);
 		}
-		if (isNorth == null) {
-			if (outboundTransferStation != null) {
-				returnList.addAll(getOutboundTransferStation()
-						.getRoutesForDestination(dest,
-								getOutboundTransferStation()));
-			} else if (dest.getInboundTransferStation() != null) {
-				final List<Route> routesForDestination = getRoutesForDestination(
-						dest.getInboundTransferStation(),
-						dest.getInboundTransferStation());
-				if (routesForDestination != null
-						&& !routesForDestination.isEmpty()) {
-					returnList.addAll(routesForDestination);
-				}
+		return returnList;
+	}
+
+	public List<Route> getTransferRoutes(Station dest) {
+		List<Route> returnList = new ArrayList<Route>();
+		if (dest.getInboundTransferStation() != null) {
+			// Try getting to the destination's inbound xfer station first
+			returnList.addAll(getDirectRoutesForDestination(this,
+					dest.getInboundTransferStation(),
+					dest.getInboundTransferStation(), null));
+		}
+
+		if (returnList.isEmpty() && outboundTransferStation != null) {
+			// Try getting from the outbound transfer station to the
+			// destination next
+			final Collection<Line> outboundTransferLines = Line
+					.getLinesWithStations(this, getOutboundTransferStation());
+			final List<Route> routesForDestination = getOutboundTransferStation()
+					.getDirectRoutesForDestination(this, dest,
+							getOutboundTransferStation(), outboundTransferLines);
+			if (routesForDestination != null && !routesForDestination.isEmpty()) {
+				returnList.addAll(routesForDestination);
 			}
 		}
+
+		if (returnList.isEmpty()) {
+			// Try getting from the outbound transfer station to the
+			// destination's inbound xfer station
+			final List<Route> routesForDestination = getDoubleTransferRoutes(dest);
+			if (routesForDestination != null && !routesForDestination.isEmpty()) {
+				returnList.addAll(routesForDestination);
+			}
+		}
+
 		return returnList;
+	}
+
+	public List<Route> getDoubleTransferRoutes(Station dest) {
+		if (getOutboundTransferStation() == null
+				|| dest.getInboundTransferStation() == null)
+			return new ArrayList<Route>();
+
+		// Get routes from the outbound transfer station to the
+		// destination's inbound xfer station
+		return getOutboundTransferStation().getDirectRoutesForDestination(this,
+				dest.getInboundTransferStation(), getOutboundTransferStation(),
+				Line.getLinesWithStations(this, getOutboundTransferStation()));
 	}
 
 	static public List<Station> getStationList() {

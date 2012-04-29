@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-
 public class RealTimeDepartures {
 	public RealTimeDepartures(Station origin, Station destination,
 			List<Route> routes) {
 		this.origin = origin;
 		this.destination = destination;
 		this.routes = routes;
+		this.unfilteredDepartures = new ArrayList<Departure>();
 	}
 
 	private Station origin;
@@ -18,6 +18,8 @@ public class RealTimeDepartures {
 	private long time;
 
 	private List<Departure> departures;
+
+	final private List<Departure> unfilteredDepartures;
 
 	private List<Route> routes;
 
@@ -56,7 +58,29 @@ public class RealTimeDepartures {
 		this.departures = departures;
 	}
 
+	public void includeTransferRoutes() {
+		routes.addAll(origin.getTransferRoutes(destination));
+		rebuildFilteredDepaturesCollection();
+	}
+
+	public void includeDoubleTransferRoutes() {
+		routes.addAll(origin.getDoubleTransferRoutes(destination));
+		rebuildFilteredDepaturesCollection();
+	}
+
+	private void rebuildFilteredDepaturesCollection() {
+		getDepartures().clear();
+		for (Departure departure : unfilteredDepartures) {
+			addDepartureIfApplicable(departure);
+		}
+	}
+
 	public void addDeparture(Departure departure) {
+		unfilteredDepartures.add(departure);
+		addDepartureIfApplicable(departure);
+	}
+
+	private void addDepartureIfApplicable(Departure departure) {
 		Station destination = Station.getByAbbreviation(departure
 				.getDestinationAbbreviation());
 		if (departure.getLine() == null)

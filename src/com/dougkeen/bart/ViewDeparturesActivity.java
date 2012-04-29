@@ -244,6 +244,12 @@ public class ViewDeparturesActivity extends ListActivity {
 
 	protected void processLatestDepartures(RealTimeDepartures result) {
 		if (result.getDepartures().isEmpty()) {
+			result.includeTransferRoutes();
+		}
+		if (result.getDepartures().isEmpty()) {
+			result.includeDoubleTransferRoutes();
+		}
+		if (result.getDepartures().isEmpty()) {
 			final TextView textView = (TextView) findViewById(android.R.id.empty);
 			textView.setText(R.string.no_data_message);
 			Linkify.addLinks(textView, Linkify.WEB_URLS);
@@ -356,6 +362,8 @@ public class ViewDeparturesActivity extends ListActivity {
 		int lastSearchIndex = 0;
 		int tripCount = mLatestScheduleInfo.getTrips().size();
 		boolean departureUpdated = false;
+		Departure lastUnestimatedTransfer = null;
+		int departuresWithoutEstimates = 0;
 		for (int departureIndex = 0; departureIndex < departuresCount; departureIndex++) {
 			Departure departure = mDeparturesAdapter.getItem(departureIndex);
 			for (int i = lastSearchIndex; i < tripCount; i++) {
@@ -369,9 +377,10 @@ public class ViewDeparturesActivity extends ListActivity {
 						- departure.getMeanEstimate());
 				final long millisUntilTripDeparture = trip.getDepartureTime()
 						- System.currentTimeMillis();
-				final int equalityTolerance = (departure.getOrigin() != null) ? departure
-						.getOrigin().departureEqualityTolerance
-						: Station.DEFAULT_DEPARTURE_EQUALITY_TOLERANCE;
+				final int equalityTolerance = (departure.getOrigin() != null) ? Math
+						.max(departure.getOrigin().departureEqualityTolerance,
+								ScheduleItem.SCHEDULE_ITEM_DEPARTURE_EQUALS_TOLERANCE)
+						: ScheduleItem.SCHEDULE_ITEM_DEPARTURE_EQUALS_TOLERANCE;
 				if (departure.getOrigin() != null
 						&& departure.getOrigin().longStationLinger
 						&& departure.hasDeparted()
@@ -380,6 +389,11 @@ public class ViewDeparturesActivity extends ListActivity {
 					departure.setArrivalTimeOverride(trip.getArrivalTime());
 					lastSearchIndex = i;
 					departureUpdated = true;
+					if (lastUnestimatedTransfer != null) {
+						lastUnestimatedTransfer.setArrivalTimeOverride(trip
+								.getArrivalTime());
+						departuresWithoutEstimates--;
+					}
 					break;
 				} else if (departTimeDiff <= (equalityTolerance + departure
 						.getUncertaintySeconds() * 1000)
@@ -388,13 +402,27 @@ public class ViewDeparturesActivity extends ListActivity {
 					departure.setEstimatedTripTime(trip.getTripLength());
 					lastSearchIndex = i;
 					departureUpdated = true;
+					if (lastUnestimatedTransfer != null) {
+						lastUnestimatedTransfer.setArrivalTimeOverride(trip
+								.getArrivalTime());
+						departuresWithoutEstimates--;
+					}
 					break;
 				}
 			}
-			if (!departure.hasEstimatedTripTime() && localAverageLength > 0) {
-				departure.setEstimatedTripTime(localAverageLength);
-			} else if (!departure.hasEstimatedTripTime()) {
-				departure.setEstimatedTripTime(mAverageTripLength);
+			// Don't estimate for non-scheduled transfers
+			if (!departure.getRequiresTransfer()) {
+				if (!departure.hasEstimatedTripTime() && localAverageLength > 0) {
+					departure.setEstimatedTripTime(localAverageLength);
+				} else if (!departure.hasEstimatedTripTime()) {
+					departure.setEstimatedTripTime(mAverageTripLength);
+				}
+			} else if (departure.getRequiresTransfer()
+					&& !departure.hasAnyArrivalEstimate()) {
+				lastUnestimatedTransfer = departure;
+			}
+			if (!departure.hasAnyArrivalEstimate()) {
+				departuresWithoutEstimates++;
 			}
 		}
 
@@ -417,6 +445,10 @@ public class ViewDeparturesActivity extends ListActivity {
 					newAverageSampleCount);
 
 			getContentResolver().update(mUri, contentValues, null, null);
+		}
+
+		if (departuresWithoutEstimates > 0) {
+			scheduleScheduleInfoFetch(20000);
 		}
 	}
 
