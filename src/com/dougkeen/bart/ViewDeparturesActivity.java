@@ -2,6 +2,8 @@ package com.dougkeen.bart;
 
 import java.util.List;
 
+import org.apache.commons.lang3.math.NumberUtils;
+
 import android.app.ListActivity;
 import android.content.ContentValues;
 import android.content.Context;
@@ -170,6 +172,8 @@ public class ViewDeparturesActivity extends ListActivity {
 		}
 	}
 
+	private boolean mIgnoreDepartureDirection = false;
+
 	private void fetchLatestDepartures() {
 		if (!hasWindowFocus())
 			return;
@@ -180,7 +184,8 @@ public class ViewDeparturesActivity extends ListActivity {
 			return;
 		}
 
-		mGetDeparturesTask = new GetRealTimeDeparturesTask() {
+		mGetDeparturesTask = new GetRealTimeDeparturesTask(
+				mIgnoreDepartureDirection) {
 			@Override
 			public void onResult(RealTimeDepartures result) {
 				mDepartureFetchIsPending = false;
@@ -248,6 +253,13 @@ public class ViewDeparturesActivity extends ListActivity {
 		}
 		if (result.getDepartures().isEmpty()) {
 			result.includeDoubleTransferRoutes();
+		}
+		if (result.getDepartures().isEmpty() && !mIgnoreDepartureDirection) {
+			// Let's try again, ignoring direction (this sometimes comes up when
+			// you travel between Millbrae and SFO)
+			mIgnoreDepartureDirection = true;
+			scheduleDepartureFetch(50);
+			return;
 		}
 		if (result.getDepartures().isEmpty()) {
 			final TextView textView = (TextView) findViewById(android.R.id.empty);
@@ -359,6 +371,23 @@ public class ViewDeparturesActivity extends ListActivity {
 		int localAverageLength = mLatestScheduleInfo.getAverageTripLength();
 
 		int departuresCount = mDeparturesAdapter.getCount();
+
+		// Let's get smallest interval between departures
+		int smallestDepartureInterval = 0;
+		long previousDepartureTime = 0;
+		for (int departureIndex = 0; departureIndex < departuresCount; departureIndex++) {
+			Departure departure = mDeparturesAdapter.getItem(departureIndex);
+			if (previousDepartureTime == 0) {
+				previousDepartureTime = departure.getMeanEstimate();
+			} else if (smallestDepartureInterval == 0) {
+				smallestDepartureInterval = (int) (departure.getMeanEstimate() - previousDepartureTime);
+			} else {
+				smallestDepartureInterval = Math
+						.min(smallestDepartureInterval,
+								(int) (departure.getMeanEstimate() - previousDepartureTime));
+			}
+		}
+
 		int lastSearchIndex = 0;
 		int tripCount = mLatestScheduleInfo.getTrips().size();
 		boolean departureUpdated = false;
@@ -377,9 +406,10 @@ public class ViewDeparturesActivity extends ListActivity {
 						- departure.getMeanEstimate());
 				final long millisUntilTripDeparture = trip.getDepartureTime()
 						- System.currentTimeMillis();
-				final int equalityTolerance = (departure.getOrigin() != null) ? Math
+				final int equalityTolerance = (departure.getOrigin() != null) ? NumberUtils
 						.max(departure.getOrigin().departureEqualityTolerance,
-								ScheduleItem.SCHEDULE_ITEM_DEPARTURE_EQUALS_TOLERANCE)
+								ScheduleItem.SCHEDULE_ITEM_DEPARTURE_EQUALS_TOLERANCE,
+								smallestDepartureInterval)
 						: ScheduleItem.SCHEDULE_ITEM_DEPARTURE_EQUALS_TOLERANCE;
 				if (departure.getOrigin() != null
 						&& departure.getOrigin().longStationLinger

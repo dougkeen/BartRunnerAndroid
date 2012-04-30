@@ -35,6 +35,13 @@ public abstract class GetRealTimeDeparturesTask extends
 
 	private List<Route> mRoutes;
 
+	private final boolean ignoreDirection;
+
+	public GetRealTimeDeparturesTask(boolean ignoreDirection) {
+		super();
+		this.ignoreDirection = ignoreDirection;
+	}
+
 	@Override
 	protected RealTimeDepartures doInBackground(StationPair... paramsArray) {
 		// Always expect one param
@@ -60,7 +67,7 @@ public abstract class GetRealTimeDeparturesTask extends
 		String xml = null;
 		try {
 			String url;
-			if (params.getOrigin().endOfLine) {
+			if (ignoreDirection || params.getOrigin().endOfLine) {
 				url = String.format(ETD_URL_NO_DIRECTION,
 						params.getOrigin().abbreviation);
 			} else {
