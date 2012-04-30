@@ -152,13 +152,28 @@ public enum Station {
 		List<Route> returnList = new ArrayList<Route>();
 		final Collection<Line> applicableLines = Line.getLinesWithStations(
 				this, dest);
-		for (Line line : applicableLines) {
-			int origIndex = line.stations.indexOf(this);
-			int destIndex = line.stations.indexOf(dest);
+		if (transferLines != null && !transferLines.isEmpty()) {
+			for (Line transferLine : transferLines) {
+				int origIndex = transferLine.stations.indexOf(origin);
+				int destIndex = transferLine.stations.indexOf(origin
+						.getOutboundTransferStation());
 
-			isNorth = (origIndex < destIndex);
-			if (line.directionMayInvert && this.invertDirection) {
-				isNorth = !isNorth;
+				isNorth = (origIndex < destIndex);
+				if (origin.invertDirection && transferLine.directionMayInvert) {
+					isNorth = !isNorth;
+					break;
+				}
+			}
+		}
+		for (Line line : applicableLines) {
+			if (transferLines == null || transferLines.isEmpty()) {
+				int origIndex = line.stations.indexOf(this);
+				int destIndex = line.stations.indexOf(dest);
+
+				isNorth = (origIndex < destIndex);
+				if (line.directionMayInvert && this.invertDirection) {
+					isNorth = !isNorth;
+				}
 			}
 			Route route = new Route();
 			route.setOrigin(origin);
