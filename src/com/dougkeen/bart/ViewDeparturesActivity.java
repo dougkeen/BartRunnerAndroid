@@ -428,7 +428,9 @@ public class ViewDeparturesActivity extends ListActivity {
 				} else if (departTimeDiff <= (equalityTolerance + departure
 						.getUncertaintySeconds() * 1000)
 						&& departure.getEstimatedTripTime() != trip
-								.getTripLength()) {
+								.getTripLength()
+						&& !(departure.getOrigin().longStationLinger && departure
+								.hasDeparted())) {
 					departure.setEstimatedTripTime(trip.getTripLength());
 					lastSearchIndex = i;
 					departureUpdated = true;
