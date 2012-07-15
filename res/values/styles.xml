@@ -1,78 +1,129 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-	<!-- Base application theme is the default theme. -->
-	<style name="Theme" parent="android:Theme"></style>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-	<style name="ButtonBar">
-		<item name="android:layout_width">fill_parent</item>
-		<item name="android:layout_height">wrap_content</item>
-		<item name="android:paddingTop">10dp</item>
-		<item name="android:paddingBottom">10dp</item>
-	</style>
+    <!-- Base application theme is the default theme. -->
+    <style name="AppTheme" parent="@android:Theme">
+        <item name="android:windowTitleSize">@dimen/actionbar_compat_height</item>
+        <item name="android:windowTitleBackgroundStyle">@style/ActionBarCompat</item>
+        <item name="android:windowContentOverlay">@drawable/actionbar_shadow</item>
 
-	<style name="FavoriteListingTextView">
-		<item name="android:layout_width">wrap_content</item>
-		<item name="android:layout_height">wrap_content</item>
-		<item name="android:textSize">20dp</item>
-		<item name="android:ellipsize">end</item>
-		<item name="android:singleLine">true</item>
-	</style>
+        <!-- for programmatic instantiation -->
+        <item name="actionbarCompatTitleStyle">@style/ActionBarCompatTitle</item>
+        <item name="actionbarCompatItemStyle">@style/ActionBarCompatItem</item>
+        <item name="actionbarCompatItemHomeStyle">@style/ActionBarCompatHomeItem</item>
+        <item name="actionbarCompatProgressIndicatorStyle">@style/ActionBarCompatProgressIndicator</item>
+    </style>
 
-	<style name="FareTextView">
-		<item name="android:layout_width">wrap_content</item>
-		<item name="android:layout_height">wrap_content</item>
-		<item name="android:textSize">16dp</item>
-		<item name="android:ellipsize">end</item>
-		<item name="android:singleLine">true</item>
-	</style>
+    <style name="ActionBarCompat">
+        <item name="android:background">#222</item>
+    </style>
 
-	<style name="DepartureDestinationText">
-		<item name="android:layout_width">wrap_content</item>
-		<item name="android:layout_height">wrap_content</item>
-		<item name="android:textSize">22dp</item>
-		<item name="android:textStyle">bold</item>
-		<item name="android:singleLine">true</item>
-		<item name="android:layout_marginLeft">3dp</item>
-	</style>
+    <style name="ActionBarCompatItemBase">
 
-	<style name="DepartureTrainLengthText">
-		<item name="android:layout_width">wrap_content</item>
-		<item name="android:layout_height">wrap_content</item>
-		<item name="android:textSize">18dp</item>
-		<item name="android:singleLine">true</item>
-		<item name="android:layout_marginLeft">3dp</item>
-	</style>
+        <!-- layout_width/height must be set in code -->
+        <item name="android:scaleType">center</item>
+        <item name="android:background">@drawable/actionbar_compat_item</item>
+    </style>
 
-	<style name="DepartureCountdownText">
-		<item name="android:layout_width">wrap_content</item>
-		<item name="android:layout_height">wrap_content</item>
-		<item name="android:textSize">20dp</item>
-		<item name="android:singleLine">true</item>
-		<item name="android:width">90dp</item>
-	</style>
-	<style name="DepartureUncertaintyText">
-		<item name="android:layout_width">wrap_content</item>
-		<item name="android:layout_height">wrap_content</item>
-		<item name="android:textSize">16dp</item>
-		<item name="android:singleLine">true</item>
-	</style>
-	<style name="MissingDepartureText">
-		<item name="android:layout_width">wrap_content</item>
-		<item name="android:layout_height">wrap_content</item>
-		<item name="android:textSize">12dp</item>
-		<item name="android:singleLine">true</item>
-		<item name="android:gravity">center</item>
-	</style>
-	<style name="BikeIcon">
-		<item name="android:layout_width">wrap_content</item>
-		<item name="android:layout_height">wrap_content</item>
-		<item name="android:layout_marginTop">5dp</item>
-		<item name="android:layout_marginLeft">5dp</item>
-	</style>
-	<style name="XferIcon">
-		<item name="android:layout_width">wrap_content</item>
-		<item name="android:layout_height">wrap_content</item>
-		<item name="android:layout_marginRight">87dp</item>
-		<item name="android:layout_marginBottom">5dp</item>
-	</style>
+    <style name="ActionBarCompatProgressIndicator" parent="android:style/Widget.ProgressBar.Large">
+        <item name="android:indeterminate">true</item>
+    </style>
+
+    <style name="ActionBarCompatTitleBase">
+        <item name="android:id">@id/actionbar_compat_title</item>
+        <!-- layout_width/height/weight must be set in code -->
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:paddingLeft">6dp</item>
+        <item name="android:paddingRight">6dp</item>
+        <item name="android:singleLine">false</item>
+        <item name="android:maxLines">2</item>
+        <item name="android:ellipsize">marquee</item>
+    </style>
+
+    <style name="ActionBarCompatTitle" parent="style/ActionBarCompatTitleBase">
+        <item name="android:textColor">@color/actionbar_title_color</item>
+    </style>
+
+    <style name="ActionBarCompatItem" parent="style/ActionBarCompatItemBase"></style>
+
+    <style name="ActionBarCompatHomeItem" parent="style/ActionBarCompatItemBase"></style>
+
+    <style name="ButtonBar">
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingTop">10dp</item>
+        <item name="android:paddingBottom">10dp</item>
+    </style>
+
+    <style name="FavoriteListingTextView">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">20dp</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:singleLine">true</item>
+    </style>
+
+    <style name="FareTextView">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">16dp</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:singleLine">true</item>
+    </style>
+
+    <style name="DepartureDestinationText">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">22dp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:layout_marginLeft">3dp</item>
+    </style>
+
+    <style name="DepartureTrainLengthText">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">18dp</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:layout_marginLeft">3dp</item>
+    </style>
+
+    <style name="DepartureCountdownText">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">20dp</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:width">90dp</item>
+    </style>
+
+    <style name="DepartureUncertaintyText">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">16dp</item>
+        <item name="android:singleLine">true</item>
+    </style>
+
+    <style name="MissingDepartureText">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">12dp</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="BikeIcon">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">5dp</item>
+        <item name="android:layout_marginLeft">5dp</item>
+    </style>
+
+    <style name="XferIcon">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginRight">87dp</item>
+        <item name="android:layout_marginBottom">5dp</item>
+    </style>
+
 </resources>

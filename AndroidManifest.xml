@@ -7,21 +7,24 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
-    <uses-sdk android:minSdkVersion="7" />
+    <uses-sdk
+        android:minSdkVersion="7"
+        android:targetSdkVersion="14" />
 
     <application
         android:debuggable="true"
         android:icon="@drawable/icon"
-        android:label="@string/app_name" >
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
         <activity
-            android:label="@string/app_name"
-            android:name="RoutesListActivity" >
-            <intent-filter >
+            android:name="RoutesListActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <intent-filter >
+            <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.EDIT" />
                 <action android:name="android.intent.action.PICK" />
@@ -30,7 +33,7 @@
 
                 <data android:mimeType="vnd.android.cursor.dir/com.dougkeen.bart.favorite" />
             </intent-filter>
-            <intent-filter >
+            <intent-filter>
                 <action android:name="android.intent.action.GET_CONTENT" />
 
                 <category android:name="android.intent.category.DEFAULT" />
@@ -39,9 +42,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:label="@string/app_name"
-            android:name="AddRouteActivity" >
-            <intent-filter >
+            android:name="AddRouteActivity"
+            android:label="@string/add_route"
+            android:theme="@android:style/Theme.Dialog" >
+            <intent-filter>
                 <action android:name="android.intent.action.INSERT" />
 
                 <category android:name="android.intent.category.DEFAULT" />
@@ -50,9 +54,9 @@
             </intent-filter>
         </activity>
         <activity
-            android:label="@string/app_name"
-            android:name="ViewDeparturesActivity" >
-            <intent-filter >
+            android:name="ViewDeparturesActivity"
+            android:label="@string/departures" >
+            <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
@@ -61,14 +65,14 @@
             </intent-filter>
         </activity>
         <activity
-            android:label="@string/app_name"
-            android:name="ViewMapActivity" >
+            android:name="ViewMapActivity"
+            android:label="@string/system_map" >
         </activity>
 
         <provider
+            android:name=".data.BartContentProvider"
             android:authorities="com.dougkeen.bart.dataprovider"
-            android:label="Don\&apos;t Miss The Bart data provider"
-            android:name=".data.BartContentProvider" />
+            android:label="BartRunner data provider" />
     </application>
 
 </manifest>

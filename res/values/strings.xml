@@ -2,8 +2,7 @@
 <resources>
 	<string name="app_name">BART Runner</string>
 	<string name="favorite_routes">Favorite Routes</string>
-	<string name="empty_favorites_list_message">Press the menu button and select \"Add route\" to
-		add a route</string>
+	<string name="empty_favorites_list_message">No favorite routes have been added yet</string>
 	<string name="add_route">Add a route</string>
 	<string name="origin">Origin</string>
 	<string name="destination">Destination</string>
@@ -29,4 +28,6 @@
 		again later.</string>
 	<string name="also_add_return_route">Also add return route</string>
 	<string name="view_system_map">View system map</string>
+	<string name="system_map">System map</string>
+	<string name="departures">Departures</string>
 </resources>

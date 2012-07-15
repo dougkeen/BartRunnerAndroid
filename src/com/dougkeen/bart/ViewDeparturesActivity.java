@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.apache.commons.lang3.math.NumberUtils;
 
-import android.app.ListActivity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -24,6 +23,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.dougkeen.bart.actionbarcompat.ActionBarListActivity;
 import com.dougkeen.bart.data.RoutesColumns;
 import com.dougkeen.bart.model.Constants;
 import com.dougkeen.bart.model.Departure;
@@ -35,7 +35,7 @@ import com.dougkeen.bart.model.StationPair;
 import com.dougkeen.bart.networktasks.GetRealTimeDeparturesTask;
 import com.dougkeen.bart.networktasks.GetScheduleInformationTask;
 
-public class ViewDeparturesActivity extends ListActivity {
+public class ViewDeparturesActivity extends ActionBarListActivity {
 
 	private static final int UNCERTAINTY_THRESHOLD = 17;
 
@@ -50,7 +50,7 @@ public class ViewDeparturesActivity extends ListActivity {
 
 	private ScheduleInformation mLatestScheduleInfo;
 
-	private TextView mListTitleView;
+	private TextView mEmptyView;
 
 	private AsyncTask<StationPair, Integer, RealTimeDepartures> mGetDeparturesTask;
 	private AsyncTask<StationPair, Integer, ScheduleInformation> mGetScheduleInformationTask;
@@ -71,7 +71,7 @@ public class ViewDeparturesActivity extends ListActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.main);
+		setContentView(R.layout.departures);
 
 		final Intent intent = getIntent();
 
@@ -96,13 +96,11 @@ public class ViewDeparturesActivity extends ListActivity {
 		mAverageTripLength = cursor.getInt(2);
 		mAverageTripSampleCount = cursor.getInt(3);
 
-		String header = "Departures:\n" + mOrigin.name + " to "
-				+ mDestination.name;
+		((TextView) findViewById(R.id.listTitle)).setText(mOrigin.name + " to "
+				+ mDestination.name);
 
-		mListTitleView = (TextView) findViewById(R.id.listTitle);
-		mListTitleView.setText(header);
-		((TextView) findViewById(android.R.id.empty))
-				.setText(R.string.departure_wait_message);
+		mEmptyView = (TextView) findViewById(android.R.id.empty);
+		mEmptyView.setText(R.string.departure_wait_message);
 
 		mDeparturesAdapter = new DepartureArrayAdapter(this,
 				R.layout.departure_listing);
@@ -200,8 +198,7 @@ public class ViewDeparturesActivity extends ListActivity {
 				Log.w(Constants.TAG, e.getMessage(), e);
 				Toast.makeText(ViewDeparturesActivity.this,
 						R.string.could_not_connect, Toast.LENGTH_LONG).show();
-				((TextView) findViewById(android.R.id.empty))
-						.setText(R.string.could_not_connect);
+				mEmptyView.setText(R.string.could_not_connect);
 				// Try again in 60s
 				scheduleDepartureFetch(60000);
 			}
@@ -236,8 +233,7 @@ public class ViewDeparturesActivity extends ListActivity {
 				Log.w(Constants.TAG, e.getMessage(), e);
 				Toast.makeText(ViewDeparturesActivity.this,
 						R.string.could_not_connect, Toast.LENGTH_LONG).show();
-				((TextView) findViewById(android.R.id.empty))
-						.setText(R.string.could_not_connect);
+				mEmptyView.setText(R.string.could_not_connect);
 				// Try again in 60s
 				scheduleScheduleInfoFetch(60000);
 			}
@@ -262,7 +258,7 @@ public class ViewDeparturesActivity extends ListActivity {
 			return;
 		}
 		if (result.getDepartures().isEmpty()) {
-			final TextView textView = (TextView) findViewById(android.R.id.empty);
+			final TextView textView = mEmptyView;
 			textView.setText(R.string.no_data_message);
 			Linkify.addLinks(textView, Linkify.WEB_URLS);
 			return;
@@ -486,7 +482,7 @@ public class ViewDeparturesActivity extends ListActivity {
 
 	private void scheduleDepartureFetch(int millisUntilExecute) {
 		if (!mDepartureFetchIsPending) {
-			mListTitleView.postDelayed(new Runnable() {
+			postDelayed(new Runnable() {
 				public void run() {
 					fetchLatestDepartures();
 				}
@@ -499,7 +495,7 @@ public class ViewDeparturesActivity extends ListActivity {
 
 	private void scheduleScheduleInfoFetch(int millisUntilExecute) {
 		if (!mScheduleFetchIsPending) {
-			mListTitleView.postDelayed(new Runnable() {
+			postDelayed(new Runnable() {
 				public void run() {
 					fetchLatestSchedule();
 				}
@@ -523,10 +519,14 @@ public class ViewDeparturesActivity extends ListActivity {
 		}
 		mLastAutoUpdate = now;
 		if (hasWindowFocus()) {
-			mListTitleView.postDelayed(AUTO_UPDATE_RUNNABLE, 1000);
+			postDelayed(AUTO_UPDATE_RUNNABLE, 1000);
 		} else {
 			mIsAutoUpdating = false;
 		}
+	}
+
+	private boolean postDelayed(Runnable runnable, long delayMillis) {
+		return mEmptyView.postDelayed(runnable, delayMillis);
 	}
 
 	@Override

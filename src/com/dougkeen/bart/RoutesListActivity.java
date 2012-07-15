@@ -6,7 +6,6 @@ import java.util.TimeZone;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
-import android.app.ListActivity;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.DialogInterface;
@@ -27,13 +26,14 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.SimpleCursorAdapter.ViewBinder;
 import android.widget.TextView;
 
+import com.dougkeen.bart.actionbarcompat.ActionBarListActivity;
 import com.dougkeen.bart.data.CursorUtils;
 import com.dougkeen.bart.data.RoutesColumns;
 import com.dougkeen.bart.model.Constants;
 import com.dougkeen.bart.model.Station;
 import com.dougkeen.bart.networktasks.GetRouteFareTask;
 
-public class RoutesListActivity extends ListActivity {
+public class RoutesListActivity extends ActionBarListActivity {
 	private static final TimeZone PACIFIC_TIME = TimeZone
 			.getTimeZone("America/Los_Angeles");
 
@@ -50,6 +50,7 @@ public class RoutesListActivity extends ListActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
+		setTitle(R.string.favorite_routes);
 
 		mQuery = managedQuery(Constants.FAVORITE_CONTENT_URI, new String[] {
 				RoutesColumns._ID.string, RoutesColumns.FROM_STATION.string,
@@ -138,8 +139,6 @@ public class RoutesListActivity extends ListActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		((TextView) findViewById(R.id.listTitle))
-				.setText(R.string.favorite_routes);
 		((TextView) findViewById(android.R.id.empty))
 				.setText(R.string.empty_favorites_list_message);
 		refreshFares();

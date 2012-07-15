@@ -2,10 +2,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent" android:layout_height="fill_parent"
 	android:paddingLeft="5dp" android:paddingRight="5dp">
-	<TextView android:id="@+id/form_header" android:layout_width="wrap_content"
-		android:layout_height="wrap_content" android:textSize="24dp"
-		android:textStyle="bold" android:layout_alignParentTop="true"
-		android:text="@string/add_route" android:paddingBottom="10dp" />
 	<TextView android:id="@+id/origin_label" android:text="@string/origin"
 		android:layout_width="wrap_content" android:layout_height="wrap_content"
 		android:textSize="15dp" android:layout_below="@+id/form_header"
