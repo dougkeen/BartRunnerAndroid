@@ -9,6 +9,8 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.MatrixCursor;
+import android.database.MatrixCursor.RowBuilder;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
@@ -22,6 +24,8 @@ public class BartContentProvider extends ContentProvider {
 
 	private static final int FAVORITES = 1;
 	private static final int FAVORITE_ID = 2;
+	private static final int ARBITRARY_ROUTE = 3;
+	private static final int ARBITRARY_ROUTE_UNDEFINED = 4;
 
 	/**
 	 * The default sort order for events
@@ -33,6 +37,9 @@ public class BartContentProvider extends ContentProvider {
 		sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 		sUriMatcher.addURI(Constants.AUTHORITY, "favorites", FAVORITES);
 		sUriMatcher.addURI(Constants.AUTHORITY, "favorites/#", FAVORITE_ID);
+		sUriMatcher.addURI(Constants.AUTHORITY, "route/*/*", ARBITRARY_ROUTE);
+		sUriMatcher.addURI(Constants.AUTHORITY, "route",
+				ARBITRARY_ROUTE_UNDEFINED);
 
 		sFavoritesProjectionMap = new HashMap<String, String>();
 		sFavoritesProjectionMap.put(RoutesColumns._ID.string,
@@ -45,7 +52,8 @@ public class BartContentProvider extends ContentProvider {
 				RoutesColumns.FARE.string);
 		sFavoritesProjectionMap.put(RoutesColumns.FARE_LAST_UPDATED.string,
 				RoutesColumns.FARE_LAST_UPDATED.string);
-		sFavoritesProjectionMap.put(RoutesColumns.AVERAGE_TRIP_SAMPLE_COUNT.string,
+		sFavoritesProjectionMap.put(
+				RoutesColumns.AVERAGE_TRIP_SAMPLE_COUNT.string,
 				RoutesColumns.AVERAGE_TRIP_SAMPLE_COUNT.string);
 		sFavoritesProjectionMap.put(RoutesColumns.AVERAGE_TRIP_LENGTH.string,
 				RoutesColumns.AVERAGE_TRIP_LENGTH.string);
@@ -66,6 +74,10 @@ public class BartContentProvider extends ContentProvider {
 			return Constants.FAVORITE_CONTENT_TYPE;
 		} else if (match == FAVORITE_ID) {
 			return Constants.FAVORITE_CONTENT_ITEM_TYPE;
+		} else if (match == ARBITRARY_ROUTE) {
+			return Constants.ARBITRARY_ROUTE_TYPE;
+		} else if (match == ARBITRARY_ROUTE_UNDEFINED) {
+			return Constants.ARBITRARY_ROUTE_UNDEFINED_TYPE;
 		} else {
 			throw new IllegalArgumentException("Unknown URI " + uri);
 		}
@@ -82,14 +94,29 @@ public class BartContentProvider extends ContentProvider {
 
 		int match = sUriMatcher.match(uri);
 
-		if (match == FAVORITES) {
-			qb.setTables(DatabaseHelper.FAVORITES_TABLE_NAME);
-			qb.setProjectionMap(sFavoritesProjectionMap);
+		if (match == ARBITRARY_ROUTE) {
+			MatrixCursor returnCursor = new MatrixCursor(projection);
+			RowBuilder newRow = returnCursor.newRow();
+
+			for (String column : projection) {
+				if (column.equals(RoutesColumns.FROM_STATION.string)) {
+					newRow.add(uri.getPathSegments().get(1));
+				} else if (column.equals(RoutesColumns.TO_STATION.string)) {
+					newRow.add(uri.getPathSegments().get(2));
+				} else {
+					newRow.add(null);
+				}
+			}
+
+			return returnCursor;
 		} else if (match == FAVORITE_ID) {
 			qb.setTables(DatabaseHelper.FAVORITES_TABLE_NAME);
 			qb.setProjectionMap(sFavoritesProjectionMap);
 			qb.appendWhere(RoutesColumns._ID + " = "
 					+ uri.getPathSegments().get(1));
+		} else if (match == FAVORITES) {
+			qb.setTables(DatabaseHelper.FAVORITES_TABLE_NAME);
+			qb.setProjectionMap(sFavoritesProjectionMap);
 		} else {
 			throw new IllegalArgumentException("Unknown URI " + uri);
 		}

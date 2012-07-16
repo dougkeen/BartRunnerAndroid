@@ -21,6 +21,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.SimpleCursorAdapter.ViewBinder;
@@ -88,6 +89,15 @@ public class RoutesListActivity extends ActionBarListActivity {
 		setListAdapter(adapter);
 
 		registerForContextMenu(getListView());
+
+		((Button) findViewById(R.id.quickLookupButton))
+				.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						startActivity(new Intent(Intent.ACTION_PICK,
+								Constants.ARBITRARY_ROUTE_CONTENT_URI_ROOT));
+					}
+				});
 	}
 
 	private void refreshFares() {

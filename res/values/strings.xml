@@ -30,4 +30,6 @@
 	<string name="view_system_map">View system map</string>
 	<string name="system_map">System map</string>
 	<string name="departures">Departures</string>
+	<string name="ok">OK</string>
+	<string name="quick_departure_lookup">Quick departure lookup</string>
 </resources>

@@ -1,83 +1,25 @@
 package com.dougkeen.bart;
 
-import com.dougkeen.bart.data.RoutesColumns;
-import com.dougkeen.bart.model.Constants;
-import com.dougkeen.bart.model.Station;
-
-import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
-import android.widget.Toast;
 
-public class AddRouteActivity extends Activity {
+import com.dougkeen.bart.data.RoutesColumns;
+import com.dougkeen.bart.model.Constants;
+import com.dougkeen.bart.model.Station;
 
+public class AddRouteActivity extends AbstractRouteSelectionActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		setContentView(R.layout.add_favorite);
-
-		SpinnerAdapter originSpinnerAdapter = new ArrayAdapter<Station>(this,
-				R.layout.simple_spinner_item, Station.getStationList());
-		((Spinner) findViewById(R.id.origin_spinner))
-				.setAdapter(originSpinnerAdapter);
-
-		SpinnerAdapter destinationSpinnerAdapter = new ArrayAdapter<Station>(
-				this, R.layout.simple_spinner_item, Station.getStationList());
-		((Spinner) findViewById(R.id.destination_spinner))
-				.setAdapter(destinationSpinnerAdapter);
-
-		Button saveButton = (Button) findViewById(R.id.saveButton);
-		saveButton.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				onSaveButtonClick();
-			}
-
-		});
-
-		Button cancelButton = (Button) findViewById(R.id.cancelButton);
-		cancelButton.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				setResult(RESULT_CANCELED);
-				finish();
-			}
-		});
-
+		findViewById(R.id.return_checkbox).setVisibility(View.VISIBLE);
 	}
 
-	protected void onSaveButtonClick() {
-		Station origin = (Station) ((Spinner) findViewById(R.id.origin_spinner))
-				.getSelectedItem();
-		Station destination = (Station) ((Spinner) findViewById(R.id.destination_spinner))
-				.getSelectedItem();
-
-		if (origin == null) {
-			Toast.makeText(this, com.dougkeen.bart.R.string.error_null_origin,
-					Toast.LENGTH_LONG);
-			return;
-		}
-		if (destination == null) {
-			Toast.makeText(this,
-					com.dougkeen.bart.R.string.error_null_destination,
-					Toast.LENGTH_LONG);
-			return;
-		}
-		if (origin.equals(destination)) {
-			Toast.makeText(
-					this,
-					com.dougkeen.bart.R.string.error_matching_origin_and_destination,
-					Toast.LENGTH_LONG);
-			return;
-		}
-
+	@Override
+	protected void onOkButtonClick(Station origin, Station destination) {
 		ContentValues values = new ContentValues();
 		values.put(RoutesColumns.FROM_STATION.string, origin.abbreviation);
 		values.put(RoutesColumns.TO_STATION.string, destination.abbreviation);
@@ -97,5 +39,4 @@ public class AddRouteActivity extends Activity {
 		setResult(RESULT_OK, (new Intent()).setAction(newUri.toString()));
 		finish();
 	}
-
 }
