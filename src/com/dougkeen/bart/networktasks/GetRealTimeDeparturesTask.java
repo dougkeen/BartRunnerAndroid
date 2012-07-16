@@ -98,7 +98,13 @@ public abstract class GetRealTimeDeparturesTask extends
 				throw new IOException("Server returned blank xml document");
 			}
 
-			Xml.parse(xml, handler);
+			try {
+				Xml.parse(xml, handler);
+			} catch (Exception e) {
+				mException = new IOException("Server returned malformed xml: "
+						+ xml);
+				return null;
+			}
 			final RealTimeDepartures realTimeDepartures = handler
 					.getRealTimeDepartures();
 			return realTimeDepartures;
@@ -121,10 +127,6 @@ public abstract class GetRealTimeDeparturesTask extends
 				mException = new Exception("Could not contact BART system", e);
 				return null;
 			}
-		} catch (SAXException e) {
-			mException = new Exception(
-					"Could not understand response from BART system: " + xml, e);
-			return null;
 		}
 	}
 
