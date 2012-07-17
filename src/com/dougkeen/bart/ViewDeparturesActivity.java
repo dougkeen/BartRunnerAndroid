@@ -8,6 +8,8 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -16,14 +18,20 @@ import android.os.PowerManager;
 import android.text.format.DateFormat;
 import android.text.util.Linkify;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dougkeen.bart.actionbarcompat.ActionBarListActivity;
+import com.dougkeen.bart.controls.CountdownTextView;
+import com.dougkeen.bart.controls.Ticker;
 import com.dougkeen.bart.data.RoutesColumns;
 import com.dougkeen.bart.model.Constants;
 import com.dougkeen.bart.model.Departure;
@@ -32,6 +40,7 @@ import com.dougkeen.bart.model.ScheduleInformation;
 import com.dougkeen.bart.model.ScheduleItem;
 import com.dougkeen.bart.model.Station;
 import com.dougkeen.bart.model.StationPair;
+import com.dougkeen.bart.model.TextProvider;
 import com.dougkeen.bart.networktasks.GetRealTimeDeparturesTask;
 import com.dougkeen.bart.networktasks.GetScheduleInformationTask;
 
@@ -46,6 +55,9 @@ public class ViewDeparturesActivity extends ActionBarListActivity {
 	private int mAverageTripLength;
 	private int mAverageTripSampleCount;
 
+	private Departure mSelectedDeparture;
+	private Departure mBoardedDeparture;
+
 	private DepartureArrayAdapter mDeparturesAdapter;
 
 	private ScheduleInformation mLatestScheduleInfo;
@@ -54,14 +66,6 @@ public class ViewDeparturesActivity extends ActionBarListActivity {
 
 	private AsyncTask<StationPair, Integer, RealTimeDepartures> mGetDeparturesTask;
 	private AsyncTask<StationPair, Integer, ScheduleInformation> mGetScheduleInformationTask;
-
-	private boolean mIsAutoUpdating = false;
-
-	private final Runnable AUTO_UPDATE_RUNNABLE = new Runnable() {
-		public void run() {
-			runAutoUpdate();
-		}
-	};
 
 	private PowerManager.WakeLock mWakeLock;
 
@@ -104,21 +108,32 @@ public class ViewDeparturesActivity extends ActionBarListActivity {
 
 		mDeparturesAdapter = new DepartureArrayAdapter(this,
 				R.layout.departure_listing);
-		if (savedInstanceState != null
-				&& savedInstanceState.containsKey("departures")) {
-			for (Parcelable departure : savedInstanceState
-					.getParcelableArray("departures")) {
-				mDeparturesAdapter.add((Departure) departure);
+		if (savedInstanceState != null) {
+
+			if (savedInstanceState.containsKey("departures")) {
+				for (Parcelable departure : savedInstanceState
+						.getParcelableArray("departures")) {
+					mDeparturesAdapter.add((Departure) departure);
+				}
+			}
+			if (savedInstanceState.containsKey("boardedDeparture")) {
+				mBoardedDeparture = (Departure) savedInstanceState
+						.getParcelable("boardedDeparture");
 			}
 		}
 		setListAdapter(mDeparturesAdapter);
 
+		registerForContextMenu(getListView());
+
 		findViewById(R.id.missingDepartureText).setVisibility(View.VISIBLE);
+
+		refreshBoardedDeparture();
 	}
 
 	@Override
 	protected void onPause() {
 		cancelDataFetch();
+		Ticker.getInstance().stopTicking();
 		super.onPause();
 	}
 
@@ -147,6 +162,13 @@ public class ViewDeparturesActivity extends ActionBarListActivity {
 			departures[i] = mDeparturesAdapter.getItem(i);
 		}
 		outState.putParcelableArray("departures", departures);
+		outState.putParcelable("boardedDeparture", mBoardedDeparture);
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		Ticker.getInstance().startTicking();
 	}
 
 	@Override
@@ -161,10 +183,7 @@ public class ViewDeparturesActivity extends ActionBarListActivity {
 					.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK,
 							"ViewDeparturesActivity");
 			mWakeLock.acquire();
-			if (mDeparturesAdapter != null && !mDeparturesAdapter.isEmpty()) {
-				mIsAutoUpdating = true;
-			}
-			runAutoUpdate();
+			refreshBoardedDeparture();
 		} else if (mWakeLock != null) {
 			mWakeLock.release();
 		}
@@ -336,11 +355,6 @@ public class ViewDeparturesActivity extends ActionBarListActivity {
 
 				scheduleDepartureFetch(interval);
 			}
-			if (!mIsAutoUpdating) {
-				mIsAutoUpdating = true;
-			}
-		} else {
-			mIsAutoUpdating = false;
 		}
 	}
 
@@ -506,25 +520,6 @@ public class ViewDeparturesActivity extends ActionBarListActivity {
 		}
 	}
 
-	private long mLastAutoUpdate = 0;
-
-	private void runAutoUpdate() {
-		long now = System.currentTimeMillis();
-		if (now - mLastAutoUpdate < 950) {
-			return;
-		}
-		if (mIsAutoUpdating && mDeparturesAdapter != null) {
-			mDeparturesAdapter.incrementRefreshCounter();
-			mDeparturesAdapter.notifyDataSetChanged();
-		}
-		mLastAutoUpdate = now;
-		if (hasWindowFocus()) {
-			postDelayed(AUTO_UPDATE_RUNNABLE, 1000);
-		} else {
-			mIsAutoUpdating = false;
-		}
-	}
-
 	private boolean postDelayed(Runnable runnable, long delayMillis) {
 		return mEmptyView.postDelayed(runnable, delayMillis);
 	}
@@ -556,5 +551,85 @@ public class ViewDeparturesActivity extends ActionBarListActivity {
 		} else {
 			return super.onOptionsItemSelected(item);
 		}
+	}
+
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v,
+			ContextMenuInfo menuInfo) {
+		super.onCreateContextMenu(menu, v, menuInfo);
+
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.departure_context_menu, menu);
+
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
+		mSelectedDeparture = (Departure) getListAdapter()
+				.getItem(info.position);
+		menu.setHeaderTitle(R.string.departure_options);
+	}
+
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		if (item.getItemId() == R.id.boardTrain) {
+			mBoardedDeparture = mSelectedDeparture;
+			refreshBoardedDeparture();
+			return true;
+		}
+		return super.onContextItemSelected(item);
+	}
+
+	private void refreshBoardedDeparture() {
+		if (mBoardedDeparture == null)
+			return;
+
+		final Departure departure = mBoardedDeparture;
+		findViewById(R.id.yourTrainSection).setVisibility(View.VISIBLE);
+		((TextView) findViewById(R.id.yourTrainDestinationText))
+				.setText(departure.getDestination().toString());
+
+		((TextView) findViewById(R.id.yourTrainTrainLengthText))
+				.setText(departure.getTrainLengthText());
+
+		ImageView colorBar = (ImageView) findViewById(R.id.yourTrainDestinationColorBar);
+		((GradientDrawable) colorBar.getDrawable()).setColor(Color
+				.parseColor(departure.getDestinationColor()));
+		if (departure.isBikeAllowed()) {
+			((ImageView) findViewById(R.id.yourTrainBikeIcon))
+					.setVisibility(View.VISIBLE);
+		} else {
+			((ImageView) findViewById(R.id.yourTrainBikeIcon))
+					.setVisibility(View.INVISIBLE);
+		}
+		if (departure.getRequiresTransfer()) {
+			((ImageView) findViewById(R.id.yourTrainXferIcon))
+					.setVisibility(View.VISIBLE);
+		} else {
+			((ImageView) findViewById(R.id.yourTrainXferIcon))
+					.setVisibility(View.INVISIBLE);
+		}
+		CountdownTextView departureCountdown = (CountdownTextView) findViewById(R.id.yourTrainDepartureCountdown);
+		CountdownTextView arrivalCountdown = (CountdownTextView) findViewById(R.id.yourTrainArrivalCountdown);
+
+		departureCountdown.setText("Leaves in " + departure.getCountdownText()
+				+ " " + departure.getUncertaintyText());
+		departureCountdown.setTextProvider(new TextProvider() {
+			@Override
+			public String getText() {
+				if (departure.hasDeparted()) {
+					return "Departed";
+				} else {
+					return "Leaves in " + departure.getCountdownText() + " "
+							+ departure.getUncertaintyText();
+				}
+			}
+		});
+
+		arrivalCountdown
+				.setText(departure.getEstimatedArrivalMinutesLeftText());
+		arrivalCountdown.setTextProvider(new TextProvider() {
+			@Override
+			public String getText() {
+				return departure.getEstimatedArrivalMinutesLeftText();
+			}
+		});
 	}
 }

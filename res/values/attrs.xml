@@ -12,9 +12,11 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-  -->
+-->
 
 <resources>
+
+    <attr name="tickInterval" format="integer" />
 
     <declare-styleable name="AppTheme">
         <attr name="actionbarCompatTitleStyle" format="reference" />
@@ -22,10 +24,15 @@
         <attr name="actionbarCompatItemHomeStyle" format="reference" />
         <attr name="actionbarCompatProgressIndicatorStyle" format="reference" />
     </declare-styleable>
-
     <declare-styleable name="BezelImageView">
         <attr name="maskDrawable" format="reference" />
         <attr name="borderDrawable" format="reference" />
+    </declare-styleable>
+    <declare-styleable name="CountdownTextView">
+        <attr name="tickInterval" />
+    </declare-styleable>
+    <declare-styleable name="TimedTextSwitcher">
+        <attr name="tickInterval" />
     </declare-styleable>
 
 </resources>

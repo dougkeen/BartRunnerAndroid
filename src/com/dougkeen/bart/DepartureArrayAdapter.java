@@ -18,11 +18,12 @@ import android.widget.TextSwitcher;
 import android.widget.TextView;
 import android.widget.ViewSwitcher.ViewFactory;
 
+import com.dougkeen.bart.controls.CountdownTextView;
+import com.dougkeen.bart.controls.TimedTextSwitcher;
 import com.dougkeen.bart.model.Departure;
+import com.dougkeen.bart.model.TextProvider;
 
 public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
-
-	private int refreshCounter = 1;
 
 	public DepartureArrayAdapter(Context context, int textViewResourceId,
 			Departure[] objects) {
@@ -52,10 +53,6 @@ public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
 	public DepartureArrayAdapter(Context context, int textViewResourceId) {
 		super(context, textViewResourceId);
 	}
-	
-	public void incrementRefreshCounter() {
-		refreshCounter++;
-	}
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
@@ -67,39 +64,46 @@ public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
 			view = inflater.inflate(R.layout.departure_listing, parent, false);
 		}
 
-		Departure departure = getItem(position);
+		final Departure departure = getItem(position);
 		((TextView) view.findViewById(R.id.destinationText)).setText(departure
 				.getDestination().toString());
 
-		TextSwitcher textSwitcher = (TextSwitcher) view
+		TimedTextSwitcher textSwitcher = (TimedTextSwitcher) view
 				.findViewById(R.id.trainLengthText);
 		initTextSwitcher(textSwitcher);
 
-		final String estimatedArrivalTimeText = departure
-				.getEstimatedArrivalTimeText(getContext());
-		String arrivalText = "Est. arrival " + estimatedArrivalTimeText;
-		if (StringUtils.isBlank(estimatedArrivalTimeText)) {
-			textSwitcher.setCurrentText(departure.getTrainLengthText());
-		} else if (refreshCounter % 6 < 3) {
-			String trainLengthText = departure.getTrainLengthText();
-			if (refreshCounter % 6 == 0) {
-				textSwitcher.setText(trainLengthText);
-			} else {
-				textSwitcher.setCurrentText(trainLengthText);
+		textSwitcher.setCurrentText(departure.getTrainLengthText());
+		textSwitcher.setTextProviders(new TextProvider[] { new TextProvider() {
+			@Override
+			public String getText() {
+				final String estimatedArrivalTimeText = departure
+						.getEstimatedArrivalTimeText(getContext());
+				if (StringUtils.isBlank(estimatedArrivalTimeText)) {
+					return "";
+				} else {
+					return "Est. arrival " + estimatedArrivalTimeText;
+				}
 			}
-		} else {
-			if (refreshCounter % 6 == 3) {
-				textSwitcher.setText(arrivalText);
-			} else {
-				textSwitcher.setCurrentText(arrivalText);
+		}, new TextProvider() {
+			@Override
+			public String getText() {
+				return departure.getTrainLengthText();
 			}
-		}
+		} });
+
 		ImageView colorBar = (ImageView) view
 				.findViewById(R.id.destinationColorBar);
 		((GradientDrawable) colorBar.getDrawable()).setColor(Color
 				.parseColor(departure.getDestinationColor()));
-		((TextView) view.findViewById(R.id.countdown)).setText(departure
-				.getCountdownText());
+		CountdownTextView countdownTextView = (CountdownTextView) view
+				.findViewById(R.id.countdown);
+		countdownTextView.setText(departure.getCountdownText());
+		countdownTextView.setTextProvider(new TextProvider() {
+			@Override
+			public String getText() {
+				return departure.getCountdownText();
+			}
+		});
 		((TextView) view.findViewById(R.id.uncertainty)).setText(departure
 				.getUncertaintyText());
 		if (departure.isBikeAllowed()) {
@@ -130,7 +134,9 @@ public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
 			});
 
 			textSwitcher.setInAnimation(AnimationUtils.loadAnimation(
-					getContext(), android.R.anim.fade_in));
+					getContext(), android.R.anim.slide_in_left));
+			textSwitcher.setOutAnimation(AnimationUtils.loadAnimation(
+					getContext(), android.R.anim.slide_out_right));
 		}
 	}
 }

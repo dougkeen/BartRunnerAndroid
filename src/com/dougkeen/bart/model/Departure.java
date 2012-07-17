@@ -219,6 +219,30 @@ public class Departure implements Parcelable, Comparable<Departure> {
 		return getMeanEstimate() + getEstimatedTripTime();
 	}
 
+	public long getEstimatedArrivalMinutesLeft() {
+		long millisLeft = getEstimatedArrivalTime()
+				- System.currentTimeMillis();
+		if (millisLeft < 0) {
+			return -1;
+		} else {
+			// Add ~30s to emulate rounding
+			return (millisLeft + 29999) / (60 * 1000);
+		}
+	}
+
+	public String getEstimatedArrivalMinutesLeftText() {
+		long minutesLeft = getEstimatedArrivalMinutesLeft();
+		if (minutesLeft < 0) {
+			return "Arrived";
+		} else if (minutesLeft == 0) {
+			return "Estimated arrival in < 1 min.";
+		} else if (minutesLeft == 1) {
+			return "Estimated arrival in 1 min.";
+		} else {
+			return "Estimated arrival in " + minutesLeft + " mins.";
+		}
+	}
+
 	public String getEstimatedArrivalTimeText(Context context) {
 		if (getEstimatedTripTime() > 0 || arrivalTimeOverride > 0) {
 			return DateFormat.getTimeFormat(context).format(

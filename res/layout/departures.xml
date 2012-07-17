@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bart="http://schemas.android.com/apk/res/com.dougkeen.bart"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical" >
@@ -12,6 +13,82 @@
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
         android:textSize="24dp" />
+
+    <RelativeLayout
+        android:id="@+id/yourTrainSection"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:background="#222"
+        android:padding="10dp"
+        android:visibility="gone" >
+
+        <TextView
+            android:id="@+id/yourTrainHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:text="@string/your_train"
+            android:textAllCaps="true"
+            android:textSize="20dp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/yourTrainDestinationColorBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/yourTrainHeader"
+            android:src="@drawable/basic_rectangle" />
+
+        <TextView
+            android:id="@+id/yourTrainDestinationText"
+            style="@style/DepartureDestinationText"
+            android:layout_below="@id/yourTrainHeader"
+            android:layout_toRightOf="@id/yourTrainDestinationColorBar"
+            android:ellipsize="marquee"
+            android:singleLine="true" />
+
+        <ImageView
+            android:id="@+id/yourTrainBikeIcon"
+            style="@style/BikeIcon"
+            android:layout_below="@id/yourTrainHeader"
+            android:layout_toRightOf="@id/yourTrainDestinationText"
+            android:src="@drawable/bike" />
+
+        <ImageView
+            android:id="@+id/yourTrainXferIcon"
+            style="@style/XferIcon"
+            android:layout_below="@id/yourTrainBikeIcon"
+            android:layout_toRightOf="@id/yourTrainDestinationText"
+            android:src="@drawable/xfer" />
+
+        <TextView
+            android:id="@+id/yourTrainTrainLengthText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/yourTrainDestinationText"
+            android:layout_toRightOf="@id/yourTrainDestinationColorBar"
+            android:paddingLeft="5dp" />
+
+        <com.dougkeen.bart.controls.CountdownTextView
+            android:id="@+id/yourTrainDepartureCountdown"
+            style="@style/DepartureCountdownText"
+            android:layout_alignLeft="@id/yourTrainSection"
+            android:layout_alignRight="@id/yourTrainSection"
+            android:layout_below="@id/yourTrainTrainLengthText"
+            bart:tickInterval="1" />
+
+        <com.dougkeen.bart.controls.CountdownTextView
+            android:id="@+id/yourTrainArrivalCountdown"
+            style="@style/DepartureCountdownText"
+            android:layout_alignLeft="@id/yourTrainSection"
+            android:layout_alignRight="@id/yourTrainSection"
+            android:layout_below="@id/yourTrainDepartureCountdown"
+            android:ellipsize="end"
+            bart:tickInterval="5" />
+    </RelativeLayout>
 
     <ListView
         android:id="@android:id/list"

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bart="http://schemas.android.com/apk/res/com.dougkeen.bart"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" >
 
@@ -30,10 +31,12 @@
             style="@style/BikeIcon"
             android:src="@drawable/bike" />
 
-        <TextView
+        <com.dougkeen.bart.controls.CountdownTextView
             android:id="@+id/countdown"
             style="@style/DepartureCountdownText"
-            android:gravity="right" />
+            android:gravity="right"
+            android:width="90dp"
+            bart:tickInterval="1" />
     </LinearLayout>
 
     <ImageView
@@ -43,12 +46,13 @@
         android:layout_below="@id/topRow"
         android:src="@drawable/xfer" />
 
-    <TextSwitcher
+    <com.dougkeen.bart.controls.TimedTextSwitcher
         android:id="@+id/trainLengthText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/topRow"
-        android:layout_toRightOf="@id/destinationColorBar" />
+        android:layout_toRightOf="@id/destinationColorBar"
+        bart:tickInterval="3" />
 
     <TextView
         android:id="@+id/uncertainty"

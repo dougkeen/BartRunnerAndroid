@@ -2,7 +2,9 @@ package com.dougkeen.bart.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import android.util.Log;
 
@@ -199,6 +201,19 @@ public enum Station {
 
 	public List<Route> getTransferRoutes(Station dest) {
 		List<Route> returnList = new ArrayList<Route>();
+
+		/**
+		 * Kind of gimpy logic... no transfers from lake or 12th if headed to
+		 * somewhere between woak and daly
+		 */
+		if (this.equals(LAKE) || this.equals(_12TH)) {
+			int destIndex = Line.BLUE.stations.indexOf(dest);
+			if (destIndex >= Line.BLUE.stations.indexOf(DALY)
+					&& destIndex <= Line.BLUE.stations.indexOf(WOAK)) {
+				return returnList;
+			}
+		}
+
 		if (dest.getInboundTransferStation() != null) {
 			// Try getting to the destination's inbound xfer station first
 			returnList.addAll(getDirectRoutesForDestination(this,
