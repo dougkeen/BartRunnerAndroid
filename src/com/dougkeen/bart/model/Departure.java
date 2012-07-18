@@ -233,7 +233,7 @@ public class Departure implements Parcelable, Comparable<Departure> {
 	public String getEstimatedArrivalMinutesLeftText() {
 		long minutesLeft = getEstimatedArrivalMinutesLeft();
 		if (minutesLeft < 0) {
-			return "Arrived";
+			return "Arrived at destination";
 		} else if (minutesLeft == 0) {
 			return "Estimated arrival in < 1 min.";
 		} else if (minutesLeft == 1) {

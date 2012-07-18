@@ -11,16 +11,15 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.xml.sax.SAXException;
 
 import android.os.AsyncTask;
 import android.util.Log;
 import android.util.Xml;
 
 import com.dougkeen.bart.model.Constants;
-import com.dougkeen.bart.model.StationPair;
 import com.dougkeen.bart.model.RealTimeDepartures;
 import com.dougkeen.bart.model.Route;
+import com.dougkeen.bart.model.StationPair;
 
 public abstract class GetRealTimeDeparturesTask extends
 		AsyncTask<StationPair, Integer, RealTimeDepartures> {
@@ -50,7 +49,16 @@ public abstract class GetRealTimeDeparturesTask extends
 		mRoutes = params.getOrigin().getDirectRoutesForDestination(
 				params.getDestination());
 
-		if (mRoutes.isEmpty() || params.getOrigin().transferFriendly) {
+		boolean hasDirectLine = false;
+		for (Route route : mRoutes) {
+			if (!route.hasTransfer()) {
+				hasDirectLine = true;
+				break;
+			}
+		}
+
+		if (mRoutes.isEmpty()
+				|| (params.getOrigin().transferFriendly && !hasDirectLine)) {
 			mRoutes.addAll(params.getOrigin().getTransferRoutes(
 					params.getDestination()));
 		}
