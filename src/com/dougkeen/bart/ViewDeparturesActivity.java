@@ -128,6 +128,9 @@ public class ViewDeparturesActivity extends ActionBarListActivity {
 		findViewById(R.id.missingDepartureText).setVisibility(View.VISIBLE);
 
 		refreshBoardedDeparture();
+
+		getActionBarHelper().setHomeButtonEnabled(true);
+		getActionBarHelper().setDisplayHomeAsUpEnabled(true);
 	}
 
 	@Override
@@ -534,7 +537,11 @@ public class ViewDeparturesActivity extends ActionBarListActivity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int itemId = item.getItemId();
-		if (itemId == R.id.view_on_bart_site_button) {
+		if (itemId == android.R.id.home) {
+			startActivity(new Intent(Intent.ACTION_PICK,
+					Constants.FAVORITE_CONTENT_URI));
+			return true;
+		} else if (itemId == R.id.view_on_bart_site_button) {
 			startActivity(new Intent(
 					Intent.ACTION_VIEW,
 					Uri.parse("http://m.bart.gov/schedules/qp_results.aspx?type=departure&date=today&time="

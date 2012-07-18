@@ -43,20 +43,20 @@ public abstract class AbstractRouteSelectionActivity extends Activity {
 				if (origin == null) {
 					Toast.makeText(v.getContext(),
 							com.dougkeen.bart.R.string.error_null_origin,
-							Toast.LENGTH_LONG);
+							Toast.LENGTH_LONG).show();
 					return;
 				}
 				if (destination == null) {
 					Toast.makeText(v.getContext(),
 							com.dougkeen.bart.R.string.error_null_destination,
-							Toast.LENGTH_LONG);
+							Toast.LENGTH_LONG).show();
 					return;
 				}
 				if (origin.equals(destination)) {
 					Toast.makeText(
 							v.getContext(),
 							com.dougkeen.bart.R.string.error_matching_origin_and_destination,
-							Toast.LENGTH_LONG);
+							Toast.LENGTH_LONG).show();
 					return;
 				}
 				onOkButtonClick(origin, destination);

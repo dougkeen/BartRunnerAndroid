@@ -316,4 +316,12 @@ public class ActionBarHelperBase extends ActionBarHelper {
 		}
 
 	}
+
+	@Override
+	public void setHomeButtonEnabled(boolean enabled) {
+	}
+
+	@Override
+	public void setDisplayHomeAsUpEnabled(boolean enabled) {
+	}
 }
