@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-	<item android:title="@string/view_departures" android:id="@+id/view"></item>
-	<item android:title="@string/delete" android:id="@+id/delete"></item>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/view"
+        android:icon="@drawable/departure_icon"
+        android:showAsAction="ifRoom|withText"
+        android:title="@string/view_departures">
+    </item>
+    <item
+        android:id="@+id/delete"
+        android:icon="@drawable/delete_icon"
+        android:showAsAction="ifRoom|withText"
+        android:title="@string/delete">
+    </item>
+
 </menu>

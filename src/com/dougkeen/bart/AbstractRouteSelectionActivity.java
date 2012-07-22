@@ -6,7 +6,6 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 import android.widget.Toast;
 
 import com.dougkeen.bart.model.Station;
@@ -23,13 +22,20 @@ public abstract class AbstractRouteSelectionActivity extends Activity {
 
 		setContentView(R.layout.route_form);
 
-		SpinnerAdapter originSpinnerAdapter = new ArrayAdapter<Station>(this,
-				R.layout.simple_spinner_item, Station.getStationList());
+		ArrayAdapter<Station> originSpinnerAdapter = new ArrayAdapter<Station>(
+				this, android.R.layout.simple_spinner_item,
+				Station.getStationList());
+		originSpinnerAdapter
+				.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
 		((Spinner) findViewById(R.id.origin_spinner))
 				.setAdapter(originSpinnerAdapter);
 
-		SpinnerAdapter destinationSpinnerAdapter = new ArrayAdapter<Station>(
-				this, R.layout.simple_spinner_item, Station.getStationList());
+		ArrayAdapter<Station> destinationSpinnerAdapter = new ArrayAdapter<Station>(
+				this, android.R.layout.simple_spinner_item,
+				Station.getStationList());
+		destinationSpinnerAdapter
+				.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
+
 		((Spinner) findViewById(R.id.destination_spinner))
 				.setAdapter(destinationSpinnerAdapter);
 

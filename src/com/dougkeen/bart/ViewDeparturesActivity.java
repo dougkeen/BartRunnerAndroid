@@ -18,18 +18,17 @@ import android.os.PowerManager;
 import android.text.format.DateFormat;
 import android.text.util.Linkify;
 import android.util.Log;
-import android.view.ContextMenu;
-import android.view.ContextMenu.ContextMenuInfo;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.dougkeen.bart.actionbarcompat.ActionBarListActivity;
+import com.actionbarsherlock.app.SherlockListActivity;
+import com.actionbarsherlock.view.ActionMode;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 import com.dougkeen.bart.controls.CountdownTextView;
 import com.dougkeen.bart.controls.Ticker;
 import com.dougkeen.bart.data.RoutesColumns;
@@ -44,7 +43,7 @@ import com.dougkeen.bart.model.TextProvider;
 import com.dougkeen.bart.networktasks.GetRealTimeDeparturesTask;
 import com.dougkeen.bart.networktasks.GetScheduleInformationTask;
 
-public class ViewDeparturesActivity extends ActionBarListActivity {
+public class ViewDeparturesActivity extends SherlockListActivity {
 
 	private static final int UNCERTAINTY_THRESHOLD = 17;
 
@@ -71,6 +70,8 @@ public class ViewDeparturesActivity extends ActionBarListActivity {
 
 	private boolean mDepartureFetchIsPending;
 	private boolean mScheduleFetchIsPending;
+
+	private ActionMode mActionMode;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -120,17 +121,22 @@ public class ViewDeparturesActivity extends ActionBarListActivity {
 				mBoardedDeparture = (Departure) savedInstanceState
 						.getParcelable("boardedDeparture");
 			}
+			if (savedInstanceState.containsKey("selectedDeparture")) {
+				mSelectedDeparture = (Departure) savedInstanceState
+						.getParcelable("selectedDeparture");
+			}
+			if(savedInstanceState.getBoolean("hasActionMode") && mSelectedDeparture != null) {
+				startDepartureActionMode();
+			}
 		}
 		setListAdapter(mDeparturesAdapter);
-
-		registerForContextMenu(getListView());
 
 		findViewById(R.id.missingDepartureText).setVisibility(View.VISIBLE);
 
 		refreshBoardedDeparture();
 
-		getActionBarHelper().setHomeButtonEnabled(true);
-		getActionBarHelper().setDisplayHomeAsUpEnabled(true);
+		getSupportActionBar().setHomeButtonEnabled(true);
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 	}
 
 	@Override
@@ -166,6 +172,8 @@ public class ViewDeparturesActivity extends ActionBarListActivity {
 		}
 		outState.putParcelableArray("departures", departures);
 		outState.putParcelable("boardedDeparture", mBoardedDeparture);
+		outState.putParcelable("selectedDeparture", mSelectedDeparture);
+		outState.putBoolean("hasActionMode", mActionMode != null);
 	}
 
 	@Override
@@ -529,7 +537,7 @@ public class ViewDeparturesActivity extends ActionBarListActivity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getMenuInflater();
+		MenuInflater inflater = getSupportMenuInflater();
 		inflater.inflate(R.menu.route_menu, menu);
 		return true;
 	}
@@ -538,8 +546,7 @@ public class ViewDeparturesActivity extends ActionBarListActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int itemId = item.getItemId();
 		if (itemId == android.R.id.home) {
-			startActivity(new Intent(Intent.ACTION_PICK,
-					Constants.FAVORITE_CONTENT_URI));
+			finish();
 			return true;
 		} else if (itemId == R.id.view_on_bart_site_button) {
 			startActivity(new Intent(
@@ -558,30 +565,6 @@ public class ViewDeparturesActivity extends ActionBarListActivity {
 		} else {
 			return super.onOptionsItemSelected(item);
 		}
-	}
-
-	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v,
-			ContextMenuInfo menuInfo) {
-		super.onCreateContextMenu(menu, v, menuInfo);
-
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.departure_context_menu, menu);
-
-		AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
-		mSelectedDeparture = (Departure) getListAdapter()
-				.getItem(info.position);
-		menu.setHeaderTitle(R.string.departure_options);
-	}
-
-	@Override
-	public boolean onContextItemSelected(MenuItem item) {
-		if (item.getItemId() == R.id.boardTrain) {
-			mBoardedDeparture = mSelectedDeparture;
-			refreshBoardedDeparture();
-			return true;
-		}
-		return super.onContextItemSelected(item);
 	}
 
 	private void refreshBoardedDeparture() {
@@ -630,13 +613,60 @@ public class ViewDeparturesActivity extends ActionBarListActivity {
 			}
 		});
 
-		arrivalCountdown
-				.setText(departure.getEstimatedArrivalMinutesLeftText());
+		arrivalCountdown.setText(departure
+				.getEstimatedArrivalMinutesLeftText(this));
 		arrivalCountdown.setTextProvider(new TextProvider() {
 			@Override
 			public String getText() {
-				return departure.getEstimatedArrivalMinutesLeftText();
+				return departure
+						.getEstimatedArrivalMinutesLeftText(ViewDeparturesActivity.this);
 			}
 		});
+	}
+
+	@Override
+	protected void onListItemClick(ListView l, View v, int position, long id) {
+		mSelectedDeparture = (Departure) getListAdapter().getItem(position);
+		if (mActionMode != null) {
+			mActionMode.finish();
+		}
+		startDepartureActionMode();
+	}
+
+	private void startDepartureActionMode() {
+		mActionMode = startActionMode(new DepartureActionMode());
+		mActionMode.setTitle(mSelectedDeparture.getDestinationName());
+		mActionMode.setSubtitle(mSelectedDeparture.getTrainLengthText());
+	}
+
+	private class DepartureActionMode implements ActionMode.Callback {
+
+		@Override
+		public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+			mode.getMenuInflater().inflate(R.menu.departure_context_menu, menu);
+			return true;
+		}
+
+		@Override
+		public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+			return false;
+		}
+
+		@Override
+		public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+			if (item.getItemId() == R.id.boardTrain) {
+				mBoardedDeparture = mSelectedDeparture;
+				refreshBoardedDeparture();
+				mode.finish();
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public void onDestroyActionMode(ActionMode mode) {
+			mActionMode = null;
+		}
+
 	}
 }

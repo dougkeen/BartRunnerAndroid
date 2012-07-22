@@ -40,7 +40,7 @@ public class Ticker {
 				mForceStop = false;
 				return;
 			}
-			Log.w("Ticker", "Tick #: " + mTickCount);
+
 			long startTimeNanos = System.nanoTime();
 			Iterator<TickSubscriber> iterator = publisher.mSubscribers.keySet()
 					.iterator();

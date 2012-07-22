@@ -15,7 +15,16 @@ public class AddRouteActivity extends AbstractRouteSelectionActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		findViewById(R.id.return_checkbox).setVisibility(View.VISIBLE);
+		final View checkboxText = findViewById(R.id.return_checkbox_text);
+		final View checkbox = findViewById(R.id.return_checkbox);
+		checkboxText.setVisibility(View.VISIBLE);
+		checkbox.setVisibility(View.VISIBLE);
+		checkboxText.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				checkbox.performClick();
+			}
+		});
 	}
 
 	@Override

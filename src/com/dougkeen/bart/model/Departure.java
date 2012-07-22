@@ -230,16 +230,22 @@ public class Departure implements Parcelable, Comparable<Departure> {
 		}
 	}
 
-	public String getEstimatedArrivalMinutesLeftText() {
+	public String getEstimatedArrivalMinutesLeftText(Context context) {
+		if (!hasAnyArrivalEstimate()) {
+			return "Estimated arrival unknown";
+		}
 		long minutesLeft = getEstimatedArrivalMinutesLeft();
 		if (minutesLeft < 0) {
 			return "Arrived at destination";
 		} else if (minutesLeft == 0) {
-			return "Estimated arrival in < 1 min.";
+			return "Arrives around " + getEstimatedArrivalTimeText(context)
+					+ " (<1 min)";
 		} else if (minutesLeft == 1) {
-			return "Estimated arrival in 1 min.";
+			return "Arrives around " + getEstimatedArrivalTimeText(context)
+					+ " (1 min)";
 		} else {
-			return "Estimated arrival in " + minutesLeft + " mins.";
+			return "Arrives around " + getEstimatedArrivalTimeText(context)
+					+ " (" + minutesLeft + " mins)";
 		}
 	}
 

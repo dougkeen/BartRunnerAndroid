@@ -4,12 +4,11 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:ellipsize="marquee"
-    android:background="#282829"
-    android:textColor="#fff"
-    android:paddingBottom="12dip"
+    android:textColor="#000"
+    android:paddingBottom="10dip"
     android:paddingLeft="5dip"
     android:paddingRight="5dip"
-    android:paddingTop="12dip"
+    android:paddingTop="10dip"
     android:singleLine="true" >
 
 </TextView>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<string name="app_name">BART Runner</string>
-	<string name="favorite_routes">Favorite Routes</string>
+	<string name="favorite_routes">Favorite routes</string>
 	<string name="empty_favorites_list_message">No favorite routes have been added yet</string>
 	<string name="add_route">Add a route</string>
 	<string name="origin">Origin</string>
@@ -32,7 +32,7 @@
 	<string name="departures">Departures</string>
 	<string name="ok">OK</string>
 	<string name="quick_departure_lookup">Quick departure lookup</string>
-	<string name="getting_on_this_train">I\'m getting on this train</string>
+	<string name="getting_on_this_train">I will board this train</string>
 	<string name="departure_options">Departure options</string>
 	<string name="your_train">Your train</string>
 </resources>

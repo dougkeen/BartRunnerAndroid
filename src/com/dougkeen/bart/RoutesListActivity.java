@@ -14,27 +14,26 @@ import android.database.Cursor;
 import android.database.CursorWrapper;
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.ContextMenu;
-import android.view.ContextMenu.ContextMenuInfo;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.SimpleCursorAdapter.ViewBinder;
 import android.widget.TextView;
 
-import com.dougkeen.bart.actionbarcompat.ActionBarListActivity;
+import com.actionbarsherlock.app.SherlockListActivity;
+import com.actionbarsherlock.view.ActionMode;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 import com.dougkeen.bart.data.CursorUtils;
 import com.dougkeen.bart.data.RoutesColumns;
 import com.dougkeen.bart.model.Constants;
 import com.dougkeen.bart.model.Station;
 import com.dougkeen.bart.networktasks.GetRouteFareTask;
 
-public class RoutesListActivity extends ActionBarListActivity {
+public class RoutesListActivity extends SherlockListActivity {
 	private static final TimeZone PACIFIC_TIME = TimeZone
 			.getTimeZone("America/Los_Angeles");
 
@@ -44,7 +43,10 @@ public class RoutesListActivity extends ActionBarListActivity {
 
 	private Uri mCurrentlySelectedUri;
 
-	private String mCurrentlySelectedRouteName;
+	private Station mCurrentlySelectedOrigin;
+	private Station mCurrentlySelectedDestination;
+
+	private ActionMode mActionMode;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -88,7 +90,31 @@ public class RoutesListActivity extends ActionBarListActivity {
 
 		setListAdapter(adapter);
 
-		registerForContextMenu(getListView());
+		getListView().setOnItemLongClickListener(
+				new AdapterView.OnItemLongClickListener() {
+					@Override
+					public boolean onItemLongClick(AdapterView<?> parent,
+							View view, int position, long id) {
+						if (mActionMode != null) {
+							mActionMode.finish();
+						}
+
+						mCurrentlySelectedUri = ContentUris.withAppendedId(
+								Constants.FAVORITE_CONTENT_URI, id);
+
+						CursorWrapper item = (CursorWrapper) getListAdapter()
+								.getItem(position);
+						Station orig = Station.getByAbbreviation(CursorUtils
+								.getString(item, RoutesColumns.FROM_STATION));
+						Station dest = Station.getByAbbreviation(CursorUtils
+								.getString(item, RoutesColumns.TO_STATION));
+						mCurrentlySelectedOrigin = orig;
+						mCurrentlySelectedDestination = dest;
+
+						startContextualActionMode();
+						return true;
+					}
+				});
 
 		((Button) findViewById(R.id.quickLookupButton))
 				.setOnClickListener(new View.OnClickListener() {
@@ -98,6 +124,26 @@ public class RoutesListActivity extends ActionBarListActivity {
 								Constants.ARBITRARY_ROUTE_CONTENT_URI_ROOT));
 					}
 				});
+
+		if (savedInstanceState != null) {
+			if (savedInstanceState.getString("currentlySelectedOrigin") != null) {
+				mCurrentlySelectedOrigin = Station
+						.getByAbbreviation(savedInstanceState
+								.getString("currentlySelectedOrigin"));
+			}
+			if (savedInstanceState.getString("currentlySelectedDestination") != null) {
+				mCurrentlySelectedDestination = Station
+						.getByAbbreviation(savedInstanceState
+								.getString("currentlySelectedDestination"));
+			}
+			if (savedInstanceState.getParcelable("currentlySelectedUri") != null) {
+				mCurrentlySelectedUri = (Uri) savedInstanceState
+						.getParcelable("currentlySelectedUri");
+			}
+			if (savedInstanceState.getBoolean("hasActionMode")) {
+				startContextualActionMode();
+			}
+		}
 	}
 
 	private void refreshFares() {
@@ -147,6 +193,19 @@ public class RoutesListActivity extends ActionBarListActivity {
 	}
 
 	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		if (mCurrentlySelectedOrigin != null)
+			outState.putString("currentlySelectedOrigin",
+					mCurrentlySelectedOrigin.abbreviation);
+		if (mCurrentlySelectedDestination != null)
+			outState.putString("currentlySelectedDestination",
+					mCurrentlySelectedDestination.abbreviation);
+		outState.putParcelable("currentlySelectedUri", mCurrentlySelectedUri);
+		outState.putBoolean("hasActionMode", mActionMode != null);
+	}
+
+	@Override
 	protected void onResume() {
 		super.onResume();
 		((TextView) findViewById(android.R.id.empty))
@@ -154,14 +213,12 @@ public class RoutesListActivity extends ActionBarListActivity {
 		refreshFares();
 	}
 
-	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getMenuInflater();
+		MenuInflater inflater = getSupportMenuInflater();
 		inflater.inflate(R.menu.routes_list_menu, menu);
-		return true;
+		return super.onCreateOptionsMenu(menu);
 	}
 
-	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int itemId = item.getItemId();
 		if (itemId == R.id.add_favorite_menu_button) {
@@ -183,46 +240,9 @@ public class RoutesListActivity extends ActionBarListActivity {
 	}
 
 	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v,
-			ContextMenuInfo menuInfo) {
-		super.onCreateContextMenu(menu, v, menuInfo);
-
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.route_context_menu, menu);
-
-		AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
-		CursorWrapper item = (CursorWrapper) getListAdapter().getItem(
-				info.position);
-		Station orig = Station.getByAbbreviation(CursorUtils.getString(item,
-				RoutesColumns.FROM_STATION));
-		Station dest = Station.getByAbbreviation(CursorUtils.getString(item,
-				RoutesColumns.TO_STATION));
-		mCurrentlySelectedRouteName = orig.name + " - " + dest.name;
-		menu.setHeaderTitle(mCurrentlySelectedRouteName);
-	}
-
-	@Override
-	public boolean onContextItemSelected(MenuItem item) {
-		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
-				.getMenuInfo();
-		mCurrentlySelectedUri = ContentUris.withAppendedId(
-				Constants.FAVORITE_CONTENT_URI, info.id);
-
-		if (item.getItemId() == R.id.view) {
-			startActivity(new Intent(Intent.ACTION_VIEW, mCurrentlySelectedUri));
-			return true;
-		} else if (item.getItemId() == R.id.delete) {
-			showDialog(DIALOG_DELETE_EVENT);
-			return true;
-		}
-		return super.onContextItemSelected(item);
-	}
-
-	@Override
 	protected Dialog onCreateDialog(int id) {
 		if (id == DIALOG_DELETE_EVENT && mCurrentlySelectedUri != null) {
 			final AlertDialog.Builder builder = new Builder(this);
-			builder.setTitle(mCurrentlySelectedRouteName);
 			builder.setCancelable(false);
 			builder.setMessage("Are you sure you want to delete this route?");
 			builder.setPositiveButton(R.string.yes,
@@ -231,15 +251,15 @@ public class RoutesListActivity extends ActionBarListActivity {
 							getContentResolver().delete(mCurrentlySelectedUri,
 									null, null);
 							mCurrentlySelectedUri = null;
-							mCurrentlySelectedRouteName = null;
+							mCurrentlySelectedOrigin = null;
+							mCurrentlySelectedDestination = null;
+							mActionMode.finish();
 							removeDialog(DIALOG_DELETE_EVENT);
 						}
 					});
 			builder.setNegativeButton(R.string.cancel,
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int which) {
-							mCurrentlySelectedUri = null;
-							mCurrentlySelectedRouteName = null;
 							removeDialog(DIALOG_DELETE_EVENT);
 						}
 					});
@@ -248,4 +268,44 @@ public class RoutesListActivity extends ActionBarListActivity {
 		return super.onCreateDialog(id);
 	}
 
+	private void startContextualActionMode() {
+		mActionMode = startActionMode(new RouteActionMode());
+		mActionMode.setTitle(mCurrentlySelectedOrigin.name);
+		mActionMode.setSubtitle("to " + mCurrentlySelectedDestination.name);
+	}
+
+	private final class RouteActionMode implements ActionMode.Callback {
+
+		@Override
+		public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+			mode.getMenuInflater().inflate(R.menu.route_context_menu, menu);
+			return true;
+		}
+
+		@Override
+		public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+			return false;
+		}
+
+		@Override
+		public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+			if (item.getItemId() == R.id.view) {
+				startActivity(new Intent(Intent.ACTION_VIEW,
+						mCurrentlySelectedUri));
+				mode.finish();
+				return true;
+			} else if (item.getItemId() == R.id.delete) {
+				showDialog(DIALOG_DELETE_EVENT);
+				return false;
+			}
+
+			return false;
+		}
+
+		@Override
+		public void onDestroyActionMode(ActionMode mode) {
+			mActionMode = null;
+		}
+
+	}
 }

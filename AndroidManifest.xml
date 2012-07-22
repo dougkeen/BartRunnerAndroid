@@ -43,7 +43,7 @@
         <activity
             android:name="AddRouteActivity"
             android:label="@string/add_route"
-            android:theme="@android:style/Theme.Dialog" >
+            android:theme="@style/DialogHoloDark" >
             <intent-filter>
                 <action android:name="android.intent.action.INSERT" />
 
@@ -55,7 +55,7 @@
         <activity
             android:name="QuickRouteActivity"
             android:label="@string/quick_departure_lookup"
-            android:theme="@android:style/Theme.Dialog" >
+            android:theme="@style/DialogHoloDark" >
             <intent-filter>
                 <action android:name="android.intent.action.PICK" />
 
