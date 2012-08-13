@@ -21,6 +21,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -62,6 +63,7 @@ public class ViewDeparturesActivity extends SherlockListActivity {
 	private ScheduleInformation mLatestScheduleInfo;
 
 	private TextView mEmptyView;
+	private ProgressBar mProgress;
 
 	private AsyncTask<StationPair, Integer, RealTimeDepartures> mGetDeparturesTask;
 	private AsyncTask<StationPair, Integer, ScheduleInformation> mGetScheduleInformationTask;
@@ -107,6 +109,8 @@ public class ViewDeparturesActivity extends SherlockListActivity {
 		mEmptyView = (TextView) findViewById(android.R.id.empty);
 		mEmptyView.setText(R.string.departure_wait_message);
 
+		mProgress = (ProgressBar) findViewById(android.R.id.progress);
+
 		mDeparturesAdapter = new DepartureArrayAdapter(this,
 				R.layout.departure_listing);
 		if (savedInstanceState != null) {
@@ -115,6 +119,7 @@ public class ViewDeparturesActivity extends SherlockListActivity {
 				for (Parcelable departure : savedInstanceState
 						.getParcelableArray("departures")) {
 					mDeparturesAdapter.add((Departure) departure);
+					mDeparturesAdapter.notifyDataSetChanged();
 				}
 			}
 			if (savedInstanceState.containsKey("boardedDeparture")) {
@@ -125,7 +130,8 @@ public class ViewDeparturesActivity extends SherlockListActivity {
 				mSelectedDeparture = (Departure) savedInstanceState
 						.getParcelable("selectedDeparture");
 			}
-			if(savedInstanceState.getBoolean("hasActionMode") && mSelectedDeparture != null) {
+			if (savedInstanceState.getBoolean("hasActionMode")
+					&& mSelectedDeparture != null) {
 				startDepartureActionMode();
 			}
 		}
@@ -218,6 +224,7 @@ public class ViewDeparturesActivity extends SherlockListActivity {
 			public void onResult(RealTimeDepartures result) {
 				mDepartureFetchIsPending = false;
 				Log.i(Constants.TAG, "Processing data from server");
+				mProgress.setVisibility(View.INVISIBLE);
 				processLatestDepartures(result);
 				Log.i(Constants.TAG, "Done processing data from server");
 			}
@@ -229,12 +236,15 @@ public class ViewDeparturesActivity extends SherlockListActivity {
 				Toast.makeText(ViewDeparturesActivity.this,
 						R.string.could_not_connect, Toast.LENGTH_LONG).show();
 				mEmptyView.setText(R.string.could_not_connect);
+				mProgress.setVisibility(View.INVISIBLE);
 				// Try again in 60s
 				scheduleDepartureFetch(60000);
 			}
 		};
 		Log.i(Constants.TAG, "Fetching data from server");
 		mGetDeparturesTask.execute(new StationPair(mOrigin, mDestination));
+		mProgress.setVisibility(View.VISIBLE);
+
 	}
 
 	private void fetchLatestSchedule() {
@@ -264,6 +274,8 @@ public class ViewDeparturesActivity extends SherlockListActivity {
 				Toast.makeText(ViewDeparturesActivity.this,
 						R.string.could_not_connect, Toast.LENGTH_LONG).show();
 				mEmptyView.setText(R.string.could_not_connect);
+				mProgress.setVisibility(View.GONE);
+
 				// Try again in 60s
 				scheduleScheduleInfoFetch(60000);
 			}
@@ -290,6 +302,7 @@ public class ViewDeparturesActivity extends SherlockListActivity {
 		if (result.getDepartures().isEmpty()) {
 			final TextView textView = mEmptyView;
 			textView.setText(R.string.no_data_message);
+			mProgress.setVisibility(View.GONE);
 			Linkify.addLinks(textView, Linkify.WEB_URLS);
 			return;
 		}

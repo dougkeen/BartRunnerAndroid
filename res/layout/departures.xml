@@ -90,14 +90,21 @@
             bart:tickInterval="5" />
     </RelativeLayout>
 
-    <ListView
-        android:id="@android:id/list"
+    <ProgressBar
+        android:id="@android:id/progress"
+        style="@style/ProgressBarHolo.Horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:visibility="invisible" />
+    <TextView
+        android:id="@android:id/empty"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1" />
 
-    <TextView
-        android:id="@android:id/empty"
+    <ListView
+        android:id="@android:id/list"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1" />
