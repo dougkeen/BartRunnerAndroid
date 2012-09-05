@@ -1,7 +1,10 @@
 package com.dougkeen.bart;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
@@ -14,6 +17,8 @@ import com.dougkeen.bart.model.Station;
 
 public abstract class AbstractRouteSelectionFragment extends DialogFragment {
 
+	private static final String KEY_LAST_SELECTED_DESTINATION = "lastSelectedDestination";
+	private static final String KEY_LAST_SELECTED_ORIGIN = "lastSelectedOrigin";
 	protected String mTitle;
 
 	public AbstractRouteSelectionFragment(String title) {
@@ -25,6 +30,14 @@ public abstract class AbstractRouteSelectionFragment extends DialogFragment {
 	public void onStart() {
 		super.onStart();
 
+		SharedPreferences preferences = getActivity().getPreferences(
+				Context.MODE_PRIVATE);
+
+		final int lastSelectedOriginPosition = preferences.getInt(
+				KEY_LAST_SELECTED_ORIGIN, 0);
+		final int lastSelectedDestinationPosition = preferences.getInt(
+				KEY_LAST_SELECTED_DESTINATION, 1);
+
 		final Dialog dialog = getDialog();
 		final FragmentActivity activity = getActivity();
 		ArrayAdapter<Station> originSpinnerAdapter = new ArrayAdapter<Station>(
@@ -32,8 +45,10 @@ public abstract class AbstractRouteSelectionFragment extends DialogFragment {
 				Station.getStationList());
 		originSpinnerAdapter
 				.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
-		((Spinner) dialog.findViewById(R.id.origin_spinner))
-				.setAdapter(originSpinnerAdapter);
+		final Spinner originSpinner = (Spinner) dialog
+				.findViewById(R.id.origin_spinner);
+		originSpinner.setAdapter(originSpinnerAdapter);
+		originSpinner.setSelection(lastSelectedOriginPosition);
 
 		ArrayAdapter<Station> destinationSpinnerAdapter = new ArrayAdapter<Station>(
 				activity, android.R.layout.simple_spinner_item,
@@ -41,8 +56,10 @@ public abstract class AbstractRouteSelectionFragment extends DialogFragment {
 		destinationSpinnerAdapter
 				.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
 
-		((Spinner) dialog.findViewById(R.id.destination_spinner))
-				.setAdapter(destinationSpinnerAdapter);
+		final Spinner destinationSpinner = (Spinner) dialog
+				.findViewById(R.id.destination_spinner);
+		destinationSpinner.setAdapter(destinationSpinnerAdapter);
+		destinationSpinner.setSelection(lastSelectedDestinationPosition);
 	}
 
 	@Override
@@ -72,10 +89,13 @@ public abstract class AbstractRouteSelectionFragment extends DialogFragment {
 
 	protected void handleOkClick() {
 		final Dialog dialog = getDialog();
-		Station origin = (Station) ((Spinner) dialog
-				.findViewById(R.id.origin_spinner)).getSelectedItem();
-		Station destination = (Station) ((Spinner) dialog
-				.findViewById(R.id.destination_spinner)).getSelectedItem();
+		final Spinner originSpinner = (Spinner) dialog
+				.findViewById(R.id.origin_spinner);
+		final Spinner destinationSpinner = (Spinner) dialog
+				.findViewById(R.id.destination_spinner);
+
+		Station origin = (Station) originSpinner.getSelectedItem();
+		Station destination = (Station) destinationSpinner.getSelectedItem();
 		if (origin == null) {
 			Toast.makeText(dialog.getContext(),
 					com.dougkeen.bart.R.string.error_null_origin,
@@ -95,6 +115,15 @@ public abstract class AbstractRouteSelectionFragment extends DialogFragment {
 					Toast.LENGTH_LONG).show();
 			return;
 		}
+
+		final Editor prefsEditor = getActivity().getPreferences(
+				Context.MODE_PRIVATE).edit();
+		prefsEditor.putInt(KEY_LAST_SELECTED_ORIGIN,
+				originSpinner.getSelectedItemPosition());
+		prefsEditor.putInt(KEY_LAST_SELECTED_DESTINATION,
+				destinationSpinner.getSelectedItemPosition());
+		prefsEditor.commit();
+
 		onOkButtonClick(origin, destination);
 	}
 

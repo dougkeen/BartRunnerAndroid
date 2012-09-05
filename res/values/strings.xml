@@ -36,5 +36,7 @@
     <string name="getting_on_this_train">I will board this train</string>
     <string name="departure_options">Departure options</string>
     <string name="your_train">Your train</string>
+    <string name="skip_alert">Skip alert</string>
+    <string name="set_up_departure_alert">Set up departure alert</string>
 
 </resources>
