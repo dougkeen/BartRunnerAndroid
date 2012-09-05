@@ -79,31 +79,4 @@
         android:layout_toLeftOf="@id/return_checkbox_text"
         android:visibility="gone" />
 
-    <LinearLayout
-        android:id="@+id/buttonBar"
-        style="@style/ButtonBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/return_checkbox"
-        android:orientation="horizontal" >
-
-        <Button
-            android:id="@+id/cancelButton"
-            style="ButtonHoloBorderless"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@android:string/cancel" >
-        </Button>
-
-        <Button
-            android:id="@+id/okButton"
-            style="ButtonHoloBorderless"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@android:string/ok" >
-        </Button>
-    </LinearLayout>
-
 </RelativeLayout>

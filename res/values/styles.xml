@@ -11,6 +11,30 @@
         <item name="android:paddingBottom">10dp</item>
     </style>
 
+    <style name="LargeText">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">20dp</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:singleLine">true</item>
+    </style>
+    
+    <style name="MediumText">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">16dp</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:singleLine">true</item>
+    </style>
+    
+    <style name="SmallText">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">12dp</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:singleLine">true</item>
+    </style>
+    
     <style name="FavoriteListingTextView">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
@@ -83,10 +107,5 @@
     <style name="bottomButton">
         <item name="android:background">#222</item>
     </style>
-
-    <style name="ButtonHoloBorderless" parent="ButtonHoloDark">
-        <item name="android:background">@drawable/btn_borderless_holo_dark</item>
-        <item name="android:textColor">#ffffff</item>
-    </style>
-
+    
 </resources>

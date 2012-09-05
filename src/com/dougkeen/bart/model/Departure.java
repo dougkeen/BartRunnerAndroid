@@ -41,6 +41,7 @@ public class Departure implements Parcelable, Comparable<Departure> {
 	private boolean bikeAllowed;
 	private String trainLength;
 	private boolean requiresTransfer;
+	private boolean transferScheduled;
 
 	private int minutes;
 
@@ -139,6 +140,14 @@ public class Departure implements Parcelable, Comparable<Departure> {
 
 	public void setRequiresTransfer(boolean requiresTransfer) {
 		this.requiresTransfer = requiresTransfer;
+	}
+
+	public boolean isTransferScheduled() {
+		return transferScheduled;
+	}
+
+	public void setTransferScheduled(boolean transferScheduled) {
+		this.transferScheduled = transferScheduled;
 	}
 
 	public int getMinutes() {

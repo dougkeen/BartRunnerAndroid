@@ -1,9 +1,7 @@
 package com.dougkeen.bart;
 
 import android.content.ContentValues;
-import android.content.Intent;
 import android.net.Uri;
-import android.os.Bundle;
 import android.view.View;
 import android.widget.CheckBox;
 
@@ -11,12 +9,17 @@ import com.dougkeen.bart.data.RoutesColumns;
 import com.dougkeen.bart.model.Constants;
 import com.dougkeen.bart.model.Station;
 
-public class AddRouteActivity extends AbstractRouteSelectionActivity {
+public class AddRouteDialogFragment extends AbstractRouteSelectionFragment {
+	public AddRouteDialogFragment(String title) {
+		super(title);
+	}
+
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		final View checkboxText = findViewById(R.id.return_checkbox_text);
-		final View checkbox = findViewById(R.id.return_checkbox);
+	public void onStart() {
+		super.onStart();
+		final View checkboxText = getDialog().findViewById(
+				R.id.return_checkbox_text);
+		final View checkbox = getDialog().findViewById(R.id.return_checkbox);
 		checkboxText.setVisibility(View.VISIBLE);
 		checkbox.setVisibility(View.VISIBLE);
 		checkboxText.setOnClickListener(new View.OnClickListener() {
@@ -33,19 +36,21 @@ public class AddRouteActivity extends AbstractRouteSelectionActivity {
 		values.put(RoutesColumns.FROM_STATION.string, origin.abbreviation);
 		values.put(RoutesColumns.TO_STATION.string, destination.abbreviation);
 
-		Uri newUri = getContentResolver().insert(
+		Uri newUri = getActivity().getContentResolver().insert(
 				Constants.FAVORITE_CONTENT_URI, values);
 
-		if (((CheckBox) findViewById(R.id.return_checkbox)).isChecked()) {
+		if (((CheckBox) getDialog().findViewById(R.id.return_checkbox))
+				.isChecked()) {
 			values = new ContentValues();
 			values.put(RoutesColumns.FROM_STATION.string,
 					destination.abbreviation);
 			values.put(RoutesColumns.TO_STATION.string, origin.abbreviation);
 
-			getContentResolver().insert(Constants.FAVORITE_CONTENT_URI, values);
+			getActivity().getContentResolver().insert(
+					Constants.FAVORITE_CONTENT_URI, values);
 		}
 
-		setResult(RESULT_OK, (new Intent()).setAction(newUri.toString()));
-		finish();
+		dismiss();
 	}
+
 }

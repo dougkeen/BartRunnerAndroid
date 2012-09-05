@@ -257,4 +257,16 @@ public enum Station {
 	public String toString() {
 		return name;
 	}
+
+	public boolean isBetween(Station origin, Station destination, Line line) {
+		int originIndex = line.stations.indexOf(origin);
+		int destinationIndex = line.stations.indexOf(destination);
+		int stationIndex = line.stations.indexOf(this);
+		if (originIndex < 0 || destinationIndex < 0 || stationIndex < 0) {
+			return false;
+		}
+
+		return Math.abs(stationIndex - originIndex) < Math.abs(destinationIndex
+				- originIndex);
+	}
 }

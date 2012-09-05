@@ -48,6 +48,8 @@ public class ViewDeparturesActivity extends SherlockListActivity {
 
 	private static final int UNCERTAINTY_THRESHOLD = 17;
 
+	private static final int DIALOG_SET_ALERT = 1;
+
 	private Uri mUri;
 
 	private Station mOrigin;

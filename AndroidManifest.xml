@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.dougkeen.bart"
     android:installLocation="auto"
-    android:versionCode="19"
-    android:versionName="2.0.1" >
+    android:versionCode="20"
+    android:versionName="2.0.2" >
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -39,30 +39,6 @@
                 <category android:name="android.intent.category.DEFAULT" />
 
                 <data android:mimeType="vnd.android.cursor.item/com.dougkeen.bart.favorite" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name="AddRouteActivity"
-            android:label="@string/add_route"
-            android:theme="@style/DialogHoloDark" >
-            <intent-filter>
-                <action android:name="android.intent.action.INSERT" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:mimeType="vnd.android.cursor.dir/com.dougkeen.bart.favorite" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name="QuickRouteActivity"
-            android:label="@string/quick_departure_lookup"
-            android:theme="@style/DialogHoloDark" >
-            <intent-filter>
-                <action android:name="android.intent.action.PICK" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:mimeType="vnd.android.cursor.dir/com.dougkeen.bart.arbitraryroute" />
             </intent-filter>
         </activity>
         <activity

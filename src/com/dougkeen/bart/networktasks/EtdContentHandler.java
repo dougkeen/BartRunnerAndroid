@@ -115,7 +115,7 @@ public class EtdContentHandler extends DefaultHandler {
 		} else if (localName.equals("etd")) {
 			currentDestination = null;
 		} else if (localName.equals("station")) {
-			realTimeDepartures.sortDepartures();
+			realTimeDepartures.finalizeDeparturesList();
 		}
 		isParsingTag = false;
 		currentValue = null;

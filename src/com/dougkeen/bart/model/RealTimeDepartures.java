@@ -2,6 +2,7 @@ package com.dougkeen.bart.model;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 public class RealTimeDepartures {
@@ -89,6 +90,9 @@ public class RealTimeDepartures {
 			if (route.trainDestinationIsApplicable(destination,
 					departure.getLine())) {
 				departure.setRequiresTransfer(route.hasTransfer());
+				departure
+						.setTransferScheduled(Line.YELLOW_ORANGE_SCHEDULED_TRANSFER
+								.equals(route.getDirectLine()));
 				getDepartures().add(departure);
 				departure.calculateEstimates(time);
 				return;
@@ -98,6 +102,29 @@ public class RealTimeDepartures {
 
 	public void sortDepartures() {
 		Collections.sort(getDepartures());
+	}
+
+	public void finalizeDeparturesList() {
+		boolean hasDirectRoute = false;
+		for (Departure departure : getDepartures()) {
+			if (!departure.getRequiresTransfer()) {
+				hasDirectRoute = true;
+				break;
+			}
+		}
+		if (hasDirectRoute) {
+			Iterator<Departure> iterator = getDepartures().iterator();
+			while (iterator.hasNext()) {
+				Departure departure = iterator.next();
+				if (departure.getRequiresTransfer()
+						&& (!departure.isTransferScheduled() || departure
+								.getDestination().isBetween(getOrigin(),
+										getDestination(), departure.getLine()))) {
+					iterator.remove();
+				}
+			}
+		}
+		sortDepartures();
 	}
 
 	public List<Route> getRoutes() {

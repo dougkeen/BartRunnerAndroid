@@ -5,7 +5,11 @@ import android.content.Intent;
 import com.dougkeen.bart.model.Constants;
 import com.dougkeen.bart.model.Station;
 
-public class QuickRouteActivity extends AbstractRouteSelectionActivity {
+public class QuickRouteDialogFragment extends AbstractRouteSelectionFragment {
+
+	public QuickRouteDialogFragment(String title) {
+		super(title);
+	}
 
 	@Override
 	protected void onOkButtonClick(Station origin, Station destination) {
