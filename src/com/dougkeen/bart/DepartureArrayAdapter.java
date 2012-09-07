@@ -73,23 +73,22 @@ public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
 		initTextSwitcher(textSwitcher);
 
 		textSwitcher.setCurrentText(departure.getTrainLengthText());
-		textSwitcher.setTextProviders(new TextProvider[] { new TextProvider() {
+		textSwitcher.setTextProvider(new TextProvider() {
 			@Override
-			public String getText() {
-				final String estimatedArrivalTimeText = departure
-						.getEstimatedArrivalTimeText(getContext());
-				if (StringUtils.isBlank(estimatedArrivalTimeText)) {
-					return "";
+			public String getText(long tickNumber) {
+				if (tickNumber % 4 == 0) {
+					return departure.getTrainLengthText();
 				} else {
-					return "Est. arrival " + estimatedArrivalTimeText;
+					final String estimatedArrivalTimeText = departure
+							.getEstimatedArrivalTimeText(getContext());
+					if (StringUtils.isBlank(estimatedArrivalTimeText)) {
+						return "";
+					} else {
+						return "Est. arrival " + estimatedArrivalTimeText;
+					}
 				}
 			}
-		}, new TextProvider() {
-			@Override
-			public String getText() {
-				return departure.getTrainLengthText();
-			}
-		} });
+		});
 
 		ImageView colorBar = (ImageView) view
 				.findViewById(R.id.destinationColorBar);
@@ -100,7 +99,7 @@ public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
 		countdownTextView.setText(departure.getCountdownText());
 		countdownTextView.setTextProvider(new TextProvider() {
 			@Override
-			public String getText() {
+			public String getText(long tickNumber) {
 				return departure.getCountdownText();
 			}
 		});

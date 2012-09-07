@@ -30,8 +30,7 @@ public class TimedTextSwitcher extends TextSwitcher implements
 	}
 
 	private int mTickInterval;
-	private TextProvider[] mTextProviderArray;
-	private int mCurrentIndex = 0;
+	private TextProvider mTextProvider;
 
 	@Override
 	public int getTickInterval() {
@@ -42,22 +41,21 @@ public class TimedTextSwitcher extends TextSwitcher implements
 		this.mTickInterval = tickInterval;
 	}
 
-	public void setTextProviders(TextProvider[] textProviders) {
-		mTextProviderArray = textProviders;
+	public void setTextProvider(TextProvider textProvider) {
+		mTextProvider = textProvider;
 		Ticker.getInstance().addSubscriber(this);
 	}
 
 	private String mLastText;
 
 	@Override
-	public void onTick() {
-		String text = mTextProviderArray[mCurrentIndex].getText();
+	public void onTick(long tickNumber) {
+		String text = mTextProvider.getText(tickNumber);
 		if (StringUtils.isNotBlank(text)
 				&& !StringUtils.equalsIgnoreCase(text, mLastText)) {
 			mLastText = text;
 			setText(text);
 		}
-		mCurrentIndex = (mCurrentIndex + 1) % mTextProviderArray.length;
 	}
 
 }

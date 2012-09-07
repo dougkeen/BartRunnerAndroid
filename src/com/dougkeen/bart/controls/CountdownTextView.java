@@ -50,8 +50,8 @@ public class CountdownTextView extends TextView implements
 	}
 
 	@Override
-	public void onTick() {
-		setText(mTextProvider.getText());
+	public void onTick(long tickNumber) {
+		setText(mTextProvider.getText(tickNumber));
 	}
 
 }

@@ -4,13 +4,12 @@ import java.util.Iterator;
 import java.util.WeakHashMap;
 
 import android.os.Handler;
-import android.util.Log;
 
 public class Ticker {
 	public static interface TickSubscriber {
 		int getTickInterval();
 
-		void onTick();
+		void onTick(long mTickCount);
 	}
 
 	private static Ticker sInstance;
@@ -54,7 +53,7 @@ public class Ticker {
 				stillHasListeners = true;
 				if (subscriber.getTickInterval() > 0
 						&& mTickCount % subscriber.getTickInterval() == 0)
-					subscriber.onTick();
+					subscriber.onTick(mTickCount);
 			}
 			long endTimeNanos = System.nanoTime();
 

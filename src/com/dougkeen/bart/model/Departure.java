@@ -405,7 +405,7 @@ public class Departure implements Parcelable, Comparable<Departure> {
 		if (hasDeparted()) {
 			return "";
 		} else {
-			return "(±" + getUncertaintySeconds() + "s)";
+			return "(Â±" + getUncertaintySeconds() + "s)";
 		}
 	}
 

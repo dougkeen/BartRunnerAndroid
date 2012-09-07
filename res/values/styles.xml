@@ -2,7 +2,13 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- Base application theme is the default theme. -->
-    <style name="AppTheme" parent="@style/Theme.HoloEverywhereDark.Sherlock"></style>
+
+    <style name="AppTheme" parent="@style/Theme.HoloEverywhereDark.Sherlock">
+        <item name="numberPickerUpButtonStyle">@style/NPWidget.Holo.ImageButton.NumberPickerUpButton</item>
+        <item name="numberPickerDownButtonStyle">@style/NPWidget.Holo.ImageButton.NumberPickerDownButton</item>
+        <item name="numberPickerInputTextStyle">@style/NPWidget.Holo.EditText.NumberPickerInputText</item>
+        <item name="numberPickerStyle">@style/NPWidget.Holo.NumberPicker</item>
+    </style>
 
     <style name="ButtonBar">
         <item name="android:layout_width">fill_parent</item>
@@ -18,7 +24,7 @@
         <item name="android:ellipsize">end</item>
         <item name="android:singleLine">true</item>
     </style>
-    
+
     <style name="MediumText">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
@@ -26,7 +32,7 @@
         <item name="android:ellipsize">end</item>
         <item name="android:singleLine">true</item>
     </style>
-    
+
     <style name="SmallText">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
@@ -34,7 +40,7 @@
         <item name="android:ellipsize">end</item>
         <item name="android:singleLine">true</item>
     </style>
-    
+
     <style name="FavoriteListingTextView">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
@@ -107,5 +113,5 @@
     <style name="bottomButton">
         <item name="android:background">#222</item>
     </style>
-    
+
 </resources>

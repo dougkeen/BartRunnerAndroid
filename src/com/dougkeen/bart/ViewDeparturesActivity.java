@@ -19,13 +19,14 @@ import android.text.format.DateFormat;
 import android.text.util.Linkify;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ImageView;
-import android.widget.ListView;
+import android.widget.ListAdapter;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockListActivity;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
@@ -44,11 +45,9 @@ import com.dougkeen.bart.model.TextProvider;
 import com.dougkeen.bart.networktasks.GetRealTimeDeparturesTask;
 import com.dougkeen.bart.networktasks.GetScheduleInformationTask;
 
-public class ViewDeparturesActivity extends SherlockListActivity {
+public class ViewDeparturesActivity extends SherlockFragmentActivity {
 
 	private static final int UNCERTAINTY_THRESHOLD = 17;
-
-	private static final int DIALOG_SET_ALERT = 1;
 
 	private Uri mUri;
 
@@ -138,6 +137,20 @@ public class ViewDeparturesActivity extends SherlockListActivity {
 			}
 		}
 		setListAdapter(mDeparturesAdapter);
+		getListView().setEmptyView(findViewById(android.R.id.empty));
+		getListView().setOnItemClickListener(
+				new AdapterView.OnItemClickListener() {
+					@Override
+					public void onItemClick(AdapterView<?> adapterView,
+							View view, int position, long id) {
+						mSelectedDeparture = (Departure) getListAdapter()
+								.getItem(position);
+						if (mActionMode != null) {
+							mActionMode.finish();
+						}
+						startDepartureActionMode();
+					}
+				});
 
 		findViewById(R.id.missingDepartureText).setVisibility(View.VISIBLE);
 
@@ -145,6 +158,22 @@ public class ViewDeparturesActivity extends SherlockListActivity {
 
 		getSupportActionBar().setHomeButtonEnabled(true);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+	}
+
+	@SuppressWarnings("unchecked")
+	private AdapterView<ListAdapter> getListView() {
+		return (AdapterView<ListAdapter>) findViewById(android.R.id.list);
+	}
+
+	private DepartureArrayAdapter mListAdapter;
+
+	protected DepartureArrayAdapter getListAdapter() {
+		return mListAdapter;
+	}
+
+	protected void setListAdapter(DepartureArrayAdapter adapter) {
+		mListAdapter = adapter;
+		getListView().setAdapter(mListAdapter);
 	}
 
 	@Override
@@ -310,9 +339,26 @@ public class ViewDeparturesActivity extends SherlockListActivity {
 		}
 
 		boolean needsBetterAccuracy = false;
+
+		// Keep track of first departure, since we'll request another quick
+		// refresh if it has departed.
 		Departure firstDeparture = null;
+
 		final List<Departure> departures = result.getDepartures();
-		if (mDeparturesAdapter.getCount() > 0) {
+		if (mDeparturesAdapter.isEmpty()) {
+			// Just copy everything to the adapter
+			for (Departure departure : departures) {
+				if (firstDeparture == null) {
+					firstDeparture = departure;
+				}
+				mDeparturesAdapter.add(departure);
+			}
+
+			// Since all the departures are new, we'll definitely need better
+			// accuracy
+			needsBetterAccuracy = true;
+		} else {
+			// Let's merge the latest departure list with the adapter
 			int adapterIndex = -1;
 			for (Departure departure : departures) {
 				adapterIndex++;
@@ -321,37 +367,42 @@ public class ViewDeparturesActivity extends SherlockListActivity {
 					existingDeparture = mDeparturesAdapter
 							.getItem(adapterIndex);
 				}
+				// Looks for departures at the beginning of the adapter that
+				// aren't in the latest list of departures
 				while (existingDeparture != null
 						&& !departure.equals(existingDeparture)) {
+					// Remove old departure
 					mDeparturesAdapter.remove(existingDeparture);
 					if (adapterIndex < mDeparturesAdapter.getCount()) {
+						// Try again with next departure (keep in mind the next
+						// departure is now at the current index, since we
+						// removed a member)
 						existingDeparture = mDeparturesAdapter
 								.getItem(adapterIndex);
 					} else {
+						// Reached the end of the adapter... give up
 						existingDeparture = null;
 					}
 				}
+				// Merge the estimate if we found a matching departure,
+				// otherwise add a new one to the adapter
 				if (existingDeparture != null) {
 					existingDeparture.mergeEstimate(departure);
 				} else {
 					mDeparturesAdapter.add(departure);
 					existingDeparture = departure;
 				}
+
+				// Set first departure
 				if (firstDeparture == null) {
 					firstDeparture = existingDeparture;
 				}
+
+				// Check if estimate is accurate enough
 				if (existingDeparture.getUncertaintySeconds() > UNCERTAINTY_THRESHOLD) {
 					needsBetterAccuracy = true;
 				}
 			}
-		} else {
-			for (Departure departure : departures) {
-				if (firstDeparture == null) {
-					firstDeparture = departure;
-				}
-				mDeparturesAdapter.add(departure);
-			}
-			needsBetterAccuracy = true;
 		}
 		mDeparturesAdapter.notifyDataSetChanged();
 		requestScheduleIfNecessary();
@@ -385,15 +436,19 @@ public class ViewDeparturesActivity extends SherlockListActivity {
 	}
 
 	private void requestScheduleIfNecessary() {
+		// Bail if there's nothing to match schedules to
 		if (mDeparturesAdapter.getCount() == 0) {
 			return;
 		}
 
+		// Fetch if we don't have anything at all
 		if (mLatestScheduleInfo == null) {
 			fetchLatestSchedule();
 			return;
 		}
 
+		// Otherwise, check if the latest departure doesn't have schedule
+		// info... if not, fetch
 		Departure lastDeparture = mDeparturesAdapter.getItem(mDeparturesAdapter
 				.getCount() - 1);
 		if (mLatestScheduleInfo.getLatestDepartureTime() < lastDeparture
@@ -424,6 +479,7 @@ public class ViewDeparturesActivity extends SherlockListActivity {
 			}
 		}
 
+		// Match scheduled departures with real time departures in adapter
 		int lastSearchIndex = 0;
 		int tripCount = mLatestScheduleInfo.getTrips().size();
 		boolean departureUpdated = false;
@@ -433,6 +489,7 @@ public class ViewDeparturesActivity extends SherlockListActivity {
 			Departure departure = mDeparturesAdapter.getItem(departureIndex);
 			for (int i = lastSearchIndex; i < tripCount; i++) {
 				ScheduleItem trip = mLatestScheduleInfo.getTrips().get(i);
+				// Definitely not a match if they have different destinations
 				if (!departure.getDestination().abbreviation.equals(trip
 						.getTrainHeadStation())) {
 					continue;
@@ -478,17 +535,21 @@ public class ViewDeparturesActivity extends SherlockListActivity {
 					break;
 				}
 			}
+
 			// Don't estimate for non-scheduled transfers
 			if (!departure.getRequiresTransfer()) {
 				if (!departure.hasEstimatedTripTime() && localAverageLength > 0) {
+					// Use the average we just calculated if available
 					departure.setEstimatedTripTime(localAverageLength);
 				} else if (!departure.hasEstimatedTripTime()) {
+					// Otherwise just assume the global average
 					departure.setEstimatedTripTime(mAverageTripLength);
 				}
 			} else if (departure.getRequiresTransfer()
 					&& !departure.hasAnyArrivalEstimate()) {
 				lastUnestimatedTransfer = departure;
 			}
+			
 			if (!departure.hasAnyArrivalEstimate()) {
 				departuresWithoutEstimates++;
 			}
@@ -515,6 +576,7 @@ public class ViewDeparturesActivity extends SherlockListActivity {
 			getContentResolver().update(mUri, contentValues, null, null);
 		}
 
+		// If we still have some departures without estimates, try again later
 		if (departuresWithoutEstimates > 0) {
 			scheduleScheduleInfoFetch(20000);
 		}
@@ -618,7 +680,7 @@ public class ViewDeparturesActivity extends SherlockListActivity {
 				+ " " + departure.getUncertaintyText());
 		departureCountdown.setTextProvider(new TextProvider() {
 			@Override
-			public String getText() {
+			public String getText(long tickNumber) {
 				if (departure.hasDeparted()) {
 					return "Departed";
 				} else {
@@ -632,20 +694,11 @@ public class ViewDeparturesActivity extends SherlockListActivity {
 				.getEstimatedArrivalMinutesLeftText(this));
 		arrivalCountdown.setTextProvider(new TextProvider() {
 			@Override
-			public String getText() {
+			public String getText(long tickNumber) {
 				return departure
 						.getEstimatedArrivalMinutesLeftText(ViewDeparturesActivity.this);
 			}
 		});
-	}
-
-	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
-		mSelectedDeparture = (Departure) getListAdapter().getItem(position);
-		if (mActionMode != null) {
-			mActionMode.finish();
-		}
-		startDepartureActionMode();
 	}
 
 	private void startDepartureActionMode() {
@@ -672,6 +725,13 @@ public class ViewDeparturesActivity extends SherlockListActivity {
 			if (item.getItemId() == R.id.boardTrain) {
 				mBoardedDeparture = mSelectedDeparture;
 				refreshBoardedDeparture();
+
+				// Don't prompt for alert if train is about to leave
+				if (mBoardedDeparture.getMeanSecondsLeft() / 60 > 1) {
+					new TrainAlertDialogFragment(mBoardedDeparture).show(
+							getSupportFragmentManager(), "dialog");
+				}
+
 				mode.finish();
 				return true;
 			}

@@ -52,7 +52,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/topRow"
         android:layout_toRightOf="@id/destinationColorBar"
-        bart:tickInterval="3" />
+        bart:tickInterval="1" />
 
     <TextView
         android:id="@+id/uncertainty"
