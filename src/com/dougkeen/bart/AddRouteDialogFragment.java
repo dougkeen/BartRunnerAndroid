@@ -1,7 +1,6 @@
 package com.dougkeen.bart;
 
 import android.content.ContentValues;
-import android.net.Uri;
 import android.view.View;
 import android.widget.CheckBox;
 
@@ -36,7 +35,7 @@ public class AddRouteDialogFragment extends AbstractRouteSelectionFragment {
 		values.put(RoutesColumns.FROM_STATION.string, origin.abbreviation);
 		values.put(RoutesColumns.TO_STATION.string, destination.abbreviation);
 
-		Uri newUri = getActivity().getContentResolver().insert(
+		getActivity().getContentResolver().insert(
 				Constants.FAVORITE_CONTENT_URI, values);
 
 		if (((CheckBox) getDialog().findViewById(R.id.return_checkbox))

@@ -72,7 +72,14 @@ public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
 				.findViewById(R.id.trainLengthText);
 		initTextSwitcher(textSwitcher);
 
-		textSwitcher.setCurrentText(departure.getTrainLengthText());
+		final String estimatedArrivalTimeText = departure
+				.getEstimatedArrivalTimeText(getContext());
+		if (!StringUtils.isBlank(estimatedArrivalTimeText)) {
+			textSwitcher.setCurrentText("Est. arrival "
+					+ estimatedArrivalTimeText);
+		} else {
+			textSwitcher.setCurrentText(departure.getTrainLengthText());
+		}
 		textSwitcher.setTextProvider(new TextProvider() {
 			@Override
 			public String getText(long tickNumber) {

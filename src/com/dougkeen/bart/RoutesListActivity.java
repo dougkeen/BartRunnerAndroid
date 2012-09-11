@@ -3,7 +3,6 @@ package com.dougkeen.bart;
 import java.util.Calendar;
 import java.util.TimeZone;
 
-import android.app.Dialog;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.DialogInterface;
@@ -18,13 +17,11 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.ListAdapter;
-import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.SimpleCursorAdapter.ViewBinder;
 import android.widget.TextView;
 
 import com.WazaBe.HoloEverywhere.AlertDialog;
-import com.WazaBe.HoloEverywhere.AlertDialog.Builder;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
@@ -39,8 +36,6 @@ import com.dougkeen.bart.networktasks.GetRouteFareTask;
 public class RoutesListActivity extends SherlockFragmentActivity {
 	private static final TimeZone PACIFIC_TIME = TimeZone
 			.getTimeZone("America/Los_Angeles");
-
-	private static final int DIALOG_DELETE_ROUTE = 0;
 
 	protected Cursor mQuery;
 

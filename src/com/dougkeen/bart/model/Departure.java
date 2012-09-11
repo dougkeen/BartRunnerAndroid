@@ -302,11 +302,17 @@ public class Departure implements Parcelable, Comparable<Departure> {
 			setMinEstimate(newMin);
 			setMaxEstimate(newMax);
 		}
+
+		if (!hasAnyArrivalEstimate() && departure.hasAnyArrivalEstimate()) {
+			setArrivalTimeOverride(departure.getArrivalTimeOverride());
+			setEstimatedTripTime(departure.getEstimatedTripTime());
+		}
 	}
 
 	public int compareTo(Departure another) {
-		return (this.getMinutes() > another.getMinutes()) ? 1 : ((this
-				.getMinutes() == another.getMinutes()) ? 0 : -1);
+		return (this.getMeanSecondsLeft() > another.getMeanSecondsLeft()) ? 1
+				: ((this.getMeanSecondsLeft() == another.getMeanSecondsLeft()) ? 0
+						: -1);
 	}
 
 	@Override

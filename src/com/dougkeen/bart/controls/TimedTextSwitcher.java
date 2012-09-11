@@ -46,7 +46,13 @@ public class TimedTextSwitcher extends TextSwitcher implements
 		Ticker.getInstance().addSubscriber(this);
 	}
 
-	private String mLastText;
+	private CharSequence mLastText;
+
+	@Override
+	public void setCurrentText(CharSequence text) {
+		mLastText = text;
+		super.setCurrentText(text);
+	}
 
 	@Override
 	public void onTick(long tickNumber) {

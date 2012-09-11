@@ -2,8 +2,6 @@ package com.dougkeen.bart.data;
 
 import java.util.HashMap;
 
-import com.dougkeen.bart.model.Constants;
-
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -16,6 +14,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
+
+import com.dougkeen.bart.model.Constants;
 
 public class BartContentProvider extends ContentProvider {
 
@@ -95,14 +95,27 @@ public class BartContentProvider extends ContentProvider {
 		int match = sUriMatcher.match(uri);
 
 		if (match == ARBITRARY_ROUTE) {
+			final String origin = uri.getPathSegments().get(1);
+			final String destination = uri.getPathSegments().get(2);
+
+			qb.setTables(DatabaseHelper.FAVORITES_TABLE_NAME);
+			qb.setProjectionMap(sFavoritesProjectionMap);
+			qb.appendWhere(String.format("%s = '%s' AND %s = '%s'",
+					RoutesColumns.FROM_STATION, origin,
+					RoutesColumns.TO_STATION, destination));
+			Cursor query = qb.query(db, projection, selection, selectionArgs,
+					null, null, sortOrder);
+			if (query.getCount() > 0)
+				return query;
+
 			MatrixCursor returnCursor = new MatrixCursor(projection);
 			RowBuilder newRow = returnCursor.newRow();
 
 			for (String column : projection) {
 				if (column.equals(RoutesColumns.FROM_STATION.string)) {
-					newRow.add(uri.getPathSegments().get(1));
+					newRow.add(origin);
 				} else if (column.equals(RoutesColumns.TO_STATION.string)) {
-					newRow.add(uri.getPathSegments().get(2));
+					newRow.add(destination);
 				} else {
 					newRow.add(null);
 				}
@@ -204,6 +217,24 @@ public class BartContentProvider extends ContentProvider {
 									+ ')' : ""), whereArgs);
 			getContext().getContentResolver().notifyChange(uri, null);
 			return count;
+		} else if (match == ARBITRARY_ROUTE) {
+			// Get the route with the origin and destination provided, and
+			// simply delegate to the previous log branch. If the given route
+			// doesn't exist, do nothing.
+			String origin = uri.getPathSegments().get(1);
+			String destination = uri.getPathSegments().get(2);
+
+			Cursor query = db.query(DatabaseHelper.FAVORITES_TABLE_NAME,
+					new String[] { RoutesColumns._ID.string },
+					RoutesColumns.FROM_STATION.string + "=? AND "
+							+ RoutesColumns.TO_STATION.string + "=?",
+					new String[] { origin, destination }, null, null, null);
+
+			if (query.moveToFirst()) {
+				return update(ContentUris.withAppendedId(
+						Constants.FAVORITE_CONTENT_URI, query.getLong(0)),
+						values, where, whereArgs);
+			}
 		}
 		return 0;
 	}

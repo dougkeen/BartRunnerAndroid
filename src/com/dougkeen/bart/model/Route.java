@@ -117,7 +117,8 @@ public class Route {
 		} else if (routeLine.transferLine2 != null
 				&& viaLine.equals(routeLine.transferLine2)) {
 			return true;
-		} else if (requiresTransfer && transferLines != null && !transferLines.isEmpty()) {
+		} else if (requiresTransfer && transferLines != null
+				&& !transferLines.isEmpty()) {
 			return transferLines.contains(viaLine);
 		} else {
 			int originIndex = viaLine.stations.indexOf(origin);

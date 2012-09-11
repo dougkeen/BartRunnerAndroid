@@ -1,6 +1,5 @@
 package com.dougkeen.bart;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.webkit.WebView;
 
@@ -8,7 +7,6 @@ import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
-import com.dougkeen.bart.model.Constants;
 
 public class ViewMapActivity extends SherlockActivity {
 
