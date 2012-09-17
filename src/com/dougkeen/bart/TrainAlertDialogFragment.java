@@ -4,6 +4,7 @@ import net.simonvt.widget.NumberPicker;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
@@ -12,15 +13,18 @@ import android.support.v4.app.FragmentActivity;
 
 import com.WazaBe.HoloEverywhere.AlertDialog;
 import com.dougkeen.bart.model.Departure;
+import com.dougkeen.bart.model.StationPair;
 
 public class TrainAlertDialogFragment extends DialogFragment {
 
-	private static final String KEY_LAST_ALERT_DELAY = "lastAlertDelay";
+	private static final String KEY_LAST_ALERT_LEAD_TIME = "lastAlertLeadTime";
 	private Departure mDeparture;
+	private StationPair mStationPair;
 
-	public TrainAlertDialogFragment(Departure mDeparture) {
+	public TrainAlertDialogFragment(Departure departure, StationPair stationPair) {
 		super();
-		this.mDeparture = mDeparture;
+		this.mDeparture = departure;
+		this.mStationPair = stationPair;
 	}
 
 	@Override
@@ -29,7 +33,7 @@ public class TrainAlertDialogFragment extends DialogFragment {
 
 		SharedPreferences preferences = getActivity().getPreferences(
 				Context.MODE_PRIVATE);
-		int lastAlertDelay = preferences.getInt(KEY_LAST_ALERT_DELAY, 5);
+		int lastAlertLeadTime = preferences.getInt(KEY_LAST_ALERT_LEAD_TIME, 5);
 
 		NumberPicker numberPicker = (NumberPicker) getDialog().findViewById(
 				R.id.numberPicker);
@@ -44,8 +48,8 @@ public class TrainAlertDialogFragment extends DialogFragment {
 		numberPicker.setMaxValue(maxValue);
 		numberPicker.setDisplayedValues(displayedValues);
 
-		if (maxValue >= lastAlertDelay) {
-			numberPicker.setValue(lastAlertDelay);
+		if (maxValue >= lastAlertLeadTime) {
+			numberPicker.setValue(lastAlertLeadTime);
 		} else if (maxValue >= 5) {
 			numberPicker.setValue(5);
 		} else if (maxValue >= 3) {
@@ -70,12 +74,22 @@ public class TrainAlertDialogFragment extends DialogFragment {
 									int which) {
 								NumberPicker numberPicker = (NumberPicker) getDialog()
 										.findViewById(R.id.numberPicker);
+								final int alertLeadTime = numberPicker
+										.getValue();
 
+								// Save most recent selection
 								Editor editor = getActivity().getPreferences(
 										Context.MODE_PRIVATE).edit();
-								editor.putInt(KEY_LAST_ALERT_DELAY,
-										numberPicker.getValue());
+								editor.putInt(KEY_LAST_ALERT_LEAD_TIME,
+										alertLeadTime);
 								editor.commit();
+
+								Intent intent = new Intent(getActivity(),
+										NotificationService.class);
+								intent.putExtra("departure", mDeparture);
+								intent.putExtra("stationPair", mStationPair);
+								intent.putExtra("alertLeadTime", alertLeadTime);
+								getActivity().startService(intent);
 							}
 						})
 				.setNegativeButton(R.string.skip_alert,

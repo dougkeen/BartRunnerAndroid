@@ -13,7 +13,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcelable;
-import android.os.PowerManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -21,6 +20,7 @@ import android.text.format.DateFormat;
 import android.text.util.Linkify;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
@@ -62,8 +62,6 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 	private TextView mEmptyView;
 	private ProgressBar mProgress;
 
-	private PowerManager.WakeLock mWakeLock;
-
 	private ActionMode mActionMode;
 
 	private EtdService mEtdService;
@@ -73,6 +71,7 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
 		setContentView(R.layout.departures);
 
 		final Intent intent = getIntent();
@@ -92,6 +91,7 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 					.getString("origin"));
 			mDestination = Station.getByAbbreviation(savedInstanceState
 					.getString("destination"));
+			setListTitle();
 		} else {
 			getSupportLoaderManager().initLoader(LOADER_ID, null,
 					new LoaderCallbacks<Cursor>() {
@@ -117,9 +117,7 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 							mDestination = Station.getByAbbreviation(cursor
 									.getString(1));
 							cursor.close();
-							((TextView) findViewById(R.id.listTitle))
-									.setText(mOrigin.name + " to "
-											+ mDestination.name);
+							setListTitle();
 							if (mBound && mEtdService != null)
 								mEtdService
 										.registerListener(ViewDeparturesActivity.this);
@@ -141,6 +139,13 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 
 		mDeparturesAdapter = new DepartureArrayAdapter(this,
 				R.layout.departure_listing);
+
+		if (intent.getExtras() != null
+				&& intent.getExtras().containsKey("boardedDeparture")) {
+			mBoardedDeparture = (Departure) intent.getExtras().getParcelable(
+					"boardedDeparture");
+		}
+
 		if (savedInstanceState != null) {
 			if (savedInstanceState.containsKey("departures")) {
 				for (Parcelable departure : savedInstanceState
@@ -186,6 +191,11 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 	}
 
+	private void setListTitle() {
+		((TextView) findViewById(R.id.listTitle)).setText(mOrigin.name + " to "
+				+ mDestination.name);
+	}
+
 	@SuppressWarnings("unchecked")
 	private AdapterView<ListAdapter> getListView() {
 		return (AdapterView<ListAdapter>) findViewById(android.R.id.list);
@@ -225,6 +235,7 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 		if (mBound)
 			unbindService(mConnection);
 		Ticker.getInstance().stopTicking();
+		WakeLocker.release();
 	}
 
 	@Override
@@ -254,14 +265,10 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 	public void onWindowFocusChanged(boolean hasFocus) {
 		super.onWindowFocusChanged(hasFocus);
 		if (hasFocus) {
-			PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-			mWakeLock = powerManager
-					.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK,
-							"ViewDeparturesActivity");
-			mWakeLock.acquire();
+			getWindow()
+					.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+			Ticker.getInstance().startTicking();
 			refreshBoardedDeparture();
-		} else if (mWakeLock != null) {
-			mWakeLock.release();
 		}
 	}
 
@@ -276,7 +283,10 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int itemId = item.getItemId();
 		if (itemId == android.R.id.home) {
-			finish();
+			Intent intent = new Intent(Intent.ACTION_VIEW,
+					Constants.FAVORITE_CONTENT_URI);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(intent);
 			return true;
 		} else if (itemId == R.id.view_on_bart_site_button) {
 			startActivity(new Intent(
@@ -381,8 +391,9 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 
 				// Don't prompt for alert if train is about to leave
 				if (mBoardedDeparture.getMeanSecondsLeft() / 60 > 1) {
-					new TrainAlertDialogFragment(mBoardedDeparture).show(
-							getSupportFragmentManager(), "dialog");
+					new TrainAlertDialogFragment(mBoardedDeparture,
+							getStationPair()).show(getSupportFragmentManager(),
+							"dialog");
 				}
 
 				mode.finish();
@@ -440,7 +451,6 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 					} else {
 						final DepartureArrayAdapter listAdapter = getListAdapter();
 						listAdapter.clear();
-						// addAll() method isn't available until API level 11
 						for (Departure departure : departures) {
 							listAdapter.add(departure);
 						}
@@ -449,7 +459,7 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 					if (mBoardedDeparture != null) {
 						for (Departure departure : departures) {
 							if (departure.equals(mBoardedDeparture)) {
-								mBoardedDeparture = departure;
+								mBoardedDeparture.mergeEstimate(departure);
 								refreshBoardedDeparture();
 								break;
 							}

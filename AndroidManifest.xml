@@ -61,10 +61,22 @@
         <provider
             android:name=".data.BartContentProvider"
             android:authorities="com.dougkeen.bart.dataprovider"
+            android:exported="false"
             android:label="BartRunner data provider" />
 
         <service android:name=".NotificationService" />
         <service android:name=".EtdService" />
+
+        <receiver android:name=".AlarmBroadcastReceiver" >
+            <intent-filter>
+                <action android:name="com.dougkeen.action.ALARM" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="vnd.android.cursor.item/com.dougkeen.bart.favorite" />
+                <data android:mimeType="vnd.android.cursor.item/com.dougkeen.bart.arbitraryroute" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

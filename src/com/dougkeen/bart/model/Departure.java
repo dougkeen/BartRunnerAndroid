@@ -7,6 +7,7 @@ import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.format.DateFormat;
+import android.util.Log;
 
 public class Departure implements Parcelable, Comparable<Departure> {
 	private static final int MINIMUM_MERGE_OVERLAP_MILLIS = 10000;
@@ -206,11 +207,19 @@ public class Departure implements Parcelable, Comparable<Departure> {
 	}
 
 	public int getMeanSecondsLeft() {
-		return (int) ((getMeanEstimate() - System.currentTimeMillis()) / 1000);
+		return (int) getMeanSecondsLeft(getMinEstimate(), getMaxEstimate());
+	}
+
+	public int getMeanSecondsLeft(long min, long max) {
+		return (int) ((getMeanEstimate(min, max) - System.currentTimeMillis()) / 1000);
 	}
 
 	public long getMeanEstimate() {
-		return (getMinEstimate() + getMaxEstimate()) / 2;
+		return getMeanEstimate(getMinEstimate(), getMaxEstimate());
+	}
+
+	public long getMeanEstimate(long min, long max) {
+		return (min + max) / 2;
 	}
 
 	public long getArrivalTimeOverride() {
@@ -280,15 +289,25 @@ public class Departure implements Parcelable, Comparable<Departure> {
 	public void mergeEstimate(Departure departure) {
 		if (departure.hasDeparted() && origin.longStationLinger
 				&& getMinEstimate() > 0 && !beganAsDeparted) {
-			// This is probably not a true departure, but an indication that
-			// the train is in the station. Don't update the estimates.
+			/*
+			 * This is probably not a true departure, but an indication that the
+			 * train is in the station. Don't update the estimates.
+			 */
 			return;
+		}
+
+		boolean wasDeparted = hasDeparted();
+		if (!hasAnyArrivalEstimate() && departure.hasAnyArrivalEstimate()) {
+			setArrivalTimeOverride(departure.getArrivalTimeOverride());
+			setEstimatedTripTime(departure.getEstimatedTripTime());
 		}
 
 		if ((getMaxEstimate() - departure.getMinEstimate()) < MINIMUM_MERGE_OVERLAP_MILLIS
 				|| departure.getMaxEstimate() - getMinEstimate() < MINIMUM_MERGE_OVERLAP_MILLIS) {
-			// The estimate must have changed... just use the latest incoming
-			// values
+			/*
+			 * The estimate must have changed... just use the latest incoming
+			 * values
+			 */
 			setMinEstimate(departure.getMinEstimate());
 			setMaxEstimate(departure.getMaxEstimate());
 			return;
@@ -298,14 +317,22 @@ public class Departure implements Parcelable, Comparable<Departure> {
 				departure.getMinEstimate());
 		final long newMax = Math.min(getMaxEstimate(),
 				departure.getMaxEstimate());
+
+		/*
+		 * If the new departure would mark this as departed, and we have < 1
+		 * minute left on a fairly accurate local estimate, ignore the incoming
+		 * departure
+		 */
+		if (!wasDeparted && getMeanSecondsLeft(newMin, newMax) < 0
+				&& getMeanSecondsLeft() < 60 && getUncertaintySeconds() < 30) {
+			Log.d(Constants.TAG,
+					"Skipping estimate merge, since it would make this departure show as 'departed' prematurely");
+			return;
+		}
+
 		if (newMax > newMin) { // We can never have 0 or negative uncertainty
 			setMinEstimate(newMin);
 			setMaxEstimate(newMax);
-		}
-
-		if (!hasAnyArrivalEstimate() && departure.hasAnyArrivalEstimate()) {
-			setArrivalTimeOverride(departure.getArrivalTimeOverride());
-			setEstimatedTripTime(departure.getEstimatedTripTime());
 		}
 	}
 
@@ -435,6 +462,7 @@ public class Departure implements Parcelable, Comparable<Departure> {
 	}
 
 	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(origin.abbreviation);
 		dest.writeString(destination.abbreviation);
 		dest.writeString(destinationColor);
 		dest.writeString(platform);
@@ -445,9 +473,15 @@ public class Departure implements Parcelable, Comparable<Departure> {
 		dest.writeInt(minutes);
 		dest.writeLong(minEstimate);
 		dest.writeLong(maxEstimate);
+		dest.writeLong(arrivalTimeOverride);
+		dest.writeInt(estimatedTripTime);
+		dest.writeInt(line.ordinal());
+		dest.writeBooleanArray(new boolean[] { beganAsDeparted, bikeAllowed,
+				requiresTransfer, transferScheduled });
 	}
 
 	private void readFromParcel(Parcel in) {
+		origin = Station.getByAbbreviation(in.readString());
 		destination = Station.getByAbbreviation(in.readString());
 		destinationColor = in.readString();
 		platform = in.readString();
@@ -458,6 +492,15 @@ public class Departure implements Parcelable, Comparable<Departure> {
 		minutes = in.readInt();
 		minEstimate = in.readLong();
 		maxEstimate = in.readLong();
+		arrivalTimeOverride = in.readLong();
+		estimatedTripTime = in.readInt();
+		line = Line.values()[in.readInt()];
+		boolean[] bools = new boolean[4];
+		in.readBooleanArray(bools);
+		beganAsDeparted = bools[0];
+		bikeAllowed = bools[1];
+		requiresTransfer = bools[2];
+		transferScheduled = bools[3];
 	}
 
 	public static final Parcelable.Creator<Departure> CREATOR = new Parcelable.Creator<Departure>() {

@@ -14,6 +14,7 @@ public class Constants {
 			.parse("content://" + AUTHORITY + "/route");
 	public static final String MAP_URL = "http://m.bart.gov/images/global/system-map29.gif";
 
-	public static final String TAG = "BartRunner";
+	public static final String TAG = "com.dougkeen.BartRunner";
 	public static final String API_KEY = "5LD9-IAYI-TRAT-MHHW";
+	public static final String ACTION_ALARM = "com.dougkeen.action.ALARM";
 }

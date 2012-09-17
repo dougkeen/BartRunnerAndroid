@@ -1,10 +1,18 @@
 package com.dougkeen.bart.model;
 
-public class StationPair {
+import android.net.Uri;
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class StationPair implements Parcelable {
 	public StationPair(Station origin, Station destination) {
 		super();
 		this.origin = origin;
 		this.destination = destination;
+	}
+
+	public StationPair(Parcel in) {
+		readFromParcel(in);
 	}
 
 	private Station origin;
@@ -21,6 +29,16 @@ public class StationPair {
 	public boolean isBetweenStations(Station station1, Station station2) {
 		return (origin.equals(station1) && destination.equals(station2))
 				|| (origin.equals(station2) && destination.equals(station1));
+	}
+
+	public Uri getUri() {
+		if (getOrigin() != null && getDestination() != null) {
+			return Constants.ARBITRARY_ROUTE_CONTENT_URI_ROOT.buildUpon()
+					.appendPath(getOrigin().abbreviation)
+					.appendPath(getDestination().abbreviation).build();
+		} else {
+			return null;
+		}
 	}
 
 	@Override
@@ -49,4 +67,28 @@ public class StationPair {
 		return true;
 	}
 
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(origin.abbreviation);
+		dest.writeString(destination.abbreviation);
+	}
+
+	private void readFromParcel(Parcel in) {
+		origin = Station.getByAbbreviation(in.readString());
+		destination = Station.getByAbbreviation(in.readString());
+	}
+
+	public static final Parcelable.Creator<StationPair> CREATOR = new Parcelable.Creator<StationPair>() {
+		public StationPair createFromParcel(Parcel in) {
+			return new StationPair(in);
+		}
+
+		public StationPair[] newArray(int size) {
+			return new StationPair[size];
+		}
+	};
 }

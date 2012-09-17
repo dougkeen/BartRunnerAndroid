@@ -64,7 +64,7 @@ public enum Station {
 	public final boolean longStationLinger;
 	public final int departureEqualityTolerance;
 
-	public final static int DEFAULT_DEPARTURE_EQUALITY_TOLERANCE = 59999;
+	public final static int DEFAULT_DEPARTURE_EQUALITY_TOLERANCE = 119999;
 
 	private Station(String abbreviation, String name, boolean invertDirection,
 			boolean endOfLine) {
