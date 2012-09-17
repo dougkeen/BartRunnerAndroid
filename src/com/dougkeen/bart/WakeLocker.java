@@ -16,8 +16,7 @@ public abstract class WakeLocker {
 				.getSystemService(Context.POWER_SERVICE);
 		wakeLock = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK
 				| PowerManager.ACQUIRE_CAUSES_WAKEUP
-				| PowerManager.ON_AFTER_RELEASE
-				| PowerManager.SCREEN_DIM_WAKE_LOCK, Constants.TAG);
+				| PowerManager.ON_AFTER_RELEASE, Constants.TAG);
 		wakeLock.acquire();
 	}
 
