@@ -555,15 +555,26 @@ public class EtdService extends Service {
 			}
 		}
 
+		private long mNextFetchClockTime = 0;
+
 		private void scheduleDepartureFetch(int millisUntilExecute) {
 			mPendingEtdRequest = true;
-			mRunnableQueue.postDelayed(new Runnable() {
-				public void run() {
-					fetchLatestDepartures();
-				}
-			}, millisUntilExecute);
-			Log.d(Constants.TAG, "Scheduled another departure fetch in "
-					+ millisUntilExecute / 1000 + "s");
+			long now = System.currentTimeMillis();
+			long requestedFetchTime = now + millisUntilExecute;
+			if (mNextFetchClockTime > now
+					&& mNextFetchClockTime < requestedFetchTime) {
+				Log.d(Constants.TAG,
+						"Did not schedule departure fetch, since one is already scheduled");
+			} else {
+				mRunnableQueue.postDelayed(new Runnable() {
+					public void run() {
+						fetchLatestDepartures();
+					}
+				}, millisUntilExecute);
+				mNextFetchClockTime = requestedFetchTime;
+				Log.d(Constants.TAG, "Scheduled another departure fetch in "
+						+ millisUntilExecute / 1000 + "s");
+			}
 		}
 
 		private void scheduleScheduleInfoFetch(int millisUntilExecute) {
