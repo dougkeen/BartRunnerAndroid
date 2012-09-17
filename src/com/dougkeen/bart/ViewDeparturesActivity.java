@@ -1,16 +1,25 @@
 package com.dougkeen.bart;
 
+import java.io.IOException;
 import java.util.List;
 
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
+import android.media.MediaPlayer;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcelable;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
@@ -65,6 +74,8 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 	private ActionMode mActionMode;
 
 	private EtdService mEtdService;
+
+	private Handler mHandler = new Handler();
 
 	private boolean mBound = false;
 
@@ -189,6 +200,70 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 
 		getSupportActionBar().setHomeButtonEnabled(true);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+		if (intent.getBooleanExtra("soundAlarm", false)) {
+			soundTheAlarm();
+		}
+	}
+
+	private MediaPlayer mMediaPlayer;
+
+	private void soundTheAlarm() {
+		Uri alertSound = RingtoneManager
+				.getDefaultUri(RingtoneManager.TYPE_ALARM);
+
+		if (alertSound == null || !tryToPlayRingtone(alertSound)) {
+			alertSound = RingtoneManager
+					.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+			if (alertSound == null || !tryToPlayRingtone(alertSound)) {
+				alertSound = RingtoneManager
+						.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+			}
+		}
+		if (mMediaPlayer == null) {
+			tryToPlayRingtone(alertSound);
+		}
+		mHandler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				silenceAlarm();
+			}
+		}, 20000);
+
+		Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage("Your train is leaving soon!")
+				.setCancelable(false)
+				.setNeutralButton("Silence alarm",
+						new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog,
+									int which) {
+								silenceAlarm();
+								dialog.dismiss();
+							}
+						}).show();
+	}
+
+	private boolean tryToPlayRingtone(Uri alertSound) {
+		mMediaPlayer = MediaPlayer.create(this, alertSound);
+		if (mMediaPlayer == null)
+			return false;
+		mMediaPlayer.setLooping(true);
+		mMediaPlayer.start();
+		return true;
+	}
+
+	private void silenceAlarm() {
+		try {
+			if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
+				mMediaPlayer.stop();
+				mMediaPlayer.release();
+				mMediaPlayer = null;
+			}
+		} catch (IllegalStateException e) {
+			Log.e(Constants.TAG,
+					"Couldn't stop media player; It was in an invalid state", e);
+		}
 	}
 
 	private void setListTitle() {

@@ -13,7 +13,7 @@ public class AlarmBroadcastReceiver extends BroadcastReceiver {
 		Intent targetIntent = new Intent(Intent.ACTION_VIEW, intent.getData());
 		targetIntent.putExtra("boardedDeparture", intent.getExtras()
 				.getParcelable("departure"));
-		targetIntent.putExtra("isAlarm", true);
+		targetIntent.putExtra("soundAlarm", true);
 		targetIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
 		context.startActivity(targetIntent);
