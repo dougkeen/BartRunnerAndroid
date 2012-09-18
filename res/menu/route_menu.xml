@@ -3,13 +3,13 @@
 
     <item
         android:id="@+id/view_on_bart_site_button"
-        android:icon="@drawable/web_icon"
+        android:icon="@drawable/ic_action_web"
         android:showAsAction="ifRoom|withText"
         android:title="@string/view_on_bart_site">
     </item>
     <item
         android:id="@+id/view_system_map_button"
-        android:icon="@drawable/map_icon"
+        android:icon="@drawable/ic_action_map"
         android:showAsAction="ifRoom|withText"
         android:title="@string/view_system_map">
     </item>

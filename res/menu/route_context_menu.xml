@@ -3,13 +3,13 @@
 
     <item
         android:id="@+id/view"
-        android:icon="@drawable/departure_icon"
+        android:icon="@drawable/ic_action_departure"
         android:showAsAction="ifRoom|withText"
         android:title="@string/view_departures">
     </item>
     <item
         android:id="@+id/delete"
-        android:icon="@drawable/delete_icon"
+        android:icon="@drawable/ic_action_delete"
         android:showAsAction="ifRoom|withText"
         android:title="@string/delete">
     </item>

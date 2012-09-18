@@ -294,12 +294,12 @@ public class NotificationService extends Service implements EtdServiceListener {
 
 		Builder notificationBuilder = new NotificationCompat.Builder(this)
 				.setOngoing(true)
-				.setSmallIcon(R.drawable.icon)
+				.setSmallIcon(R.drawable.ic_stat_notification)
 				.setContentTitle(
 						mStationPair.getOrigin().shortName + " to "
 								+ mStationPair.getDestination().shortName)
 				.setContentText(minutesText + " until departure")
-				.setContentIntent(mNotificationIntent);
+				.setContentIntent(mNotificationIntent).setWhen(0);
 		mNotificationManager.notify(DEPARTURE_NOTIFICATION_ID,
 				notificationBuilder.getNotification());
 	}

@@ -469,8 +469,8 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 				refreshBoardedDeparture();
 
 				// Stop the notification service
-				/*stopService(new Intent(getApplicationContext(),
-						NotificationService.class));*/
+				stopService(new Intent(getApplicationContext(),
+						NotificationService.class));
 
 				// Don't prompt for alert if train is about to leave
 				if (mSelectedDeparture.getMeanSecondsLeft() / 60 > 1) {

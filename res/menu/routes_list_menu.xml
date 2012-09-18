@@ -3,13 +3,13 @@
 
     <item
         android:id="@+id/add_favorite_menu_button"
-        android:icon="@drawable/new_icon"
+        android:icon="@drawable/ic_action_new"
         android:showAsAction="ifRoom|withText"
         android:title="@string/add_route">
     </item>
     <item
         android:id="@+id/view_system_map_button"
-        android:icon="@drawable/map_icon"
+        android:icon="@drawable/ic_action_map"
         android:showAsAction="ifRoom|withText"
         android:title="@string/view_system_map">
     </item>
