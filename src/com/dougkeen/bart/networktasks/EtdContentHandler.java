@@ -57,7 +57,7 @@ public class EtdContentHandler extends DefaultHandler {
 		}
 		if (localName.equals("estimate")) {
 			currentDeparture = new Departure();
-			currentDeparture.setDestination(Station
+			currentDeparture.setTrainDestination(Station
 					.getByAbbreviation(currentDestination));
 			currentDeparture.setOrigin(realTimeDepartures.getOrigin());
 		}
@@ -89,7 +89,7 @@ public class EtdContentHandler extends DefaultHandler {
 				if (currentValue.equalsIgnoreCase("WHITE")) {
 					for (Line line : Line.values()) {
 						if (line.stations.indexOf(currentDeparture
-								.getDestination()) >= 0
+								.getTrainDestination()) >= 0
 								&& line.stations.indexOf(realTimeDepartures
 										.getDestination()) >= 0) {
 							currentDeparture.setLine(line);
@@ -104,7 +104,7 @@ public class EtdContentHandler extends DefaultHandler {
 						+ "'");
 			}
 		} else if (localName.equals("hexcolor")) {
-			currentDeparture.setDestinationColor("#ff"
+			currentDeparture.setTrainDestinationColor("#ff"
 					+ currentValue.substring(1));
 		} else if (localName.equals("bikeflag")) {
 			currentDeparture.setBikeAllowed(currentValue.equalsIgnoreCase("1"));

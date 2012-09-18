@@ -1,12 +1,10 @@
 package com.dougkeen.bart;
 
-import java.io.IOException;
 import java.util.List;
 
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -15,7 +13,6 @@ import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.media.MediaPlayer;
-import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -64,7 +61,6 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 	private Station mDestination;
 
 	private Departure mSelectedDeparture;
-	private Departure mBoardedDeparture;
 
 	private DepartureArrayAdapter mDeparturesAdapter;
 
@@ -132,6 +128,7 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 							if (mBound && mEtdService != null)
 								mEtdService
 										.registerListener(ViewDeparturesActivity.this);
+							refreshBoardedDeparture();
 
 							getSupportLoaderManager().destroyLoader(LOADER_ID);
 						}
@@ -151,12 +148,6 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 		mDeparturesAdapter = new DepartureArrayAdapter(this,
 				R.layout.departure_listing);
 
-		if (intent.getExtras() != null
-				&& intent.getExtras().containsKey("boardedDeparture")) {
-			mBoardedDeparture = (Departure) intent.getExtras().getParcelable(
-					"boardedDeparture");
-		}
-
 		if (savedInstanceState != null) {
 			if (savedInstanceState.containsKey("departures")) {
 				for (Parcelable departure : savedInstanceState
@@ -164,10 +155,6 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 					mDeparturesAdapter.add((Departure) departure);
 				}
 				mDeparturesAdapter.notifyDataSetChanged();
-			}
-			if (savedInstanceState.containsKey("boardedDeparture")) {
-				mBoardedDeparture = (Departure) savedInstanceState
-						.getParcelable("boardedDeparture");
 			}
 			if (savedInstanceState.containsKey("selectedDeparture")) {
 				mSelectedDeparture = (Departure) savedInstanceState
@@ -201,7 +188,8 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 		getSupportActionBar().setHomeButtonEnabled(true);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-		if (intent.getBooleanExtra("soundAlarm", false)) {
+		if (((BartRunnerApplication) getApplication())
+				.shouldPlayAlarmRingtone()) {
 			soundTheAlarm();
 		}
 	}
@@ -230,10 +218,12 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 			}
 		}, 20000);
 
+		((BartRunnerApplication) getApplication()).setPlayAlarmRingtone(false);
+
 		Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage("Your train is leaving soon!")
+		builder.setMessage(R.string.train_alert_text)
 				.setCancelable(false)
-				.setNeutralButton("Silence alarm",
+				.setNeutralButton(R.string.silence_alarm,
 						new DialogInterface.OnClickListener() {
 							@Override
 							public void onClick(DialogInterface dialog,
@@ -316,16 +306,22 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		Departure[] departures = new Departure[mDeparturesAdapter.getCount()];
-		for (int i = mDeparturesAdapter.getCount() - 1; i >= 0; i--) {
-			departures[i] = mDeparturesAdapter.getItem(i);
+		if (mOrigin != null || mDestination != null) {
+			/*
+			 * If origin or destination are null, this thing was never
+			 * initialized in the first place, so there's really nothing to save
+			 */
+			Departure[] departures = new Departure[mDeparturesAdapter
+					.getCount()];
+			for (int i = mDeparturesAdapter.getCount() - 1; i >= 0; i--) {
+				departures[i] = mDeparturesAdapter.getItem(i);
+			}
+			outState.putParcelableArray("departures", departures);
+			outState.putParcelable("selectedDeparture", mSelectedDeparture);
+			outState.putBoolean("hasActionMode", mActionMode != null);
+			outState.putString("origin", mOrigin.abbreviation);
+			outState.putString("destination", mDestination.abbreviation);
 		}
-		outState.putParcelableArray("departures", departures);
-		outState.putParcelable("boardedDeparture", mBoardedDeparture);
-		outState.putParcelable("selectedDeparture", mSelectedDeparture);
-		outState.putBoolean("hasActionMode", mActionMode != null);
-		outState.putString("origin", mOrigin.abbreviation);
-		outState.putString("destination", mDestination.abbreviation);
 	}
 
 	@Override
@@ -383,28 +379,33 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 	}
 
 	private void refreshBoardedDeparture() {
-		if (mBoardedDeparture == null)
+		final Departure boardedDeparture = ((BartRunnerApplication) getApplication())
+				.getBoardedDeparture();
+		if (boardedDeparture == null
+				|| boardedDeparture.getStationPair() == null
+				|| !boardedDeparture.getStationPair().equals(getStationPair())) {
+			findViewById(R.id.yourTrainSection).setVisibility(View.GONE);
 			return;
+		}
 
-		final Departure departure = mBoardedDeparture;
 		findViewById(R.id.yourTrainSection).setVisibility(View.VISIBLE);
 		((TextView) findViewById(R.id.yourTrainDestinationText))
-				.setText(departure.getDestination().toString());
+				.setText(boardedDeparture.getTrainDestination().toString());
 
 		((TextView) findViewById(R.id.yourTrainTrainLengthText))
-				.setText(departure.getTrainLengthText());
+				.setText(boardedDeparture.getTrainLengthText());
 
 		ImageView colorBar = (ImageView) findViewById(R.id.yourTrainDestinationColorBar);
 		((GradientDrawable) colorBar.getDrawable()).setColor(Color
-				.parseColor(departure.getDestinationColor()));
-		if (departure.isBikeAllowed()) {
+				.parseColor(boardedDeparture.getTrainDestinationColor()));
+		if (boardedDeparture.isBikeAllowed()) {
 			((ImageView) findViewById(R.id.yourTrainBikeIcon))
 					.setVisibility(View.VISIBLE);
 		} else {
 			((ImageView) findViewById(R.id.yourTrainBikeIcon))
 					.setVisibility(View.INVISIBLE);
 		}
-		if (departure.getRequiresTransfer()) {
+		if (boardedDeparture.getRequiresTransfer()) {
 			((ImageView) findViewById(R.id.yourTrainXferIcon))
 					.setVisibility(View.VISIBLE);
 		} else {
@@ -414,26 +415,27 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 		CountdownTextView departureCountdown = (CountdownTextView) findViewById(R.id.yourTrainDepartureCountdown);
 		CountdownTextView arrivalCountdown = (CountdownTextView) findViewById(R.id.yourTrainArrivalCountdown);
 
-		departureCountdown.setText("Leaves in " + departure.getCountdownText()
-				+ " " + departure.getUncertaintyText());
+		departureCountdown.setText("Leaves in "
+				+ boardedDeparture.getCountdownText() + " "
+				+ boardedDeparture.getUncertaintyText());
 		departureCountdown.setTextProvider(new TextProvider() {
 			@Override
 			public String getText(long tickNumber) {
-				if (departure.hasDeparted()) {
+				if (boardedDeparture.hasDeparted()) {
 					return "Departed";
 				} else {
-					return "Leaves in " + departure.getCountdownText() + " "
-							+ departure.getUncertaintyText();
+					return "Leaves in " + boardedDeparture.getCountdownText()
+							+ " " + boardedDeparture.getUncertaintyText();
 				}
 			}
 		});
 
-		arrivalCountdown.setText(departure
+		arrivalCountdown.setText(boardedDeparture
 				.getEstimatedArrivalMinutesLeftText(this));
 		arrivalCountdown.setTextProvider(new TextProvider() {
 			@Override
 			public String getText(long tickNumber) {
-				return departure
+				return boardedDeparture
 						.getEstimatedArrivalMinutesLeftText(ViewDeparturesActivity.this);
 			}
 		});
@@ -441,7 +443,7 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 
 	private void startDepartureActionMode() {
 		mActionMode = startActionMode(new DepartureActionMode());
-		mActionMode.setTitle(mSelectedDeparture.getDestinationName());
+		mActionMode.setTitle(mSelectedDeparture.getTrainDestinationName());
 		mActionMode.setSubtitle(mSelectedDeparture.getTrainLengthText());
 	}
 
@@ -461,14 +463,19 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 		@Override
 		public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 			if (item.getItemId() == R.id.boardTrain) {
-				mBoardedDeparture = mSelectedDeparture;
+				final BartRunnerApplication application = (BartRunnerApplication) getApplication();
+				mSelectedDeparture.setPassengerDestination(mDestination);
+				application.setBoardedDeparture(mSelectedDeparture);
 				refreshBoardedDeparture();
 
+				// Stop the notification service
+				/*stopService(new Intent(getApplicationContext(),
+						NotificationService.class));*/
+
 				// Don't prompt for alert if train is about to leave
-				if (mBoardedDeparture.getMeanSecondsLeft() / 60 > 1) {
-					new TrainAlertDialogFragment(mBoardedDeparture,
-							getStationPair()).show(getSupportFragmentManager(),
-							"dialog");
+				if (mSelectedDeparture.getMeanSecondsLeft() / 60 > 1) {
+					new TrainAlertDialogFragment().show(
+							getSupportFragmentManager(), "dialog");
 				}
 
 				mode.finish();
@@ -531,15 +538,8 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 						}
 					}
 
-					if (mBoardedDeparture != null) {
-						for (Departure departure : departures) {
-							if (departure.equals(mBoardedDeparture)) {
-								mBoardedDeparture.mergeEstimate(departure);
-								refreshBoardedDeparture();
-								break;
-							}
-						}
-					}
+					refreshBoardedDeparture();
+
 					getListAdapter().notifyDataSetChanged();
 				}
 			}

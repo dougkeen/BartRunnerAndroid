@@ -83,7 +83,7 @@ public class RealTimeDepartures {
 
 	private void addDepartureIfApplicable(Departure departure) {
 		Station destination = Station.getByAbbreviation(departure
-				.getDestinationAbbreviation());
+				.getTrainDestinationAbbreviation());
 		if (departure.getLine() == null)
 			return;
 		for (Route route : routes) {
@@ -118,7 +118,7 @@ public class RealTimeDepartures {
 				Departure departure = iterator.next();
 				if (departure.getRequiresTransfer()
 						&& (!departure.isTransferScheduled() || departure
-								.getDestination().isBetween(getOrigin(),
+								.getTrainDestination().isBetween(getOrigin(),
 										getDestination(), departure.getLine()))) {
 					iterator.remove();
 				}

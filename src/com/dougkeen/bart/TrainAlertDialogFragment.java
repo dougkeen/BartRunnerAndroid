@@ -12,19 +12,13 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 
 import com.WazaBe.HoloEverywhere.AlertDialog;
-import com.dougkeen.bart.model.Departure;
-import com.dougkeen.bart.model.StationPair;
 
 public class TrainAlertDialogFragment extends DialogFragment {
 
 	private static final String KEY_LAST_ALERT_LEAD_TIME = "lastAlertLeadTime";
-	private Departure mDeparture;
-	private StationPair mStationPair;
 
-	public TrainAlertDialogFragment(Departure departure, StationPair stationPair) {
+	public TrainAlertDialogFragment() {
 		super();
-		this.mDeparture = departure;
-		this.mStationPair = stationPair;
 	}
 
 	@Override
@@ -38,7 +32,11 @@ public class TrainAlertDialogFragment extends DialogFragment {
 		NumberPicker numberPicker = (NumberPicker) getDialog().findViewById(
 				R.id.numberPicker);
 
-		final int maxValue = mDeparture.getMeanSecondsLeft() / 60;
+		BartRunnerApplication application = (BartRunnerApplication) getActivity()
+				.getApplication();
+
+		final int maxValue = application.getBoardedDeparture()
+				.getMeanSecondsLeft() / 60;
 
 		String[] displayedValues = new String[maxValue];
 		for (int i = 1; i <= maxValue; i++) {
@@ -84,10 +82,9 @@ public class TrainAlertDialogFragment extends DialogFragment {
 										alertLeadTime);
 								editor.commit();
 
-								Intent intent = new Intent(getActivity(),
+								Intent intent = new Intent(getActivity()
+										.getApplicationContext(),
 										NotificationService.class);
-								intent.putExtra("departure", mDeparture);
-								intent.putExtra("stationPair", mStationPair);
 								intent.putExtra("alertLeadTime", alertLeadTime);
 								getActivity().startService(intent);
 							}

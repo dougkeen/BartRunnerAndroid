@@ -10,10 +10,12 @@ public class AlarmBroadcastReceiver extends BroadcastReceiver {
 	public void onReceive(Context context, Intent intent) {
 		WakeLocker.acquire(context);
 
-		Intent targetIntent = new Intent(Intent.ACTION_VIEW, intent.getData());
-		targetIntent.putExtra("boardedDeparture", intent.getExtras()
-				.getParcelable("departure"));
-		targetIntent.putExtra("soundAlarm", true);
+		BartRunnerApplication application = (BartRunnerApplication) context
+				.getApplicationContext();
+		application.setPlayAlarmRingtone(true);
+
+		Intent targetIntent = new Intent(Intent.ACTION_VIEW, application
+				.getBoardedDeparture().getStationPair().getUri());
 		targetIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
 		context.startActivity(targetIntent);

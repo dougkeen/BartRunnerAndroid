@@ -66,7 +66,7 @@ public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
 
 		final Departure departure = getItem(position);
 		((TextView) view.findViewById(R.id.destinationText)).setText(departure
-				.getDestination().toString());
+				.getTrainDestination().toString());
 
 		TimedTextSwitcher textSwitcher = (TimedTextSwitcher) view
 				.findViewById(R.id.trainLengthText);
@@ -100,7 +100,7 @@ public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
 		ImageView colorBar = (ImageView) view
 				.findViewById(R.id.destinationColorBar);
 		((GradientDrawable) colorBar.getDrawable()).setColor(Color
-				.parseColor(departure.getDestinationColor()));
+				.parseColor(departure.getTrainDestinationColor()));
 		CountdownTextView countdownTextView = (CountdownTextView) view
 				.findViewById(R.id.countdown);
 		countdownTextView.setText(departure.getCountdownText());

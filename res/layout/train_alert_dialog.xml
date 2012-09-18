@@ -7,7 +7,7 @@
     <net.simonvt.widget.NumberPicker
         android:id="@+id/numberPicker"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="wrap_content"
         android:layout_weight="1" >
     </net.simonvt.widget.NumberPicker>
 

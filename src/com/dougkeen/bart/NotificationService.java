@@ -3,16 +3,19 @@ package com.dougkeen.bart;
 import java.util.List;
 
 import android.app.AlarmManager;
-import android.app.IntentService;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
 import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationCompat.Builder;
@@ -23,13 +26,15 @@ import com.dougkeen.bart.model.Constants;
 import com.dougkeen.bart.model.Departure;
 import com.dougkeen.bart.model.StationPair;
 
-public class NotificationService extends IntentService implements
-		EtdServiceListener {
+public class NotificationService extends Service implements EtdServiceListener {
 
 	private static final int DEPARTURE_NOTIFICATION_ID = 123;
+
+	private volatile Looper mServiceLooper;
+	private volatile ServiceHandler mServiceHandler;
+
 	private boolean mBound = false;
 	private EtdService mEtdService;
-	private Departure mDeparture;
 	private StationPair mStationPair;
 	private NotificationManager mNotificationManager;
 	private AlarmManager mAlarmManager;
@@ -37,9 +42,21 @@ public class NotificationService extends IntentService implements
 	private PendingIntent mAlarmPendingIntent;
 	private int mAlertLeadTime;
 	private Handler mHandler;
+	private boolean mHasShutDown = false;
 
 	public NotificationService() {
-		super("BartRunnerNotificationService");
+		super();
+	}
+
+	private final class ServiceHandler extends Handler {
+		public ServiceHandler(Looper looper) {
+			super(looper);
+		}
+
+		@Override
+		public void handleMessage(Message msg) {
+			onHandleIntent((Intent) msg.obj);
+		}
 	}
 
 	private final ServiceConnection mConnection = new ServiceConnection() {
@@ -61,6 +78,13 @@ public class NotificationService extends IntentService implements
 
 	@Override
 	public void onCreate() {
+		HandlerThread thread = new HandlerThread(
+				"BartRunnerNotificationService");
+		thread.start();
+
+		mServiceLooper = thread.getLooper();
+		mServiceHandler = new ServiceHandler(mServiceLooper);
+
 		bindService(new Intent(this, EtdService.class), mConnection,
 				Context.BIND_AUTO_CREATE);
 		mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -70,25 +94,46 @@ public class NotificationService extends IntentService implements
 	}
 
 	@Override
-	public void onDestroy() {
-		if (mBound)
-			unbindService(mConnection);
-		super.onDestroy();
+	public void onStart(Intent intent, int startId) {
+		Message msg = mServiceHandler.obtainMessage();
+		msg.arg1 = startId;
+		msg.obj = intent;
+		mServiceHandler.sendMessage(msg);
 	}
 
 	@Override
-	protected void onHandleIntent(Intent intent) {
-		Bundle bundle = intent.getExtras();
-		Departure departure = (Departure) bundle.getParcelable("departure");
-		mStationPair = (StationPair) bundle.getParcelable("stationPair");
-		mAlertLeadTime = bundle.getInt("alertLeadTime");
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		onStart(intent, startId);
+		return START_STICKY;
+	}
 
-		if (mEtdService != null && mDeparture != null
-				&& !mDeparture.equals(departure)) {
-			mEtdService.unregisterListener(this);
+	@Override
+	public void onDestroy() {
+		shutDown(true);
+		if (mBound)
+			unbindService(mConnection);
+		mServiceLooper.quit();
+		super.onDestroy();
+	}
+
+	protected void onHandleIntent(Intent intent) {
+		final Departure boardedDeparture = ((BartRunnerApplication) getApplication())
+				.getBoardedDeparture();
+		if (boardedDeparture == null) {
+			// Nothing to notify about
+			shutDown(false);
+			return;
 		}
 
-		mDeparture = departure;
+		Bundle bundle = intent.getExtras();
+		StationPair oldStationPair = mStationPair;
+		mStationPair = boardedDeparture.getStationPair();
+		mAlertLeadTime = bundle.getInt("alertLeadTime");
+
+		if (mEtdService != null && mStationPair != null
+				&& !mStationPair.equals(oldStationPair)) {
+			mEtdService.unregisterListener(this);
+		}
 
 		if (getStationPair() != null && mEtdService != null) {
 			mEtdService.registerListener(this);
@@ -98,7 +143,6 @@ public class NotificationService extends IntentService implements
 
 		Intent targetIntent = new Intent(Intent.ACTION_VIEW,
 				mStationPair.getUri());
-		targetIntent.putExtra("boardedDeparture", mDeparture);
 		targetIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		mNotificationIntent = PendingIntent.getActivity(this, 0, targetIntent,
 				PendingIntent.FLAG_UPDATE_CURRENT);
@@ -111,7 +155,9 @@ public class NotificationService extends IntentService implements
 	private void refreshAlarmPendingIntent() {
 		final Intent alarmIntent = new Intent(Constants.ACTION_ALARM,
 				getStationPair().getUri());
-		alarmIntent.putExtra("departure", mDeparture);
+		final Departure boardedDeparture = ((BartRunnerApplication) getApplication())
+				.getBoardedDeparture();
+		alarmIntent.putExtra("departure", boardedDeparture);
 		mAlarmPendingIntent = PendingIntent.getBroadcast(this, 0, alarmIntent,
 				PendingIntent.FLAG_UPDATE_CURRENT);
 	}
@@ -137,7 +183,9 @@ public class NotificationService extends IntentService implements
 	}
 
 	private long getAlertClockTime() {
-		return mDeparture.getMeanEstimate() - mAlertLeadTime * 60 * 1000;
+		final Departure boardedDeparture = ((BartRunnerApplication) getApplication())
+				.getBoardedDeparture();
+		return boardedDeparture.getMeanEstimate() - mAlertLeadTime * 60 * 1000;
 	}
 
 	private void cancelAlarm() {
@@ -146,15 +194,17 @@ public class NotificationService extends IntentService implements
 
 	@Override
 	public void onETDChanged(List<Departure> departures) {
+		final Departure boardedDeparture = ((BartRunnerApplication) getApplication())
+				.getBoardedDeparture();
 		for (Departure departure : departures) {
-			if (departure.equals(mDeparture)
-					&& (mDeparture.getMeanSecondsLeft() != departure
-							.getMeanSecondsLeft() || mDeparture
+			if (departure.equals(boardedDeparture)
+					&& (boardedDeparture.getMeanSecondsLeft() != departure
+							.getMeanSecondsLeft() || boardedDeparture
 							.getUncertaintySeconds() != departure
 							.getUncertaintySeconds())) {
 				long initialAlertClockTime = getAlertClockTime();
 
-				mDeparture.mergeEstimate(departure);
+				boardedDeparture.mergeEstimate(departure);
 
 				final long now = System.currentTimeMillis();
 				if (initialAlertClockTime > now
@@ -194,8 +244,11 @@ public class NotificationService extends IntentService implements
 	private long mNextScheduledCheckClockTime = 0;
 
 	private void pollDepartureStatus() {
-		if (mDeparture.hasDeparted()) {
-			shutDown();
+		final Departure boardedDeparture = ((BartRunnerApplication) getApplication())
+				.getBoardedDeparture();
+
+		if (boardedDeparture.hasDeparted()) {
+			shutDown(false);
 		}
 
 		updateNotification();
@@ -214,34 +267,52 @@ public class NotificationService extends IntentService implements
 		}
 	}
 
-	private void shutDown() {
-		mEtdService.unregisterListener(this);
-		mNotificationManager.cancel(DEPARTURE_NOTIFICATION_ID);
-		cancelAlarm();
-		stopSelf();
+	private void shutDown(boolean isBeingDestroyed) {
+		if (!mHasShutDown) {
+			mHasShutDown = true;
+			mEtdService.unregisterListener(this);
+			mNotificationManager.cancel(DEPARTURE_NOTIFICATION_ID);
+			cancelAlarm();
+			if (!isBeingDestroyed)
+				stopSelf();
+		}
 	}
 
 	private void updateNotification() {
-		Builder notificationBuilder = new NotificationCompat.Builder(this);
-		notificationBuilder.setOngoing(true);
-		notificationBuilder.setSmallIcon(R.drawable.icon);
-		final int minutes = mDeparture.getMeanSecondsLeft() / 60;
-		final String minutesText = (minutes == 0) ? "Less than one minute"
-				: (minutes + " minute" + ((minutes != 1) ? "s" : ""));
-		notificationBuilder.setContentTitle(mStationPair.getDestination().name);
-		notificationBuilder.setContentText(minutesText + " until departure");
-		notificationBuilder.setContentIntent(mNotificationIntent);
+		if (mHasShutDown) {
+			mNotificationManager.cancel(DEPARTURE_NOTIFICATION_ID);
+			return;
+		}
+
+		final Departure boardedDeparture = ((BartRunnerApplication) getApplication())
+				.getBoardedDeparture();
+		final int halfMinutes = (boardedDeparture.getMeanSecondsLeft() + 15) / 30;
+		float minutes = halfMinutes / 2f;
+		final String minutesText = (minutes < 1) ? "Less than one minute"
+				: (String.format("~%.1f minute", minutes) + ((minutes != 1.0) ? "s"
+						: ""));
+
+		Builder notificationBuilder = new NotificationCompat.Builder(this)
+				.setOngoing(true)
+				.setSmallIcon(R.drawable.icon)
+				.setContentTitle(
+						mStationPair.getOrigin().shortName + " to "
+								+ mStationPair.getDestination().shortName)
+				.setContentText(minutesText + " until departure")
+				.setContentIntent(mNotificationIntent);
 		mNotificationManager.notify(DEPARTURE_NOTIFICATION_ID,
 				notificationBuilder.getNotification());
 	}
 
 	private int getPollIntervalMillis() {
-		final int secondsToAlarm = mDeparture.getMeanSecondsLeft()
+		final Departure boardedDeparture = ((BartRunnerApplication) getApplication())
+				.getBoardedDeparture();
+		final int secondsToAlarm = boardedDeparture.getMeanSecondsLeft()
 				- mAlertLeadTime * 60;
 
 		if (secondsToAlarm < -20) {
 			/* Alarm should have already gone off by now */
-			shutDown();
+			shutDown(false);
 			return 10000000; // Arbitrarily large number
 		}
 
@@ -254,5 +325,11 @@ public class NotificationService extends IntentService implements
 		} else {
 			return 10 * 1000;
 		}
+	}
+
+	@Override
+	public IBinder onBind(Intent intent) {
+		// Doesn't support binding
+		return null;
 	}
 }

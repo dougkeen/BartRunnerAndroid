@@ -299,7 +299,7 @@ public class EtdService extends Service {
 					ScheduleItem trip = mLatestScheduleInfo.getTrips().get(i);
 					// Definitely not a match if they have different
 					// destinations
-					if (!departure.getDestination().abbreviation.equals(trip
+					if (!departure.getTrainDestination().abbreviation.equals(trip
 							.getTrainHeadStation())) {
 						continue;
 					}
@@ -419,6 +419,9 @@ public class EtdService extends Service {
 
 			boolean needsBetterAccuracy = false;
 
+			final Departure boardedDeparture = ((BartRunnerApplication) getApplication())
+					.getBoardedDeparture();
+
 			/*
 			 * Keep track of first departure, since we'll request another quick
 			 * refresh if it has departed.
@@ -433,6 +436,9 @@ public class EtdService extends Service {
 						firstDeparture = departure;
 					}
 					mLatestDepartures.add(departure);
+					if (departure.equals(boardedDeparture)) {
+						boardedDeparture.mergeEstimate(departure);
+					}
 				}
 
 				/*
@@ -493,6 +499,10 @@ public class EtdService extends Service {
 					// Check if estimate is accurate enough
 					if (existingDeparture.getUncertaintySeconds() > UNCERTAINTY_THRESHOLD) {
 						needsBetterAccuracy = true;
+					}
+
+					if (departure.equals(boardedDeparture)) {
+						boardedDeparture.mergeEstimate(departure);
 					}
 				}
 			}

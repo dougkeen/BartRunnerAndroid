@@ -7,55 +7,68 @@ import java.util.List;
 import android.util.Log;
 
 public enum Station {
-	_12TH("12th", "12th St./Oakland City Center", false, false, "bayf", "bayf"),
-	_16TH("16th", "16th St. Mission", false, false),
-	_19TH("19th", "19th St./Oakland", false, false, "bayf", "bayf"),
-	_24TH("24th", "24th St. Mission", false, false),
-	ASHB("ashb", "Ashby", false, false, "mcar", "mcar"),
-	BALB("balb", "Balboa Park", false, false),
-	BAYF("bayf", "Bay Fair", true, false, "mcar", "mcar"),
-	CAST("cast", "Castro Valley", false, false, "bayf", "bayf"),
-	CIVC("civc", "Civic Center", false, false),
-	COLS("cols", "Coliseum/Oakland Airport", true, false, "mcar", "mcar"),
-	COLM("colm", "Colma", false, false, "balb", "balb"),
-	CONC("conc", "Concord", false, false, "mcar", "mcar"),
-	DALY("daly", "Daly City", false, false),
-	DBRK("dbrk", "Downtown Berkeley", false, false, "mcar", "mcar"),
-	DUBL("dubl", "Dublin/Pleasanton", false, true, "bayf", "bayf", true, 719999),
-	DELN("deln", "El Cerrito del Norte", false, false, "mcar", "mcar"),
-	PLZA("plza", "El Cerrito Plaza", false, false, "mcar", "mcar"),
-	EMBR("embr", "Embarcadero", false, false),
-	FRMT("frmt", "Fremont", true, true, "bayf", "bayf", true, 299999),
-	FTVL("ftvl", "Fruitvale", true, false, "mcar", "mcar"),
-	GLEN("glen", "Glen Park", false, false),
-	HAYW("hayw", "Hayward", true, false, "bayf", "bayf"),
-	LAFY("lafy", "Lafayette", false, false, "mcar", "mcar"),
-	LAKE("lake", "Lake Merritt", true, false, "mcar", "mcar"),
-	MCAR("mcar", "MacArthur", false, false, "bayf", "bayf"),
-	MLBR("mlbr", "Millbrae", false, true, "balb", "balb", true, 719999),
-	MONT("mont", "Montgomery St.", false, false),
-	NBRK("nbrk", "North Berkeley", false, false, "mcar", "mcar"),
-	NCON("ncon", "North Concord/Martinez", false, false, "mcar", "mcar"),
-	ORIN("orin", "Orinda", false, false, "mcar", "mcar"),
-	PITT("pitt", "Pittsburg/Bay Point", false, true, "mcar", "mcar", true,
+	_12TH("12th", "12th St./Oakland City Center", "12th St Oak", false, false,
+			"bayf", "bayf"),
+	_16TH("16th", "16th St. Mission", "16th St", false, false),
+	_19TH("19th", "19th St./Oakland", "19th St Oak", false, false, "bayf",
+			"bayf"),
+	_24TH("24th", "24th St. Mission", "24th St", false, false),
+	ASHB("ashb", "Ashby", "Ashby", false, false, "mcar", "mcar"),
+	BALB("balb", "Balboa Park", "Balboa", false, false),
+	BAYF("bayf", "Bay Fair", "Bay Fair", true, false, "mcar", "mcar"),
+	CAST("cast", "Castro Valley", "Castro Vly", false, false, "bayf", "bayf"),
+	CIVC("civc", "Civic Center", "Civic Ctr", false, false),
+	COLS("cols", "Coliseum/Oakland Airport", "Coliseum/OAK", true, false,
+			"mcar", "mcar"),
+	COLM("colm", "Colma", "Colma", false, false, "balb", "balb"),
+	CONC("conc", "Concord", "Concord", false, false, "mcar", "mcar"),
+	DALY("daly", "Daly City", "Daly City", false, false),
+	DBRK("dbrk", "Downtown Berkeley", "Dtwn Berk", false, false, "mcar",
+			"mcar"),
+	DUBL("dubl", "Dublin/Pleasanton", "Dbln/Plsntn", false, true, "bayf",
+			"bayf", true, 719999),
+	DELN("deln", "El Cerrito del Norte", "El Cer/Norte", false, false, "mcar",
+			"mcar"),
+	PLZA("plza", "El Cerrito Plaza", "El Cer/Plz", false, false, "mcar", "mcar"),
+	EMBR("embr", "Embarcadero", "Embarcdro", false, false),
+	FRMT("frmt", "Fremont", "Fremont", true, true, "bayf", "bayf", true, 299999),
+	FTVL("ftvl", "Fruitvale", "Fruitvale", true, false, "mcar", "mcar"),
+	GLEN("glen", "Glen Park", "Glen Park", false, false),
+	HAYW("hayw", "Hayward", "Hayward", true, false, "bayf", "bayf"),
+	LAFY("lafy", "Lafayette", "Lafayette", false, false, "mcar", "mcar"),
+	LAKE("lake", "Lake Merritt", "Lk Merritt", true, false, "mcar", "mcar"),
+	MCAR("mcar", "MacArthur", "MacArthur", false, false, "bayf", "bayf"),
+	MLBR("mlbr", "Millbrae", "Millbrae", false, true, "balb", "balb", true,
 			719999),
-	PHIL("phil", "Pleasant Hill", false, false, "mcar", "mcar"),
-	POWL("powl", "Powell St.", false, false),
-	RICH("rich", "Richmond", false, true, "mcar", "mcar", true, 299999),
-	ROCK("rock", "Rockridge", false, false, "mcar", "mcar"),
-	SBRN("sbrn", "San Bruno", false, false, "balb", "balb"),
-	SANL("sanl", "San Leandro", true, false, "mcar", "mcar"),
-	SFIA("sfia", "SFO Airport", false, false, "balb", "balb", true, 719999),
-	SHAY("shay", "South Hayward", true, false, "bayf", "bayf"),
-	SSAN("ssan", "South San Francisco", false, false, "balb", "balb"),
-	UCTY("ucty", "Union City", true, false, "bayf", "bayf"),
-	WCRK("wcrk", "Walnut Creek", false, false, "mcar", "mcar"),
-	WDUB("wdub", "West Dublin/Pleasanton", false, false, "bayf", "bayf"),
-	WOAK("woak", "West Oakland", false, false),
-	SPCL("spcl", "Special", false, false);
+	MONT("mont", "Montgomery St.", "Montgomery", false, false),
+	NBRK("nbrk", "North Berkeley", "N Berkeley", false, false, "mcar", "mcar"),
+	NCON("ncon", "North Concord/Martinez", "N Conc/Mrtnz", false, false,
+			"mcar", "mcar"),
+	ORIN("orin", "Orinda", "Orinda", false, false, "mcar", "mcar"),
+	PITT("pitt", "Pittsburg/Bay Point", "Pitt/Bay Pt", false, true, "mcar",
+			"mcar", true, 719999),
+	PHIL("phil", "Pleasant Hill", "Plsnt Hill", false, false, "mcar", "mcar"),
+	POWL("powl", "Powell St.", "Powell", false, false),
+	RICH("rich", "Richmond", "Richmond", false, true, "mcar", "mcar", true,
+			299999),
+	ROCK("rock", "Rockridge", "Rockridge", false, false, "mcar", "mcar"),
+	SBRN("sbrn", "San Bruno", "San Bruno", false, false, "balb", "balb"),
+	SANL("sanl", "San Leandro", "San Leandro", true, false, "mcar", "mcar"),
+	SFIA("sfia", "SFO Airport", "SFO", false, false, "balb", "balb", true,
+			719999),
+	SHAY("shay", "South Hayward", "S Hayward", true, false, "bayf", "bayf"),
+	SSAN("ssan", "South San Francisco", "S San Fran", false, false, "balb",
+			"balb"),
+	UCTY("ucty", "Union City", "Union City", true, false, "bayf", "bayf"),
+	WCRK("wcrk", "Walnut Creek", "Walnut Crk", false, false, "mcar", "mcar"),
+	WDUB("wdub", "West Dublin/Pleasanton", "W Dbln/Plsntn", false, false,
+			"bayf", "bayf"),
+	WOAK("woak", "West Oakland", "W Oakland", false, false),
+	SPCL("spcl", "Special", "Special", false, false);
 
 	public final String abbreviation;
 	public final String name;
+	public final String shortName;
 	public final boolean transferFriendly;
 	public final boolean invertDirection;
 	protected final String inboundTransferStation;
@@ -66,32 +79,34 @@ public enum Station {
 
 	public final static int DEFAULT_DEPARTURE_EQUALITY_TOLERANCE = 119999;
 
-	private Station(String abbreviation, String name, boolean invertDirection,
-			boolean endOfLine) {
-		this(abbreviation, name, invertDirection, endOfLine, null, null, false,
-				DEFAULT_DEPARTURE_EQUALITY_TOLERANCE);
-	}
-
-	private Station(String abbreviation, String name, boolean invertDirection,
-			boolean endOfLine, String transferStation) {
-		this(abbreviation, name, invertDirection, endOfLine, transferStation,
+	private Station(String abbreviation, String name, String shortName,
+			boolean invertDirection, boolean endOfLine) {
+		this(abbreviation, name, shortName, invertDirection, endOfLine, null,
 				null, false, DEFAULT_DEPARTURE_EQUALITY_TOLERANCE);
 	}
 
-	private Station(String abbreviation, String name, boolean invertDirection,
-			boolean endOfLine, String inboundTransferStation,
-			String outboundTransferStation) {
-		this(abbreviation, name, invertDirection, endOfLine,
+	private Station(String abbreviation, String name, String shortName,
+			boolean invertDirection, boolean endOfLine, String transferStation) {
+		this(abbreviation, name, shortName, invertDirection, endOfLine,
+				transferStation, null, false,
+				DEFAULT_DEPARTURE_EQUALITY_TOLERANCE);
+	}
+
+	private Station(String abbreviation, String name, String shortName,
+			boolean invertDirection, boolean endOfLine,
+			String inboundTransferStation, String outboundTransferStation) {
+		this(abbreviation, name, shortName, invertDirection, endOfLine,
 				inboundTransferStation, outboundTransferStation, false,
 				DEFAULT_DEPARTURE_EQUALITY_TOLERANCE);
 	}
 
-	private Station(String abbreviation, String name, boolean invertDirection,
-			boolean endOfLine, String inboundTransferStation,
-			String outboundTransferStation, boolean longStationLinger,
-			int departureEqualityTolerance) {
+	private Station(String abbreviation, String name, String shortName,
+			boolean invertDirection, boolean endOfLine,
+			String inboundTransferStation, String outboundTransferStation,
+			boolean longStationLinger, int departureEqualityTolerance) {
 		this.abbreviation = abbreviation;
 		this.name = name;
+		this.shortName = shortName;
 		this.invertDirection = invertDirection;
 		this.inboundTransferStation = inboundTransferStation;
 		this.transferFriendly = outboundTransferStation != null;

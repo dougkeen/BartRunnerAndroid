@@ -38,5 +38,7 @@
     <string name="your_train">Your train</string>
     <string name="skip_alert">Skip alert</string>
     <string name="set_up_departure_alert">Set up departure alert</string>
+    <string name="train_alert_text">Your train is leaving soon!</string>
+    <string name="silence_alarm">Silence alarm</string>
 
 </resources>

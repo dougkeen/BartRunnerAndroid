@@ -20,7 +20,7 @@ public class Departure implements Parcelable, Comparable<Departure> {
 			String platform, String direction, boolean bikeAllowed,
 			String trainLength, int minutes) {
 		super();
-		this.destination = Station.getByAbbreviation(destinationAbbr);
+		this.trainDestination = Station.getByAbbreviation(destinationAbbr);
 		this.destinationColor = destinationColor;
 		this.platform = platform;
 		this.direction = direction;
@@ -34,7 +34,8 @@ public class Departure implements Parcelable, Comparable<Departure> {
 	}
 
 	private Station origin;
-	private Station destination;
+	private Station trainDestination;
+	private Station passengerDestination;
 	private Line line;
 	private String destinationColor;
 	private String platform;
@@ -63,24 +64,40 @@ public class Departure implements Parcelable, Comparable<Departure> {
 		this.origin = origin;
 	}
 
-	public Station getDestination() {
-		return destination;
+	public Station getTrainDestination() {
+		return trainDestination;
 	}
 
-	public void setDestination(Station destination) {
-		this.destination = destination;
+	public void setTrainDestination(Station destination) {
+		this.trainDestination = destination;
 	}
 
-	public String getDestinationName() {
-		if (destination != null)
-			return destination.name;
+	public String getTrainDestinationName() {
+		if (trainDestination != null)
+			return trainDestination.name;
 		return null;
 	}
 
-	public String getDestinationAbbreviation() {
-		if (destination != null)
-			return destination.abbreviation;
+	public String getTrainDestinationAbbreviation() {
+		if (trainDestination != null)
+			return trainDestination.abbreviation;
 		return null;
+	}
+
+	public Station getPassengerDestination() {
+		return passengerDestination;
+	}
+
+	public void setPassengerDestination(Station passengerDestination) {
+		this.passengerDestination = passengerDestination;
+	}
+
+	public StationPair getStationPair() {
+		if (passengerDestination != null) {
+			return new StationPair(origin, passengerDestination);
+		} else {
+			return null;
+		}
 	}
 
 	public Line getLine() {
@@ -91,11 +108,11 @@ public class Departure implements Parcelable, Comparable<Departure> {
 		this.line = line;
 	}
 
-	public String getDestinationColor() {
+	public String getTrainDestinationColor() {
 		return destinationColor;
 	}
 
-	public void setDestinationColor(String destinationColor) {
+	public void setTrainDestinationColor(String destinationColor) {
 		this.destinationColor = destinationColor;
 	}
 
@@ -347,8 +364,9 @@ public class Departure implements Parcelable, Comparable<Departure> {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + (bikeAllowed ? 1231 : 1237);
-		result = prime * result
-				+ ((destination == null) ? 0 : destination.hashCode());
+		result = prime
+				* result
+				+ ((trainDestination == null) ? 0 : trainDestination.hashCode());
 		result = prime
 				* result
 				+ ((destinationColor == null) ? 0 : destinationColor.hashCode());
@@ -377,7 +395,7 @@ public class Departure implements Parcelable, Comparable<Departure> {
 		Departure other = (Departure) obj;
 		if (bikeAllowed != other.bikeAllowed)
 			return false;
-		if (destination != other.destination)
+		if (trainDestination != other.trainDestination)
 			return false;
 		if (destinationColor == null) {
 			if (other.destinationColor != null)
@@ -446,7 +464,7 @@ public class Departure implements Parcelable, Comparable<Departure> {
 	public String toString() {
 		java.text.DateFormat format = SimpleDateFormat.getTimeInstance();
 		StringBuilder builder = new StringBuilder();
-		builder.append(destination);
+		builder.append(trainDestination);
 		if (requiresTransfer) {
 			builder.append(" (w/ xfer)");
 		}
@@ -463,7 +481,9 @@ public class Departure implements Parcelable, Comparable<Departure> {
 
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeString(origin.abbreviation);
-		dest.writeString(destination.abbreviation);
+		dest.writeString(trainDestination.abbreviation);
+		dest.writeString(passengerDestination == null ? null
+				: passengerDestination.abbreviation);
 		dest.writeString(destinationColor);
 		dest.writeString(platform);
 		dest.writeString(direction);
@@ -482,7 +502,8 @@ public class Departure implements Parcelable, Comparable<Departure> {
 
 	private void readFromParcel(Parcel in) {
 		origin = Station.getByAbbreviation(in.readString());
-		destination = Station.getByAbbreviation(in.readString());
+		trainDestination = Station.getByAbbreviation(in.readString());
+		passengerDestination = Station.getByAbbreviation(in.readString());
 		destinationColor = in.readString();
 		platform = in.readString();
 		direction = in.readString();

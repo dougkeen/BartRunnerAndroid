@@ -13,6 +13,7 @@
         android:targetSdkVersion="14" />
 
     <application
+        android:name=".BartRunnerApplication"
         android:icon="@drawable/icon"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
@@ -64,10 +65,16 @@
             android:exported="false"
             android:label="BartRunner data provider" />
 
-        <service android:name=".NotificationService" />
-        <service android:name=".EtdService" />
+        <service
+            android:name=".NotificationService"
+            android:exported="false" />
+        <service
+            android:name=".EtdService"
+            android:exported="false" />
 
-        <receiver android:name=".AlarmBroadcastReceiver" >
+        <receiver
+            android:name=".AlarmBroadcastReceiver"
+            android:exported="false" >
             <intent-filter>
                 <action android:name="com.dougkeen.action.ALARM" />
 
