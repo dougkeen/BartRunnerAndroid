@@ -166,7 +166,7 @@ public class NotificationService extends Service implements EtdServiceListener {
 		cancelAlarm();
 
 		if (mAlertLeadTime > 0) {
-			long alertTime = getAlertClockTime();
+			long alertTime = getAlarmClockTime();
 			if (alertTime > System.currentTimeMillis()) {
 				refreshAlarmPendingIntent();
 				mAlarmManager.set(AlarmManager.RTC_WAKEUP, alertTime,
@@ -182,7 +182,7 @@ public class NotificationService extends Service implements EtdServiceListener {
 				SystemClock.elapsedRealtime() + 100, mAlarmPendingIntent);
 	}
 
-	private long getAlertClockTime() {
+	private long getAlarmClockTime() {
 		final Departure boardedDeparture = ((BartRunnerApplication) getApplication())
 				.getBoardedDeparture();
 		return boardedDeparture.getMeanEstimate() - mAlertLeadTime * 60 * 1000;
@@ -202,16 +202,16 @@ public class NotificationService extends Service implements EtdServiceListener {
 							.getMeanSecondsLeft() || boardedDeparture
 							.getUncertaintySeconds() != departure
 							.getUncertaintySeconds())) {
-				long initialAlertClockTime = getAlertClockTime();
+				long initialAlertClockTime = getAlarmClockTime();
 
 				boardedDeparture.mergeEstimate(departure);
 
 				final long now = System.currentTimeMillis();
-				if (initialAlertClockTime > now
-						&& getAlertClockTime() <= System.currentTimeMillis()) {
+				final long newAlarmClockTime = getAlarmClockTime();
+				if (initialAlertClockTime > now && newAlarmClockTime <= now) {
 					// Alert time was changed to the past
 					triggerAlarmImmediately();
-				} else if (getAlertClockTime() > System.currentTimeMillis()) {
+				} else if (newAlarmClockTime > now) {
 					// Alert time is still in the future
 					setAlarm();
 				}
@@ -299,9 +299,11 @@ public class NotificationService extends Service implements EtdServiceListener {
 						mStationPair.getOrigin().shortName + " to "
 								+ mStationPair.getDestination().shortName)
 				.setContentText(minutesText + " until departure")
+				.setSubText(
+						"Alert " + mAlertLeadTime + " minutes before departure")
 				.setContentIntent(mNotificationIntent).setWhen(0);
 		mNotificationManager.notify(DEPARTURE_NOTIFICATION_ID,
-				notificationBuilder.getNotification());
+				notificationBuilder.build());
 	}
 
 	private int getPollIntervalMillis() {

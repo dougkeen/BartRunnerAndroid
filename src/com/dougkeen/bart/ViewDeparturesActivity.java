@@ -188,15 +188,30 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 		getSupportActionBar().setHomeButtonEnabled(true);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-		if (((BartRunnerApplication) getApplication())
-				.shouldPlayAlarmRingtone()) {
+		final BartRunnerApplication bartRunnerApplication = (BartRunnerApplication) getApplication();
+		if (bartRunnerApplication.shouldPlayAlarmRingtone()) {
 			soundTheAlarm();
+		}
+
+		if (bartRunnerApplication.isAlarmSounding()) {
+			Builder builder = new AlertDialog.Builder(this);
+			builder.setMessage(R.string.train_alert_text)
+					.setCancelable(false)
+					.setNeutralButton(R.string.silence_alarm,
+							new DialogInterface.OnClickListener() {
+								@Override
+								public void onClick(DialogInterface dialog,
+										int which) {
+									silenceAlarm();
+									dialog.dismiss();
+								}
+							}).show();
 		}
 	}
 
-	private MediaPlayer mMediaPlayer;
-
 	private void soundTheAlarm() {
+		final BartRunnerApplication application = (BartRunnerApplication) getApplication();
+
 		Uri alertSound = RingtoneManager
 				.getDefaultUri(RingtoneManager.TYPE_ALARM);
 
@@ -208,7 +223,7 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 						.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
 			}
 		}
-		if (mMediaPlayer == null) {
+		if (application.getAlarmMediaPlayer() == null) {
 			tryToPlayRingtone(alertSound);
 		}
 		mHandler.postDelayed(new Runnable() {
@@ -218,37 +233,30 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 			}
 		}, 20000);
 
-		((BartRunnerApplication) getApplication()).setPlayAlarmRingtone(false);
-
-		Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage(R.string.train_alert_text)
-				.setCancelable(false)
-				.setNeutralButton(R.string.silence_alarm,
-						new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog,
-									int which) {
-								silenceAlarm();
-								dialog.dismiss();
-							}
-						}).show();
+		application.setPlayAlarmRingtone(false);
+		application.setAlarmSounding(true);
 	}
 
 	private boolean tryToPlayRingtone(Uri alertSound) {
-		mMediaPlayer = MediaPlayer.create(this, alertSound);
-		if (mMediaPlayer == null)
+		MediaPlayer mediaPlayer = MediaPlayer.create(this, alertSound);
+		if (mediaPlayer == null)
 			return false;
-		mMediaPlayer.setLooping(true);
-		mMediaPlayer.start();
+		mediaPlayer.setLooping(true);
+		mediaPlayer.start();
+		((BartRunnerApplication) getApplication())
+				.setAlarmMediaPlayer(mediaPlayer);
 		return true;
 	}
 
 	private void silenceAlarm() {
+		final BartRunnerApplication application = (BartRunnerApplication) getApplication();
+		final MediaPlayer mediaPlayer = application.getAlarmMediaPlayer();
+		application.setAlarmSounding(false);
+		application.setAlarmMediaPlayer(null);
 		try {
-			if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
-				mMediaPlayer.stop();
-				mMediaPlayer.release();
-				mMediaPlayer = null;
+			if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+				mediaPlayer.stop();
+				mediaPlayer.release();
 			}
 		} catch (IllegalStateException e) {
 			Log.e(Constants.TAG,
