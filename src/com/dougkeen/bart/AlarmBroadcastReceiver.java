@@ -19,6 +19,8 @@ public class AlarmBroadcastReceiver extends BroadcastReceiver {
 		targetIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
 		context.startActivity(targetIntent);
+
+		application.setAlarmPending(false);
 	}
 
 }

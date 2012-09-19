@@ -49,6 +49,7 @@ import com.dougkeen.bart.model.Departure;
 import com.dougkeen.bart.model.Station;
 import com.dougkeen.bart.model.StationPair;
 import com.dougkeen.bart.model.TextProvider;
+import com.dougkeen.util.Observer;
 
 public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 		EtdServiceListener {
@@ -291,6 +292,8 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 		}
 	};
 
+	private Observer<Boolean> mAlarmPendingObserver;
+
 	protected DepartureArrayAdapter getListAdapter() {
 		return mDeparturesAdapter;
 	}
@@ -305,6 +308,10 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 		super.onStop();
 		if (mEtdService != null)
 			mEtdService.unregisterListener(this);
+		if (mAlarmPendingObserver != null)
+			((BartRunnerApplication) getApplication())
+					.getAlarmPendingObservable().unregisterObserver(
+							mAlarmPendingObserver);
 		if (mBound)
 			unbindService(mConnection);
 		Ticker.getInstance().stopTicking();
@@ -355,6 +362,25 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getSupportMenuInflater();
 		inflater.inflate(R.menu.route_menu, menu);
+		final MenuItem cancelAlarmButton = menu
+				.findItem(R.id.cancel_alarm_button);
+		final BartRunnerApplication application = (BartRunnerApplication) getApplication();
+		if (application.isAlarmPending()) {
+			cancelAlarmButton.setVisible(true);
+		}
+		mAlarmPendingObserver = new Observer<Boolean>() {
+			@Override
+			public void onUpdate(final Boolean newValue) {
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						cancelAlarmButton.setVisible(newValue);
+					}
+				});
+			}
+		};
+		application.getAlarmPendingObservable().registerObserver(
+				mAlarmPendingObserver);
 		return true;
 	}
 
@@ -366,6 +392,11 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 					Constants.FAVORITE_CONTENT_URI);
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(intent);
+			return true;
+		} else if (itemId == R.id.cancel_alarm_button) {
+			Intent intent = new Intent(this, NotificationService.class);
+			intent.putExtra("cancelAlarm", true);
+			startService(intent);
 			return true;
 		} else if (itemId == R.id.view_on_bart_site_button) {
 			startActivity(new Intent(
@@ -477,7 +508,7 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 				refreshBoardedDeparture();
 
 				// Stop the notification service
-				stopService(new Intent(getApplicationContext(),
+				stopService(new Intent(ViewDeparturesActivity.this,
 						NotificationService.class));
 
 				// Don't prompt for alert if train is about to leave

@@ -97,7 +97,8 @@
         android:layout_height="wrap_content"
         android:indeterminate="true"
         android:visibility="invisible" />
-    <TextView
+
+    <TextView
         android:id="@android:id/empty"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"

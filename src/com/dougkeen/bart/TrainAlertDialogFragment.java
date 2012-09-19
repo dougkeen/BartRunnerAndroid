@@ -82,8 +82,7 @@ public class TrainAlertDialogFragment extends DialogFragment {
 										alertLeadTime);
 								editor.commit();
 
-								Intent intent = new Intent(getActivity()
-										.getApplicationContext(),
+								Intent intent = new Intent(getActivity(),
 										NotificationService.class);
 								intent.putExtra("alertLeadTime", alertLeadTime);
 								getActivity().startService(intent);

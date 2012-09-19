@@ -2,6 +2,8 @@ package com.dougkeen.bart;
 
 import java.util.List;
 
+import org.apache.commons.lang3.time.DateFormatUtils;
+
 import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -19,6 +21,8 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationCompat.Builder;
+import android.util.Log;
+import android.util.TimeFormatException;
 
 import com.dougkeen.bart.EtdService.EtdServiceBinder;
 import com.dougkeen.bart.EtdService.EtdServiceListener;
@@ -103,6 +107,7 @@ public class NotificationService extends Service implements EtdServiceListener {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
+		mHasShutDown = false;
 		onStart(intent, startId);
 		return START_STICKY;
 	}
@@ -119,8 +124,9 @@ public class NotificationService extends Service implements EtdServiceListener {
 	protected void onHandleIntent(Intent intent) {
 		final Departure boardedDeparture = ((BartRunnerApplication) getApplication())
 				.getBoardedDeparture();
-		if (boardedDeparture == null) {
-			// Nothing to notify about
+		if (boardedDeparture == null
+				|| intent.getBooleanExtra("cancelAlarm", false)) {
+			// Nothing to notify about, or we want to cancel the alarm
 			shutDown(false);
 			return;
 		}
@@ -139,13 +145,13 @@ public class NotificationService extends Service implements EtdServiceListener {
 			mEtdService.registerListener(this);
 		}
 
-		updateNotification();
-
 		Intent targetIntent = new Intent(Intent.ACTION_VIEW,
 				mStationPair.getUri());
 		targetIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		mNotificationIntent = PendingIntent.getActivity(this, 0, targetIntent,
 				PendingIntent.FLAG_UPDATE_CURRENT);
+
+		updateNotification();
 
 		setAlarm();
 
@@ -168,14 +174,20 @@ public class NotificationService extends Service implements EtdServiceListener {
 		if (mAlertLeadTime > 0) {
 			long alertTime = getAlarmClockTime();
 			if (alertTime > System.currentTimeMillis()) {
+				if (Log.isLoggable(Constants.TAG, Log.VERBOSE))
+					Log.v(Constants.TAG, "Scheduling alarm for "
+							+ DateFormatUtils.format(alertTime, "h:mm:ss"));
 				refreshAlarmPendingIntent();
 				mAlarmManager.set(AlarmManager.RTC_WAKEUP, alertTime,
 						mAlarmPendingIntent);
+				((BartRunnerApplication) getApplication())
+						.setAlarmPending(true);
 			}
 		}
 	}
 
 	private void triggerAlarmImmediately() {
+		Log.v(Constants.TAG, "Setting off alarm immediately");
 		cancelAlarm();
 		refreshAlarmPendingIntent();
 		mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
@@ -189,6 +201,7 @@ public class NotificationService extends Service implements EtdServiceListener {
 	}
 
 	private void cancelAlarm() {
+		((BartRunnerApplication) getApplication()).setAlarmPending(false);
 		mAlarmManager.cancel(mAlarmPendingIntent);
 	}
 
@@ -280,7 +293,9 @@ public class NotificationService extends Service implements EtdServiceListener {
 
 	private void updateNotification() {
 		if (mHasShutDown) {
-			mNotificationManager.cancel(DEPARTURE_NOTIFICATION_ID);
+			if (mEtdService != null) {
+				mEtdService.unregisterListener(this);
+			}
 			return;
 		}
 
@@ -292,16 +307,35 @@ public class NotificationService extends Service implements EtdServiceListener {
 				: (String.format("~%.1f minute", minutes) + ((minutes != 1.0) ? "s"
 						: ""));
 
+		final Intent cancelAlarmIntent = new Intent(getApplicationContext(),
+				NotificationService.class);
+		cancelAlarmIntent.putExtra("cancelAlarm", true);
 		Builder notificationBuilder = new NotificationCompat.Builder(this)
 				.setOngoing(true)
 				.setSmallIcon(R.drawable.ic_stat_notification)
 				.setContentTitle(
 						mStationPair.getOrigin().shortName + " to "
 								+ mStationPair.getDestination().shortName)
-				.setContentText(minutesText + " until departure")
-				.setSubText(
-						"Alert " + mAlertLeadTime + " minutes before departure")
 				.setContentIntent(mNotificationIntent).setWhen(0);
+		if (android.os.Build.VERSION.SDK_INT > 16) {
+			notificationBuilder
+					.setPriority(NotificationCompat.PRIORITY_HIGH)
+					.addAction(
+							R.drawable.ic_action_cancel_alarm,
+							"Cancel alarm",
+							PendingIntent.getService(getApplicationContext(),
+									0, cancelAlarmIntent,
+									PendingIntent.FLAG_UPDATE_CURRENT))
+					.setContentText(minutesText + " until departure")
+					.setSubText(
+							"Alert " + mAlertLeadTime
+									+ " minutes before departure");
+		} else {
+			notificationBuilder.setContentText(minutesText
+					+ " to departure (alarm at " + mAlertLeadTime + " min"
+					+ ((mAlertLeadTime == 1) ? "" : "s") + ")");
+		}
+
 		mNotificationManager.notify(DEPARTURE_NOTIFICATION_ID,
 				notificationBuilder.build());
 	}
@@ -318,11 +352,7 @@ public class NotificationService extends Service implements EtdServiceListener {
 			return 10000000; // Arbitrarily large number
 		}
 
-		if (secondsToAlarm > 10 * 60) {
-			return 60 * 1000;
-		} else if (secondsToAlarm > 5 * 60) {
-			return 60 * 1000;
-		} else if (secondsToAlarm > 3 * 60) {
+		if (secondsToAlarm > 3 * 60) {
 			return 30 * 1000;
 		} else {
 			return 10 * 1000;

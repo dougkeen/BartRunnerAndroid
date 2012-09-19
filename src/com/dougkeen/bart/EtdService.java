@@ -67,10 +67,11 @@ public class EtdService extends Service {
 
 	public void unregisterListener(EtdServiceListener listener) {
 		StationPair stationPair = getStationPairFromListener(listener);
-		if (stationPair == null)
-			return;
-
-		if (mServiceEngineMap.containsKey(stationPair)) {
+		if (stationPair == null) {
+			for (EtdServiceEngine engine : mServiceEngineMap.values()) {
+				engine.unregisterListener(listener);
+			}
+		} else if (mServiceEngineMap.containsKey(stationPair)) {
 			mServiceEngineMap.get(stationPair).unregisterListener(listener);
 		}
 	}
@@ -93,7 +94,6 @@ public class EtdService extends Service {
 	}
 
 	public class EtdServiceBinder extends Binder {
-
 		public EtdService getService() {
 			return EtdService.this;
 		}
@@ -210,9 +210,9 @@ public class EtdService extends Service {
 					mIgnoreDepartureDirection) {
 				@Override
 				public void onResult(RealTimeDepartures result) {
-					Log.d(Constants.TAG, "Processing data from server");
+					Log.v(Constants.TAG, "Processing data from server");
 					processLatestDepartures(result);
-					Log.d(Constants.TAG, "Done processing data from server");
+					Log.v(Constants.TAG, "Done processing data from server");
 					notifyListenersOfRequestEnd();
 					mPendingEtdRequest = false;
 				}
@@ -227,7 +227,7 @@ public class EtdService extends Service {
 				}
 			};
 			mGetDeparturesTask = task;
-			Log.d(Constants.TAG, "Fetching data from server");
+			Log.v(Constants.TAG, "Fetching data from server");
 			task.execute(new StationPair(mStationPair.getOrigin(), mStationPair
 					.getDestination()));
 			notifyListenersOfRequestStart();
@@ -244,10 +244,10 @@ public class EtdService extends Service {
 			GetScheduleInformationTask task = new GetScheduleInformationTask() {
 				@Override
 				public void onResult(ScheduleInformation result) {
-					Log.d(Constants.TAG, "Processing data from server");
+					Log.v(Constants.TAG, "Processing data from server");
 					mLatestScheduleInfo = result;
 					applyScheduleInformation(result);
-					Log.d(Constants.TAG, "Done processing data from server");
+					Log.v(Constants.TAG, "Done processing data from server");
 				}
 
 				@Override
@@ -299,8 +299,8 @@ public class EtdService extends Service {
 					ScheduleItem trip = mLatestScheduleInfo.getTrips().get(i);
 					// Definitely not a match if they have different
 					// destinations
-					if (!departure.getTrainDestination().abbreviation.equals(trip
-							.getTrainHeadStation())) {
+					if (!departure.getTrainDestination().abbreviation
+							.equals(trip.getTrainHeadStation())) {
 						continue;
 					}
 
@@ -582,7 +582,7 @@ public class EtdService extends Service {
 					}
 				}, millisUntilExecute);
 				mNextFetchClockTime = requestedFetchTime;
-				Log.d(Constants.TAG, "Scheduled another departure fetch in "
+				Log.i(Constants.TAG, "Scheduled another departure fetch in "
 						+ millisUntilExecute / 1000 + "s");
 			}
 		}
@@ -593,7 +593,7 @@ public class EtdService extends Service {
 					fetchLatestSchedule();
 				}
 			}, millisUntilExecute);
-			Log.d(Constants.TAG, "Scheduled another schedule fetch in "
+			Log.i(Constants.TAG, "Scheduled another schedule fetch in "
 					+ millisUntilExecute / 1000 + "s");
 		}
 

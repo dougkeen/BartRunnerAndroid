@@ -4,9 +4,12 @@ import android.app.Application;
 import android.media.MediaPlayer;
 
 import com.dougkeen.bart.model.Departure;
+import com.dougkeen.util.Observable;
 
 public class BartRunnerApplication extends Application {
 	private Departure mBoardedDeparture;
+
+	private Observable<Boolean> mAlarmPending = new Observable<Boolean>(false);
 
 	private boolean mPlayAlarmRingtone;
 
@@ -44,6 +47,18 @@ public class BartRunnerApplication extends Application {
 
 	public void setAlarmMediaPlayer(MediaPlayer alarmMediaPlayer) {
 		this.mAlarmMediaPlayer = alarmMediaPlayer;
+	}
+
+	public boolean isAlarmPending() {
+		return mAlarmPending.getValue();
+	}
+
+	public Observable<Boolean> getAlarmPendingObservable() {
+		return mAlarmPending;
+	}
+
+	public void setAlarmPending(boolean alarmPending) {
+		this.mAlarmPending.setValue(alarmPending);
 	}
 
 }

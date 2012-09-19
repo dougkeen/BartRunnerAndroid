@@ -2,15 +2,21 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
+        android:id="@+id/cancel_alarm_button"
+        android:icon="@drawable/ic_action_cancel_alarm"
+        android:showAsAction="always|withText"
+        android:title="Cancel alarm"
+        android:visible="false"/>
+    <item
         android:id="@+id/view_on_bart_site_button"
         android:icon="@drawable/ic_action_web"
-        android:showAsAction="ifRoom|withText"
+        android:showAsAction="always|withText"
         android:title="@string/view_on_bart_site">
     </item>
     <item
         android:id="@+id/view_system_map_button"
         android:icon="@drawable/ic_action_map"
-        android:showAsAction="ifRoom|withText"
+        android:showAsAction="always|withText"
         android:title="@string/view_system_map">
     </item>
 
