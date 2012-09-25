@@ -230,10 +230,14 @@ public class BartContentProvider extends ContentProvider {
 							+ RoutesColumns.TO_STATION.string + "=?",
 					new String[] { origin, destination }, null, null, null);
 
-			if (query.moveToFirst()) {
-				return update(ContentUris.withAppendedId(
-						Constants.FAVORITE_CONTENT_URI, query.getLong(0)),
-						values, where, whereArgs);
+			try {
+				if (query.moveToFirst()) {
+					return update(ContentUris.withAppendedId(
+							Constants.FAVORITE_CONTENT_URI, query.getLong(0)),
+							values, where, whereArgs);
+				}
+			} finally {
+				CursorUtils.closeCursorQuietly(query);
 			}
 		}
 		return 0;
