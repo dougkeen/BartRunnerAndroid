@@ -1,4 +1,4 @@
-package com.dougkeen.bart;
+package com.dougkeen.bart.activities;
 
 import net.simonvt.widget.NumberPicker;
 import android.app.Dialog;
@@ -12,6 +12,9 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 
 import com.WazaBe.HoloEverywhere.AlertDialog;
+import com.dougkeen.bart.BartRunnerApplication;
+import com.dougkeen.bart.R;
+import com.dougkeen.bart.services.NotificationService;
 
 public class TrainAlertDialogFragment extends DialogFragment {
 

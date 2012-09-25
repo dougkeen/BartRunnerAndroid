@@ -1,4 +1,4 @@
-package com.dougkeen.bart;
+package com.dougkeen.bart.services;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,6 +21,8 @@ import android.os.IBinder;
 import android.support.v4.content.CursorLoader;
 import android.util.Log;
 
+import com.dougkeen.bart.BartRunnerApplication;
+import com.dougkeen.bart.R;
 import com.dougkeen.bart.data.RoutesColumns;
 import com.dougkeen.bart.model.Constants;
 import com.dougkeen.bart.model.Departure;
@@ -44,7 +46,8 @@ public class EtdService extends Service {
 		mServiceEngineMap = new HashMap<StationPair, EtdServiceEngine>();
 	}
 
-	public void registerListener(EtdServiceListener listener) {
+	public void registerListener(EtdServiceListener listener,
+			boolean limitToFirstNonDeparted) {
 		StationPair stationPair = getStationPairFromListener(listener);
 		if (stationPair == null)
 			return;
@@ -53,7 +56,8 @@ public class EtdService extends Service {
 			mServiceEngineMap.put(stationPair,
 					new EtdServiceEngine(stationPair));
 		}
-		mServiceEngineMap.get(stationPair).registerListener(listener);
+		mServiceEngineMap.get(stationPair).registerListener(listener,
+				limitToFirstNonDeparted);
 	}
 
 	private StationPair getStationPairFromListener(EtdServiceListener listener) {
@@ -116,6 +120,8 @@ public class EtdService extends Service {
 		// We'll only use the keys
 		private WeakHashMap<EtdServiceListener, Boolean> mListeners;
 
+		private boolean mLimitToFirstNonDeparted = true;
+
 		private List<Departure> mLatestDepartures;
 		private ScheduleInformation mLatestScheduleInfo;
 
@@ -148,8 +154,11 @@ public class EtdService extends Service {
 			cursor.close();
 		}
 
-		protected void registerListener(EtdServiceListener listener) {
+		protected void registerListener(EtdServiceListener listener,
+				boolean limitToFirstNonDeparted) {
 			mListeners.put(listener, true);
+			if (!limitToFirstNonDeparted)
+				mLimitToFirstNonDeparted = false;
 			if (!mPendingEtdRequest) {
 				mStarted = true;
 				fetchLatestDepartures();
@@ -439,6 +448,9 @@ public class EtdService extends Service {
 					if (departure.equals(boardedDeparture)) {
 						boardedDeparture.mergeEstimate(departure);
 					}
+					if (!departure.hasDeparted() && mLimitToFirstNonDeparted) {
+						break;
+					}
 				}
 
 				/*
@@ -503,6 +515,10 @@ public class EtdService extends Service {
 
 					if (departure.equals(boardedDeparture)) {
 						boardedDeparture.mergeEstimate(departure);
+					}
+
+					if (!departure.hasDeparted() && mLimitToFirstNonDeparted) {
+						break;
 					}
 				}
 			}

@@ -3,6 +3,7 @@ package com.dougkeen.bart.controls;
 import java.util.Iterator;
 import java.util.WeakHashMap;
 
+import android.content.Context;
 import android.os.Handler;
 
 public class Ticker {
@@ -15,6 +16,8 @@ public class Ticker {
 	private static Ticker sInstance;
 
 	private WeakHashMap<TickSubscriber, Object> mSubscribers;
+
+	private WeakHashMap<Context, Object> mTickerHosts;
 
 	private TickerEngine mEngine;
 
@@ -84,26 +87,28 @@ public class Ticker {
 		return sInstance;
 	}
 
-	public void addSubscriber(TickSubscriber subscriber) {
+	public void addSubscriber(TickSubscriber subscriber, Context host) {
 		if (!mSubscribers.containsKey(subscriber) && subscriber != null) {
 			mSubscribers.put(subscriber, null);
-			startTicking();
+			startTicking(host);
 		}
 	}
 
 	private Ticker() {
 		mSubscribers = new WeakHashMap<TickSubscriber, Object>();
+		mTickerHosts = new WeakHashMap<Context, Object>();
 		mEngine = new TickerEngine(this);
 	}
 
-	public void startTicking() {
+	public void startTicking(Context host) {
+		mTickerHosts.put(host, true);
 		if (!mEngine.isOn())
 			mEngine.run();
 	}
 
-	public void stopTicking() {
-		if (mEngine.isOn())
+	public void stopTicking(Context host) {
+		mTickerHosts.remove(host);
+		if (mEngine.isOn() && mTickerHosts.isEmpty())
 			mEngine.stop();
 	}
-
 }

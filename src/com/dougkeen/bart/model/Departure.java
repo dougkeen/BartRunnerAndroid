@@ -496,8 +496,10 @@ public class Departure implements Parcelable, Comparable<Departure> {
 		dest.writeLong(arrivalTimeOverride);
 		dest.writeInt(estimatedTripTime);
 		dest.writeInt(line.ordinal());
-		dest.writeBooleanArray(new boolean[] { beganAsDeparted, bikeAllowed,
-				requiresTransfer, transferScheduled });
+		dest.writeByte(beganAsDeparted ? (byte) 1 : (byte) 0);
+		dest.writeByte(bikeAllowed ? (byte) 1 : (byte) 0);
+		dest.writeByte(requiresTransfer ? (byte) 1 : (byte) 0);
+		dest.writeByte(transferScheduled ? (byte) 1 : (byte) 0);
 	}
 
 	private void readFromParcel(Parcel in) {
@@ -516,12 +518,10 @@ public class Departure implements Parcelable, Comparable<Departure> {
 		arrivalTimeOverride = in.readLong();
 		estimatedTripTime = in.readInt();
 		line = Line.values()[in.readInt()];
-		boolean[] bools = new boolean[4];
-		in.readBooleanArray(bools);
-		beganAsDeparted = bools[0];
-		bikeAllowed = bools[1];
-		requiresTransfer = bools[2];
-		transferScheduled = bools[3];
+		beganAsDeparted = in.readByte() == (byte) 1;
+		bikeAllowed = in.readByte() == (byte) 1;
+		requiresTransfer = in.readByte() == (byte) 1;
+		transferScheduled = in.readByte() == (byte) 1;
 	}
 
 	public static final Parcelable.Creator<Departure> CREATOR = new Parcelable.Creator<Departure>() {

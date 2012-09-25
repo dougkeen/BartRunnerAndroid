@@ -1,4 +1,7 @@
-package com.dougkeen.bart;
+package com.dougkeen.bart.receivers;
+
+import com.dougkeen.bart.BartRunnerApplication;
+import com.dougkeen.util.WakeLocker;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

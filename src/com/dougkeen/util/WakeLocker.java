@@ -1,4 +1,4 @@
-package com.dougkeen.bart;
+package com.dougkeen.util;
 
 import android.content.Context;
 import android.os.PowerManager;

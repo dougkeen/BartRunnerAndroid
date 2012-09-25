@@ -37,7 +37,7 @@ public class CountdownTextView extends TextView implements
 
 	public void setTextProvider(TextProvider provider) {
 		mTextProvider = provider;
-		Ticker.getInstance().addSubscriber(this);
+		Ticker.getInstance().addSubscriber(this, getContext());
 	}
 
 	@Override

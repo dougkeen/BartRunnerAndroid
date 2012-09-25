@@ -1,4 +1,4 @@
-package com.dougkeen.bart;
+package com.dougkeen.bart.activities;
 
 import java.util.Calendar;
 import java.util.TimeZone;
@@ -8,17 +8,16 @@ import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.CursorWrapper;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.CursorAdapter;
 import android.widget.ListAdapter;
-import android.widget.SimpleCursorAdapter;
-import android.widget.SimpleCursorAdapter.ViewBinder;
 import android.widget.TextView;
 
 import com.WazaBe.HoloEverywhere.AlertDialog;
@@ -27,17 +26,22 @@ import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.dougkeen.bart.R;
+import com.dougkeen.bart.controls.Ticker;
 import com.dougkeen.bart.data.CursorUtils;
+import com.dougkeen.bart.data.FavoritesArrayAdapter;
 import com.dougkeen.bart.data.RoutesColumns;
 import com.dougkeen.bart.model.Constants;
 import com.dougkeen.bart.model.Station;
+import com.dougkeen.bart.model.StationPair;
 import com.dougkeen.bart.networktasks.GetRouteFareTask;
 
-public class RoutesListActivity extends SherlockFragmentActivity {
+public class RoutesListActivity extends SherlockFragmentActivity implements
+		LoaderCallbacks<Cursor> {
+	private static final int FAVORITES_LOADER_ID = 0;
+
 	private static final TimeZone PACIFIC_TIME = TimeZone
 			.getTimeZone("America/Los_Angeles");
-
-	protected Cursor mQuery;
 
 	private Uri mCurrentlySelectedUri;
 
@@ -46,6 +50,8 @@ public class RoutesListActivity extends SherlockFragmentActivity {
 
 	private ActionMode mActionMode;
 
+	private FavoritesArrayAdapter mRoutesAdapter;
+
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -53,51 +59,24 @@ public class RoutesListActivity extends SherlockFragmentActivity {
 		setContentView(R.layout.main);
 		setTitle(R.string.favorite_routes);
 
-		mQuery = managedQuery(Constants.FAVORITE_CONTENT_URI, new String[] {
-				RoutesColumns._ID.string, RoutesColumns.FROM_STATION.string,
-				RoutesColumns.TO_STATION.string, RoutesColumns.FARE.string,
-				RoutesColumns.FARE_LAST_UPDATED.string,
-				RoutesColumns.AVERAGE_TRIP_SAMPLE_COUNT.string,
-				RoutesColumns.AVERAGE_TRIP_LENGTH.string }, null, null,
-				RoutesColumns._ID.string);
+		mRoutesAdapter = new FavoritesArrayAdapter(this,
+				R.layout.favorite_listing);
 
-		refreshFares();
+		getSupportLoaderManager().initLoader(FAVORITES_LOADER_ID, null, this);
 
-		SimpleCursorAdapter adapter = new SimpleCursorAdapter(this,
-				R.layout.favorite_listing, mQuery, new String[] {
-						RoutesColumns.FROM_STATION.string,
-						RoutesColumns.TO_STATION.string,
-						RoutesColumns.FARE.string }, new int[] {
-						R.id.originText, R.id.destinationText, R.id.fareText });
-		adapter.setViewBinder(new ViewBinder() {
-			public boolean setViewValue(View view, Cursor cursor,
-					int columnIndex) {
-				if (view.getId() == R.id.fareText) {
-					String fare = cursor.getString(columnIndex);
-					if (fare != null) {
-						((TextView) view).setSingleLine(false);
-						((TextView) view).setText("Fare:\n" + fare);
-					}
-				} else {
-					((TextView) view).setText(Station.getByAbbreviation(cursor
-							.getString(columnIndex)).name);
-				}
-				return true;
-			}
-		});
-
-		setListAdapter(adapter);
+		setListAdapter(mRoutesAdapter);
 		getListView().setOnItemClickListener(
 				new AdapterView.OnItemClickListener() {
-
 					@Override
 					public void onItemClick(AdapterView<?> l, View v,
 							int position, long id) {
+						;
 						startActivity(new Intent(Intent.ACTION_VIEW,
 								ContentUris.withAppendedId(
-										Constants.FAVORITE_CONTENT_URI, id)));
+										Constants.FAVORITE_CONTENT_URI,
+										getListAdapter().getItem(position)
+												.getId())));
 					}
-
 				});
 		getListView().setEmptyView(findViewById(android.R.id.empty));
 		getListView().setOnItemLongClickListener(
@@ -109,17 +88,13 @@ public class RoutesListActivity extends SherlockFragmentActivity {
 							mActionMode.finish();
 						}
 
-						mCurrentlySelectedUri = ContentUris.withAppendedId(
-								Constants.FAVORITE_CONTENT_URI, id);
+						StationPair item = getListAdapter().getItem(position);
 
-						CursorWrapper item = (CursorWrapper) getListAdapter()
-								.getItem(position);
-						Station orig = Station.getByAbbreviation(CursorUtils
-								.getString(item, RoutesColumns.FROM_STATION));
-						Station dest = Station.getByAbbreviation(CursorUtils
-								.getString(item, RoutesColumns.TO_STATION));
-						mCurrentlySelectedOrigin = orig;
-						mCurrentlySelectedDestination = dest;
+						mCurrentlySelectedUri = ContentUris.withAppendedId(
+								Constants.FAVORITE_CONTENT_URI, item.getId());
+
+						mCurrentlySelectedOrigin = item.getOrigin();
+						mCurrentlySelectedDestination = item.getDestination();
 
 						startContextualActionMode();
 						return true;
@@ -157,31 +132,58 @@ public class RoutesListActivity extends SherlockFragmentActivity {
 		}
 	}
 
+	@Override
+	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+		return new CursorLoader(this, Constants.FAVORITE_CONTENT_URI,
+				new String[] { RoutesColumns._ID.string,
+						RoutesColumns.FROM_STATION.string,
+						RoutesColumns.TO_STATION.string,
+						RoutesColumns.FARE.string,
+						RoutesColumns.FARE_LAST_UPDATED.string,
+						RoutesColumns.AVERAGE_TRIP_SAMPLE_COUNT.string,
+						RoutesColumns.AVERAGE_TRIP_LENGTH.string }, null, null,
+				RoutesColumns._ID.string);
+	}
+
+	@Override
+	public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+		if (cursor.getCount() == 0) {
+			((TextView) findViewById(android.R.id.empty))
+					.setText(R.string.empty_favorites_list_message);
+		}
+		mRoutesAdapter.updateFromCursor(cursor);
+		refreshFares(cursor);
+		findViewById(R.id.progress).setVisibility(View.GONE);
+	}
+
+	@Override
+	public void onLoaderReset(Loader<Cursor> loader) {
+		// Nothing to do
+	}
+
 	@SuppressWarnings("unchecked")
 	private AdapterView<ListAdapter> getListView() {
 		return (AdapterView<ListAdapter>) findViewById(android.R.id.list);
 	}
 
-	private CursorAdapter mListAdapter;
-
-	protected CursorAdapter getListAdapter() {
-		return mListAdapter;
+	protected FavoritesArrayAdapter getListAdapter() {
+		return mRoutesAdapter;
 	}
 
-	protected void setListAdapter(SimpleCursorAdapter adapter) {
-		mListAdapter = adapter;
-		getListView().setAdapter(mListAdapter);
+	protected void setListAdapter(FavoritesArrayAdapter adapter) {
+		mRoutesAdapter = adapter;
+		getListView().setAdapter(mRoutesAdapter);
 	}
 
-	private void refreshFares() {
-		if (mQuery.moveToFirst()) {
+	private void refreshFares(Cursor cursor) {
+		if (cursor.moveToFirst()) {
 			do {
 				final Station orig = Station.getByAbbreviation(CursorUtils
-						.getString(mQuery, RoutesColumns.FROM_STATION));
+						.getString(cursor, RoutesColumns.FROM_STATION));
 				final Station dest = Station.getByAbbreviation(CursorUtils
-						.getString(mQuery, RoutesColumns.TO_STATION));
-				final Long id = CursorUtils.getLong(mQuery, RoutesColumns._ID);
-				final Long lastUpdateMillis = CursorUtils.getLong(mQuery,
+						.getString(cursor, RoutesColumns.TO_STATION));
+				final Long id = CursorUtils.getLong(cursor, RoutesColumns._ID);
+				final Long lastUpdateMillis = CursorUtils.getLong(cursor,
 						RoutesColumns.FARE_LAST_UPDATED);
 
 				Calendar now = Calendar.getInstance();
@@ -215,7 +217,7 @@ public class RoutesListActivity extends SherlockFragmentActivity {
 					};
 					fareTask.execute(new GetRouteFareTask.Params(orig, dest));
 				}
-			} while (mQuery.moveToNext());
+			} while (cursor.moveToNext());
 		}
 	}
 
@@ -235,9 +237,41 @@ public class RoutesListActivity extends SherlockFragmentActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		((TextView) findViewById(android.R.id.empty))
-				.setText(R.string.empty_favorites_list_message);
-		refreshFares();
+		Ticker.getInstance().startTicking(this);
+		if (mRoutesAdapter != null && !mRoutesAdapter.isEmpty()
+				&& !mRoutesAdapter.areEtdListenersActive()) {
+			mRoutesAdapter.setUpEtdListeners();
+		}
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		if (mRoutesAdapter != null && mRoutesAdapter.areEtdListenersActive()) {
+			mRoutesAdapter.clearEtdListeners();
+		}
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		Ticker.getInstance().stopTicking(this);
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		if (mRoutesAdapter != null) {
+			mRoutesAdapter.close();
+		}
+	}
+
+	@Override
+	public void onWindowFocusChanged(boolean hasFocus) {
+		super.onWindowFocusChanged(hasFocus);
+		if (hasFocus) {
+			Ticker.getInstance().startTicking(this);
+		}
 	}
 
 	public boolean onCreateOptionsMenu(Menu menu) {

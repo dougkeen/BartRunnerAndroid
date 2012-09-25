@@ -1,5 +1,11 @@
 package com.dougkeen.bart.model;
 
+import org.apache.commons.lang3.ObjectUtils;
+
+import com.dougkeen.bart.data.CursorUtils;
+import com.dougkeen.bart.data.RoutesColumns;
+
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -11,12 +17,39 @@ public class StationPair implements Parcelable {
 		this.destination = destination;
 	}
 
+	public StationPair(Long id, Station origin, Station destination) {
+		super();
+		this.origin = origin;
+		this.destination = destination;
+		this.id = id;
+	}
+
 	public StationPair(Parcel in) {
 		readFromParcel(in);
 	}
 
+	public static StationPair createFromCursor(Cursor cursor) {
+		StationPair pair = new StationPair(
+				Station.getByAbbreviation(CursorUtils.getString(cursor,
+						RoutesColumns.FROM_STATION)),
+				Station.getByAbbreviation(CursorUtils.getString(cursor,
+						RoutesColumns.TO_STATION)));
+		pair.id = CursorUtils.getLong(cursor, RoutesColumns._ID);
+		pair.fare = CursorUtils.getString(cursor, RoutesColumns.FARE);
+		pair.fareLastUpdated = CursorUtils.getLong(cursor,
+				RoutesColumns.FARE_LAST_UPDATED);
+		return pair;
+	}
+
+	private Long id;
 	private Station origin;
 	private Station destination;
+	private String fare;
+	private Long fareLastUpdated;
+
+	public Long getId() {
+		return id;
+	}
 
 	public Station getOrigin() {
 		return origin;
@@ -24,6 +57,22 @@ public class StationPair implements Parcelable {
 
 	public Station getDestination() {
 		return destination;
+	}
+
+	public String getFare() {
+		return fare;
+	}
+
+	public void setFare(String fare) {
+		this.fare = fare;
+	}
+
+	public Long getFareLastUpdated() {
+		return fareLastUpdated;
+	}
+
+	public void setFareLastUpdated(Long fareLastUpdated) {
+		this.fareLastUpdated = fareLastUpdated;
 	}
 
 	public boolean isBetweenStations(Station station1, Station station2) {
@@ -49,6 +98,14 @@ public class StationPair implements Parcelable {
 				+ ((destination == null) ? 0 : destination.hashCode());
 		result = prime * result + ((origin == null) ? 0 : origin.hashCode());
 		return result;
+	}
+
+	public boolean fareEquals(StationPair other) {
+		if (other == null)
+			return false;
+		return ObjectUtils.equals(getFare(), other.getFare())
+				&& ObjectUtils.equals(getFareLastUpdated(),
+						other.getFareLastUpdated());
 	}
 
 	@Override

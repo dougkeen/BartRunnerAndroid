@@ -10,8 +10,6 @@ public class Route {
 	private boolean requiresTransfer;
 	private Station transferStation;
 	private String direction;
-	private String fare;
-	private Long fareLastUpdated;
 
 	public Station getOrigin() {
 		return origin;
@@ -69,22 +67,6 @@ public class Route {
 		this.direction = direction;
 	}
 
-	public String getFare() {
-		return fare;
-	}
-
-	public void setFare(String fare) {
-		this.fare = fare;
-	}
-
-	public Long getFareLastUpdated() {
-		return fareLastUpdated;
-	}
-
-	public void setFareLastUpdated(Long fareLastUpdated) {
-		this.fareLastUpdated = fareLastUpdated;
-	}
-
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
@@ -100,10 +82,6 @@ public class Route {
 		builder.append(transferStation);
 		builder.append(", direction=");
 		builder.append(direction);
-		builder.append(", fare=");
-		builder.append(fare);
-		builder.append(", fareLastUpdated=");
-		builder.append(fareLastUpdated);
 		builder.append("]");
 		return builder.toString();
 	}

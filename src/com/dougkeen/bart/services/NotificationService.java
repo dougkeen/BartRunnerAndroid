@@ -1,4 +1,4 @@
-package com.dougkeen.bart;
+package com.dougkeen.bart.services;
 
 import java.util.List;
 
@@ -18,17 +18,19 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcelable;
 import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationCompat.Builder;
 import android.util.Log;
-import android.util.TimeFormatException;
 
-import com.dougkeen.bart.EtdService.EtdServiceBinder;
-import com.dougkeen.bart.EtdService.EtdServiceListener;
+import com.dougkeen.bart.BartRunnerApplication;
+import com.dougkeen.bart.R;
 import com.dougkeen.bart.model.Constants;
 import com.dougkeen.bart.model.Departure;
 import com.dougkeen.bart.model.StationPair;
+import com.dougkeen.bart.services.EtdService.EtdServiceBinder;
+import com.dougkeen.bart.services.EtdService.EtdServiceListener;
 
 public class NotificationService extends Service implements EtdServiceListener {
 
@@ -74,7 +76,7 @@ public class NotificationService extends Service implements EtdServiceListener {
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			mEtdService = ((EtdServiceBinder) service).getService();
 			if (getStationPair() != null) {
-				mEtdService.registerListener(NotificationService.this);
+				mEtdService.registerListener(NotificationService.this, false);
 			}
 			mBound = true;
 		}
@@ -142,7 +144,7 @@ public class NotificationService extends Service implements EtdServiceListener {
 		}
 
 		if (getStationPair() != null && mEtdService != null) {
-			mEtdService.registerListener(this);
+			mEtdService.registerListener(this, false);
 		}
 
 		Intent targetIntent = new Intent(Intent.ACTION_VIEW,
@@ -163,7 +165,7 @@ public class NotificationService extends Service implements EtdServiceListener {
 				getStationPair().getUri());
 		final Departure boardedDeparture = ((BartRunnerApplication) getApplication())
 				.getBoardedDeparture();
-		alarmIntent.putExtra("departure", boardedDeparture);
+		alarmIntent.putExtra("departure", (Parcelable) boardedDeparture);
 		mAlarmPendingIntent = PendingIntent.getBroadcast(this, 0, alarmIntent,
 				PendingIntent.FLAG_UPDATE_CURRENT);
 	}
@@ -317,7 +319,7 @@ public class NotificationService extends Service implements EtdServiceListener {
 						mStationPair.getOrigin().shortName + " to "
 								+ mStationPair.getDestination().shortName)
 				.setContentIntent(mNotificationIntent).setWhen(0);
-		if (android.os.Build.VERSION.SDK_INT > 16) {
+		if (android.os.Build.VERSION.SDK_INT >= 16) {
 			notificationBuilder
 					.setPriority(NotificationCompat.PRIORITY_HIGH)
 					.addAction(

@@ -1,23 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bart="http://schemas.android.com/apk/res/com.dougkeen.bart"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:paddingLeft="5dp"
     android:paddingRight="5dp" >
 
-    <TextView
-        android:id="@+id/fareText"
-        style="@style/FareTextView"
+    <com.dougkeen.bart.controls.CountdownTextView
+        android:id="@+id/countdownText"
+        style="@style/DepartureCountdownText"
         android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
-        android:maxLines="3" />
+        android:layout_alignParentTop="true"
+        android:gravity="right"
+        android:width="90dp"
+        bart:tickInterval="1" />
+
+    <com.dougkeen.bart.controls.TimedTextSwitcher
+        android:id="@+id/uncertainty"
+        style="@style/DepartureUncertaintyText"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/countdownText"
+        bart:tickInterval="1" />
 
     <TextView
         android:id="@+id/originText"
         style="@style/FavoriteListingTextView"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:layout_toLeftOf="@id/fareText"
+        android:layout_toLeftOf="@id/countdownText"
         android:text="Origin" />
 
     <TextView
@@ -32,7 +42,7 @@
         android:id="@+id/destinationText"
         style="@style/FavoriteListingTextView"
         android:layout_below="@id/originText"
-        android:layout_toLeftOf="@id/fareText"
+        android:layout_toLeftOf="@id/countdownText"
         android:layout_toRightOf="@id/to"
         android:text="Destination" />
 

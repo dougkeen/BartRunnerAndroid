@@ -1,12 +1,27 @@
 package com.dougkeen.bart;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ObjectUtils;
+
 import android.app.Application;
 import android.media.MediaPlayer;
+import android.os.Parcel;
+import android.util.Log;
 
+import com.dougkeen.bart.model.Constants;
 import com.dougkeen.bart.model.Departure;
 import com.dougkeen.util.Observable;
 
 public class BartRunnerApplication extends Application {
+	private static final int FIVE_MINUTES = 5 * 60 * 1000;
+
+	private static final String CACHE_FILE_NAME = "lastBoardedDeparture";
+
 	private Departure mBoardedDeparture;
 
 	private Observable<Boolean> mAlarmPending = new Observable<Boolean>(false);
@@ -26,11 +41,73 @@ public class BartRunnerApplication extends Application {
 	}
 
 	public Departure getBoardedDeparture() {
+		if (mBoardedDeparture == null) {
+			// see if there's a saved one
+			File cachedDepartureFile = new File(getCacheDir(), CACHE_FILE_NAME);
+			if (cachedDepartureFile.exists()) {
+				InputStream inputStream = null;
+				try {
+					inputStream = new FileInputStream(cachedDepartureFile);
+					byte[] byteArray = IOUtils.toByteArray(inputStream);
+					Parcel parcel = Parcel.obtain();
+					parcel.unmarshall(byteArray, 0, byteArray.length);
+					parcel.setDataPosition(0);
+					Departure lastBoardedDeparture = Departure.CREATOR
+							.createFromParcel(parcel);
+
+					/*
+					 * Check if the cached one is relatively recent. If so,
+					 * restore that to the application context
+					 */
+					long now = System.currentTimeMillis();
+					if (lastBoardedDeparture.getEstimatedArrivalTime() >= now
+							- FIVE_MINUTES
+							|| lastBoardedDeparture.getMeanEstimate() >= now
+									- 2 * FIVE_MINUTES) {
+						mBoardedDeparture = lastBoardedDeparture;
+					}
+				} catch (Exception e) {
+					Log.w(Constants.TAG,
+							"Couldn't read or unmarshal lastBoardedDeparture file",
+							e);
+					try {
+						cachedDepartureFile.delete();
+					} catch (SecurityException anotherException) {
+						Log.w(Constants.TAG,
+								"Couldn't delete lastBoardedDeparture file",
+								anotherException);
+					}
+				} finally {
+					IOUtils.closeQuietly(inputStream);
+				}
+			}
+		}
 		return mBoardedDeparture;
 	}
 
 	public void setBoardedDeparture(Departure boardedDeparture) {
-		this.mBoardedDeparture = boardedDeparture;
+		if (!ObjectUtils.equals(boardedDeparture, mBoardedDeparture)
+				|| ObjectUtils.compare(mBoardedDeparture, boardedDeparture) != 0) {
+			this.mBoardedDeparture = boardedDeparture;
+
+			if (mBoardedDeparture != null) {
+				File cachedDepartureFile = new File(getCacheDir(),
+						CACHE_FILE_NAME);
+				FileOutputStream fileOutputStream = null;
+				try {
+					fileOutputStream = new FileOutputStream(cachedDepartureFile);
+					Parcel parcel = Parcel.obtain();
+					mBoardedDeparture.writeToParcel(parcel, 0);
+					fileOutputStream.write(parcel.marshall());
+				} catch (Exception e) {
+					Log.w(Constants.TAG,
+							"Couldn't write last boarded departure cache file",
+							e);
+				} finally {
+					IOUtils.closeQuietly(fileOutputStream);
+				}
+			}
+		}
 	}
 
 	public boolean isAlarmSounding() {

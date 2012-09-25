@@ -17,6 +17,14 @@
         android:layout_weight="1"
         android:visibility="gone" />
 
+    <ProgressBar
+        android:id="@+id/progress"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical|center_horizontal"
+        android:layout_weight="1000" />
+
     <FrameLayout
         style="ButtonBar"
         android:layout_width="match_parent"

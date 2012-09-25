@@ -43,7 +43,7 @@ public class TimedTextSwitcher extends TextSwitcher implements
 
 	public void setTextProvider(TextProvider textProvider) {
 		mTextProvider = textProvider;
-		Ticker.getInstance().addSubscriber(this);
+		Ticker.getInstance().addSubscriber(this, getContext());
 	}
 
 	private CharSequence mLastText;
