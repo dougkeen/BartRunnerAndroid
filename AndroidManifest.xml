@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.dougkeen.bart"
     android:installLocation="auto"
-    android:versionCode="21"
-    android:versionName="2.1.0" >
+    android:versionCode="22"
+    android:versionName="2.1.0-beta" >
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
