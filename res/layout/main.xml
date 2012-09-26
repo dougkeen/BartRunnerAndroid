@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:gravity="center"
     android:orientation="vertical" >
 
     <ListView
@@ -17,13 +18,18 @@
         android:layout_weight="1"
         android:visibility="gone" />
 
-    <ProgressBar
+    <FrameLayout
         android:id="@+id/progress"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical|center_horizontal"
-        android:layout_weight="1000" />
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1000" >
+
+        <ProgressBar
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
+    </FrameLayout>
 
     <FrameLayout
         style="ButtonBar"
