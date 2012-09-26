@@ -157,8 +157,9 @@ public class EtdService extends Service {
 		protected void registerListener(EtdServiceListener listener,
 				boolean limitToFirstNonDeparted) {
 			mListeners.put(listener, true);
-			if (!limitToFirstNonDeparted)
+			if (!limitToFirstNonDeparted) {
 				mLimitToFirstNonDeparted = false;
+			}
 			if (!mPendingEtdRequest) {
 				mStarted = true;
 				fetchLatestDepartures();
@@ -578,6 +579,8 @@ public class EtdService extends Service {
 					.getMeanEstimate()) {
 				fetchLatestSchedule();
 				return;
+			} else if (!lastDeparture.hasAnyArrivalEstimate()) {
+				applyScheduleInformation(mLatestScheduleInfo);
 			}
 		}
 

@@ -124,22 +124,29 @@ public class FavoritesArrayAdapter extends ArrayAdapter<StationPair> {
 		}
 		for (int i = 0; i < getCount(); i++) {
 			StationPair adapterItem = getItem(i);
-			StationPair cursorItem = StationPair.createFromCursor(cursor);
-			while (!cursorItem.equals(adapterItem)) {
-				remove(adapterItem);
-				if (i < getCount()) {
-					adapterItem = getItem(i);
-				} else {
-					break;
+			if (cursor.isAfterLast()) {
+				while (i < getCount()) {
+					remove(getItem(i));
 				}
+			} else {
+				StationPair cursorItem = StationPair.createFromCursor(cursor);
+				while (!cursorItem.equals(adapterItem)) {
+					remove(adapterItem);
+					if (i < getCount()) {
+						adapterItem = getItem(i);
+					} else {
+						break;
+					}
+				}
+				if (cursorItem.equals(adapterItem)
+						&& !cursorItem.fareEquals(adapterItem)) {
+					adapterItem.setFare(cursorItem.getFare());
+					adapterItem.setFareLastUpdated(cursorItem
+							.getFareLastUpdated());
+					notifyDataSetChanged();
+				}
+				cursor.moveToNext();
 			}
-			if (cursorItem.equals(adapterItem)
-					&& !cursorItem.fareEquals(adapterItem)) {
-				adapterItem.setFare(cursorItem.getFare());
-				adapterItem.setFareLastUpdated(cursorItem.getFareLastUpdated());
-				notifyDataSetChanged();
-			}
-			cursor.moveToNext();
 		}
 		while (!cursor.isAfterLast()) {
 			add(StationPair.createFromCursor(cursor));
