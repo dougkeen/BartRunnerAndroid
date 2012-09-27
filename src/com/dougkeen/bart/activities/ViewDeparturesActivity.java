@@ -29,7 +29,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ImageView;
-import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -172,20 +172,19 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 			}
 		}
 		setListAdapter(mDeparturesAdapter);
-		getListView().setEmptyView(findViewById(android.R.id.empty));
-		getListView().setOnItemClickListener(
-				new AdapterView.OnItemClickListener() {
-					@Override
-					public void onItemClick(AdapterView<?> adapterView,
-							View view, int position, long id) {
-						mSelectedDeparture = (Departure) getListAdapter()
-								.getItem(position);
-						if (mActionMode != null) {
-							mActionMode.finish();
-						}
-						startDepartureActionMode();
-					}
-				});
+		final ListView listView = getListView();
+		listView.setEmptyView(findViewById(android.R.id.empty));
+		listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> adapterView, View view,
+					int position, long id) {
+				mSelectedDeparture = (Departure) getListAdapter().getItem(
+						position);
+				view.setSelected(true);
+				startDepartureActionMode();
+			}
+		});
 
 		findViewById(R.id.missingDepartureText).setVisibility(View.VISIBLE);
 
@@ -275,9 +274,8 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 				+ mDestination.name);
 	}
 
-	@SuppressWarnings("unchecked")
-	private AdapterView<ListAdapter> getListView() {
-		return (AdapterView<ListAdapter>) findViewById(android.R.id.list);
+	private ListView getListView() {
+		return (ListView) findViewById(android.R.id.list);
 	}
 
 	private final ServiceConnection mConnection = new ServiceConnection() {
@@ -487,7 +485,8 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 	}
 
 	private void startDepartureActionMode() {
-		mActionMode = startActionMode(new DepartureActionMode());
+		if (mActionMode == null)
+			mActionMode = startActionMode(new DepartureActionMode());
 		mActionMode.setTitle(mSelectedDeparture.getTrainDestinationName());
 		mActionMode.setSubtitle(mSelectedDeparture.getTrainLengthText());
 	}
@@ -531,6 +530,8 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 
 		@Override
 		public void onDestroyActionMode(ActionMode mode) {
+			getListView().clearChoices();
+			getListView().requestLayout();
 			mActionMode = null;
 		}
 

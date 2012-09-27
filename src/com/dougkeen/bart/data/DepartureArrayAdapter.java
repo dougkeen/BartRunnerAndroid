@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
@@ -20,6 +21,7 @@ import android.widget.ViewSwitcher.ViewFactory;
 
 import com.dougkeen.bart.R;
 import com.dougkeen.bart.controls.CountdownTextView;
+import com.dougkeen.bart.controls.DepartureListItemLayout;
 import com.dougkeen.bart.controls.TimedTextSwitcher;
 import com.dougkeen.bart.model.Departure;
 import com.dougkeen.bart.model.TextProvider;
@@ -58,11 +60,11 @@ public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View view;
-		if (convertView != null && convertView instanceof RelativeLayout) {
+		if (convertView != null
+				&& convertView instanceof DepartureListItemLayout) {
 			view = convertView;
 		} else {
-			LayoutInflater inflater = LayoutInflater.from(getContext());
-			view = inflater.inflate(R.layout.departure_listing, parent, false);
+			view = new DepartureListItemLayout(getContext());
 		}
 
 		final Departure departure = getItem(position);
