@@ -204,7 +204,9 @@ public class NotificationService extends Service implements EtdServiceListener {
 
 	private void cancelAlarm() {
 		((BartRunnerApplication) getApplication()).setAlarmPending(false);
-		mAlarmManager.cancel(mAlarmPendingIntent);
+		if (mAlarmManager != null) {
+			mAlarmManager.cancel(mAlarmPendingIntent);
+		}
 	}
 
 	@Override
@@ -266,6 +268,11 @@ public class NotificationService extends Service implements EtdServiceListener {
 			shutDown(false);
 		}
 
+		// Departure must have changed... fire the alarm
+		if (getAlarmClockTime() < System.currentTimeMillis()) {
+			triggerAlarmImmediately();
+		}
+
 		updateNotification();
 
 		final int pollIntervalMillis = getPollIntervalMillis();
@@ -285,8 +292,12 @@ public class NotificationService extends Service implements EtdServiceListener {
 	private void shutDown(boolean isBeingDestroyed) {
 		if (!mHasShutDown) {
 			mHasShutDown = true;
-			mEtdService.unregisterListener(this);
-			mNotificationManager.cancel(DEPARTURE_NOTIFICATION_ID);
+			if (mEtdService != null) {
+				mEtdService.unregisterListener(this);
+			}
+			if (mNotificationManager != null) {
+				mNotificationManager.cancel(DEPARTURE_NOTIFICATION_ID);
+			}
 			cancelAlarm();
 			if (!isBeingDestroyed)
 				stopSelf();
@@ -355,9 +366,9 @@ public class NotificationService extends Service implements EtdServiceListener {
 		}
 
 		if (secondsToAlarm > 3 * 60) {
-			return 30 * 1000;
+			return 15 * 1000;
 		} else {
-			return 10 * 1000;
+			return 6 * 1000;
 		}
 	}
 
