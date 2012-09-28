@@ -8,7 +8,9 @@ import java.io.InputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ObjectUtils;
 
+import android.app.AlarmManager;
 import android.app.Application;
+import android.content.Context;
 import android.media.MediaPlayer;
 import android.os.Parcel;
 import android.util.Log;
@@ -88,6 +90,13 @@ public class BartRunnerApplication extends Application {
 	public void setBoardedDeparture(Departure boardedDeparture) {
 		if (!ObjectUtils.equals(boardedDeparture, mBoardedDeparture)
 				|| ObjectUtils.compare(mBoardedDeparture, boardedDeparture) != 0) {
+			// Cancel any pending alarms for the current departure
+			if (this.mBoardedDeparture != null
+					&& this.mBoardedDeparture.isAlarmPending()) {
+				this.mBoardedDeparture.cancelAlarm(this,
+						(AlarmManager) getSystemService(Context.ALARM_SERVICE));
+			}
+
 			this.mBoardedDeparture = boardedDeparture;
 
 			if (mBoardedDeparture != null) {

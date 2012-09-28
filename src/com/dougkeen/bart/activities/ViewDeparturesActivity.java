@@ -399,7 +399,7 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 			return true;
 		} else if (itemId == R.id.cancel_alarm_button) {
 			Intent intent = new Intent(this, NotificationService.class);
-			intent.putExtra("cancelAlarm", true);
+			intent.putExtra("cancelNotifications", true);
 			startService(intent);
 			return true;
 		} else if (itemId == R.id.view_on_bart_site_button) {
@@ -424,14 +424,20 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 	private void refreshBoardedDeparture() {
 		final Departure boardedDeparture = ((BartRunnerApplication) getApplication())
 				.getBoardedDeparture();
-		if (boardedDeparture == null
+		final View yourTrainSection = findViewById(R.id.yourTrainSection);
+		int currentVisibility = yourTrainSection.getVisibility();
+
+		final boolean boardedDepartureDoesNotApply = boardedDeparture == null
 				|| boardedDeparture.getStationPair() == null
-				|| !boardedDeparture.getStationPair().equals(getStationPair())) {
-			findViewById(R.id.yourTrainSection).setVisibility(View.GONE);
+				|| !boardedDeparture.getStationPair().equals(getStationPair());
+
+		if (boardedDepartureDoesNotApply) {
+			if (currentVisibility != View.GONE) {
+				yourTrainSection.setVisibility(View.GONE);
+			}
 			return;
 		}
 
-		findViewById(R.id.yourTrainSection).setVisibility(View.VISIBLE);
 		((TextView) findViewById(R.id.yourTrainDestinationText))
 				.setText(boardedDeparture.getTrainDestination().toString());
 
@@ -482,6 +488,10 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 						.getEstimatedArrivalMinutesLeftText(ViewDeparturesActivity.this);
 			}
 		});
+
+		if (currentVisibility != View.VISIBLE) {
+			yourTrainSection.setVisibility(View.VISIBLE);
+		}
 	}
 
 	private void startDepartureActionMode() {
@@ -512,8 +522,8 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 				application.setBoardedDeparture(mSelectedDeparture);
 				refreshBoardedDeparture();
 
-				// Stop the notification service
-				stopService(new Intent(ViewDeparturesActivity.this,
+				// Start the notification service
+				startService(new Intent(ViewDeparturesActivity.this,
 						NotificationService.class));
 
 				// Don't prompt for alert if train is about to leave

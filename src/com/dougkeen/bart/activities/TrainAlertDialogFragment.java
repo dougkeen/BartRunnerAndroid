@@ -4,7 +4,6 @@ import net.simonvt.widget.NumberPicker;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
@@ -14,7 +13,6 @@ import android.support.v4.app.FragmentActivity;
 import com.WazaBe.HoloEverywhere.AlertDialog;
 import com.dougkeen.bart.BartRunnerApplication;
 import com.dougkeen.bart.R;
-import com.dougkeen.bart.services.NotificationService;
 
 public class TrainAlertDialogFragment extends DialogFragment {
 
@@ -85,10 +83,10 @@ public class TrainAlertDialogFragment extends DialogFragment {
 										alertLeadTime);
 								editor.commit();
 
-								Intent intent = new Intent(getActivity(),
-										NotificationService.class);
-								intent.putExtra("alertLeadTime", alertLeadTime);
-								getActivity().startService(intent);
+								((BartRunnerApplication) getActivity()
+										.getApplication())
+										.getBoardedDeparture().setUpAlarm(
+												alertLeadTime);
 							}
 						})
 				.setNegativeButton(R.string.skip_alert,

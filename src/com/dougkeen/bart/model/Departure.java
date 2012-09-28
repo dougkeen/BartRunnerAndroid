@@ -3,11 +3,22 @@ package com.dougkeen.bart.model;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.apache.commons.lang3.time.DateFormatUtils;
+
+import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationCompat.Builder;
 import android.text.format.DateFormat;
 import android.util.Log;
+
+import com.dougkeen.bart.R;
+import com.dougkeen.bart.services.NotificationService;
 
 public class Departure implements Parcelable, Comparable<Departure> {
 	private static final int MINIMUM_MERGE_OVERLAP_MILLIS = 10000;
@@ -55,6 +66,9 @@ public class Departure implements Parcelable, Comparable<Departure> {
 	private boolean beganAsDeparted;
 
 	private long arrivalTimeOverride;
+
+	private int alarmLeadTimeMinutes;
+	private boolean alarmPending;
 
 	public Station getOrigin() {
 		return origin;
@@ -273,14 +287,14 @@ public class Departure implements Parcelable, Comparable<Departure> {
 		if (minutesLeft < 0) {
 			return "Arrived at destination";
 		} else if (minutesLeft == 0) {
-			return "Arrives around " + getEstimatedArrivalTimeText(context)
+			return "Arrives ~" + getEstimatedArrivalTimeText(context)
 					+ " (<1 min)";
 		} else if (minutesLeft == 1) {
-			return "Arrives around " + getEstimatedArrivalTimeText(context)
+			return "Arrives ~" + getEstimatedArrivalTimeText(context)
 					+ " (1 min)";
 		} else {
-			return "Arrives around " + getEstimatedArrivalTimeText(context)
-					+ " (" + minutesLeft + " mins)";
+			return "Arrives ~" + getEstimatedArrivalTimeText(context) + " ("
+					+ minutesLeft + " mins)";
 		}
 	}
 
@@ -460,6 +474,112 @@ public class Departure implements Parcelable, Comparable<Departure> {
 		}
 	}
 
+	public int getAlarmLeadTimeMinutes() {
+		return alarmLeadTimeMinutes;
+	}
+
+	public boolean isAlarmPending() {
+		return alarmPending;
+	}
+
+	private PendingIntent getAlarmIntent(Context context) {
+		return PendingIntent.getBroadcast(context, 0, new Intent(
+				Constants.ACTION_ALARM, getStationPair().getUri()),
+				PendingIntent.FLAG_UPDATE_CURRENT);
+	}
+
+	private long getAlarmClockTime() {
+		return getMeanEstimate() - alarmLeadTimeMinutes * 60 * 1000;
+	}
+
+	public int getSecondsUntilAlarm() {
+		return getMeanSecondsLeft() - getAlarmLeadTimeMinutes() * 60;
+	}
+
+	public void setUpAlarm(int leadTimeMinutes) {
+		this.alarmLeadTimeMinutes = leadTimeMinutes;
+		this.alarmPending = true;
+	}
+
+	public void updateAlarm(Context context, AlarmManager alarmManager) {
+		if (alarmManager == null)
+			return;
+
+		if (isAlarmPending() && getAlarmLeadTimeMinutes() > 0) {
+			final PendingIntent alarmIntent = getAlarmIntent(context);
+			alarmManager.cancel(alarmIntent);
+
+			long alertTime = getAlarmClockTime();
+
+			alarmManager.set(AlarmManager.RTC_WAKEUP, alertTime, alarmIntent);
+
+			if (Log.isLoggable(Constants.TAG, Log.VERBOSE))
+				Log.v(Constants.TAG,
+						"Scheduling alarm for "
+								+ DateFormatUtils.format(alertTime, "h:mm:ss"));
+		}
+	}
+
+	public void cancelAlarm(Context context, AlarmManager alarmManager) {
+		alarmManager.cancel(getAlarmIntent(context));
+		this.alarmPending = false;
+	}
+
+	private PendingIntent notificationIntent;
+
+	private PendingIntent getNotificationIntent(Context context) {
+		if (notificationIntent == null) {
+			Intent targetIntent = new Intent(Intent.ACTION_VIEW,
+					getStationPair().getUri());
+			targetIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			notificationIntent = PendingIntent.getActivity(context, 0,
+					targetIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+		}
+		return notificationIntent;
+	}
+
+	public Notification createNotification(Context context) {
+		final int halfMinutes = (getMeanSecondsLeft() + 15) / 30;
+		float minutes = halfMinutes / 2f;
+		final String minutesText = (minutes < 1) ? "Less than one minute"
+				: (String.format("~%.1f minute", minutes) + ((minutes != 1.0) ? "s"
+						: ""));
+
+		final Intent cancelAlarmIntent = new Intent(context,
+				NotificationService.class);
+		cancelAlarmIntent.putExtra("cancelNotifications", true);
+		Builder notificationBuilder = new NotificationCompat.Builder(context)
+				.setOngoing(true)
+				.setSmallIcon(R.drawable.ic_stat_notification)
+				.setContentTitle(
+						getOrigin().shortName + " to "
+								+ getPassengerDestination().shortName)
+				.setContentIntent(getNotificationIntent(context)).setWhen(0);
+		if (android.os.Build.VERSION.SDK_INT >= 16) {
+			notificationBuilder.setPriority(NotificationCompat.PRIORITY_HIGH)
+					.setContentText(minutesText + " until departure");
+			if (isAlarmPending()) {
+				notificationBuilder.addAction(
+						R.drawable.ic_action_cancel_alarm,
+						"Cancel alarm",
+						PendingIntent.getService(context, 0, cancelAlarmIntent,
+								PendingIntent.FLAG_UPDATE_CURRENT)).setSubText(
+						"Alert " + getAlarmLeadTimeMinutes()
+								+ " minutes before departure");
+			}
+		} else if (isAlarmPending()) {
+			notificationBuilder.setContentText(minutesText
+					+ " to departure (alarm at " + getAlarmLeadTimeMinutes()
+					+ " min" + ((getAlarmLeadTimeMinutes() == 1) ? "" : "s")
+					+ ")");
+		} else {
+			notificationBuilder
+					.setContentText(minutesText + " until departure");
+		}
+
+		return notificationBuilder.build();
+	}
+
 	@Override
 	public String toString() {
 		java.text.DateFormat format = SimpleDateFormat.getTimeInstance();
@@ -533,4 +653,8 @@ public class Departure implements Parcelable, Comparable<Departure> {
 			return new Departure[size];
 		}
 	};
+
+	public void notifyAlarmHasBeenHandled() {
+		this.alarmPending = false;
+	}
 }
