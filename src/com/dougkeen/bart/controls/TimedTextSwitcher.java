@@ -2,11 +2,11 @@ package com.dougkeen.bart.controls;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.dougkeen.bart.model.TextProvider;
-
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.TextSwitcher;
+
+import com.dougkeen.bart.model.TextProvider;
 
 public class TimedTextSwitcher extends TextSwitcher implements
 		Ticker.TickSubscriber {

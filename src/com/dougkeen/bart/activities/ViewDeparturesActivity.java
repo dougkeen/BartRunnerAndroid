@@ -10,8 +10,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.database.Cursor;
-import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -28,7 +26,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
-import android.widget.ImageView;
+import android.widget.Checkable;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -41,19 +39,18 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.dougkeen.bart.BartRunnerApplication;
 import com.dougkeen.bart.R;
-import com.dougkeen.bart.controls.CountdownTextView;
 import com.dougkeen.bart.controls.Ticker;
+import com.dougkeen.bart.controls.YourTrainLayout;
 import com.dougkeen.bart.data.DepartureArrayAdapter;
 import com.dougkeen.bart.data.RoutesColumns;
 import com.dougkeen.bart.model.Constants;
 import com.dougkeen.bart.model.Departure;
 import com.dougkeen.bart.model.Station;
 import com.dougkeen.bart.model.StationPair;
-import com.dougkeen.bart.model.TextProvider;
+import com.dougkeen.bart.services.BoardedDepartureService;
 import com.dougkeen.bart.services.EtdService;
 import com.dougkeen.bart.services.EtdService.EtdServiceBinder;
 import com.dougkeen.bart.services.EtdService.EtdServiceListener;
-import com.dougkeen.bart.services.NotificationService;
 import com.dougkeen.util.Observer;
 import com.dougkeen.util.WakeLocker;
 
@@ -97,6 +94,8 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 		}
 
 		final Uri uri = mUri;
+
+		final BartRunnerApplication bartRunnerApplication = (BartRunnerApplication) getApplication();
 
 		if (savedInstanceState != null
 				&& savedInstanceState.containsKey("origin")
@@ -166,41 +165,41 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 				mSelectedDeparture = (Departure) savedInstanceState
 						.getParcelable("selectedDeparture");
 			}
-			if (savedInstanceState.getBoolean("hasActionMode")
+			if (savedInstanceState.getBoolean("hasDepartureActionMode")
 					&& mSelectedDeparture != null) {
 				startDepartureActionMode();
+			}
+			if (savedInstanceState.getBoolean("hasYourTrainActionMode")
+					&& mSelectedDeparture != null) {
+				((Checkable) findViewById(R.id.yourTrainSection))
+						.setChecked(true);
+				startYourTrainActionMode(bartRunnerApplication);
 			}
 		}
 		setListAdapter(mDeparturesAdapter);
 		final ListView listView = getListView();
 		listView.setEmptyView(findViewById(android.R.id.empty));
 		listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> adapterView, View view,
-					int position, long id) {
-				mSelectedDeparture = (Departure) getListAdapter().getItem(
-						position);
-				view.setSelected(true);
-				startDepartureActionMode();
-			}
-		});
+		listView.setOnItemClickListener(mListItemClickListener);
+		listView.setOnItemLongClickListener(mListItemLongClickListener);
 
 		findViewById(R.id.missingDepartureText).setVisibility(View.VISIBLE);
+
+		findViewById(R.id.yourTrainSection).setOnClickListener(
+				mYourTrainSectionClickListener);
 
 		refreshBoardedDeparture();
 
 		getSupportActionBar().setHomeButtonEnabled(true);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-		final BartRunnerApplication bartRunnerApplication = (BartRunnerApplication) getApplication();
 		if (bartRunnerApplication.shouldPlayAlarmRingtone()) {
 			soundTheAlarm();
 		}
 
 		if (bartRunnerApplication.isAlarmSounding()) {
 			Builder builder = new AlertDialog.Builder(this);
-			builder.setMessage(R.string.train_alert_text)
+			builder.setMessage(R.string.train_alarm_text)
 					.setCancelable(false)
 					.setNeutralButton(R.string.silence_alarm,
 							new DialogInterface.OnClickListener() {
@@ -217,19 +216,19 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 	private void soundTheAlarm() {
 		final BartRunnerApplication application = (BartRunnerApplication) getApplication();
 
-		Uri alertSound = RingtoneManager
+		Uri alarmSound = RingtoneManager
 				.getDefaultUri(RingtoneManager.TYPE_ALARM);
 
-		if (alertSound == null || !tryToPlayRingtone(alertSound)) {
-			alertSound = RingtoneManager
+		if (alarmSound == null || !tryToPlayRingtone(alarmSound)) {
+			alarmSound = RingtoneManager
 					.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-			if (alertSound == null || !tryToPlayRingtone(alertSound)) {
-				alertSound = RingtoneManager
+			if (alarmSound == null || !tryToPlayRingtone(alarmSound)) {
+				alarmSound = RingtoneManager
 						.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
 			}
 		}
 		if (application.getAlarmMediaPlayer() == null) {
-			tryToPlayRingtone(alertSound);
+			tryToPlayRingtone(alarmSound);
 		}
 		mHandler.postDelayed(new Runnable() {
 			@Override
@@ -296,7 +295,54 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 		}
 	};
 
-	private Observer<Boolean> mAlarmPendingObserver;
+	private boolean mWasLongClick = false;
+
+	private final AdapterView.OnItemClickListener mListItemClickListener = new AdapterView.OnItemClickListener() {
+		@Override
+		public void onItemClick(AdapterView<?> adapterView, View view,
+				int position, long id) {
+			if (mWasLongClick) {
+				mWasLongClick = false;
+				return;
+			}
+
+			if (mActionMode != null) {
+				/*
+				 * If action mode is displayed, cancel out of that
+				 */
+				mActionMode.finish();
+				getListView().clearChoices();
+			} else {
+				/*
+				 * Otherwise select the clicked departure as the one the user
+				 * wants to board
+				 */
+				mSelectedDeparture = (Departure) getListAdapter().getItem(
+						position);
+				setBoardedDeparture(mSelectedDeparture);
+			}
+		}
+	};
+
+	private final AdapterView.OnItemLongClickListener mListItemLongClickListener = new AdapterView.OnItemLongClickListener() {
+		@Override
+		public boolean onItemLongClick(AdapterView<?> adapterView, View view,
+				int position, long id) {
+			mWasLongClick = true;
+			mSelectedDeparture = (Departure) getListAdapter().getItem(position);
+			view.setSelected(true);
+			startDepartureActionMode();
+			return false;
+		}
+	};
+
+	private final View.OnClickListener mYourTrainSectionClickListener = new View.OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			((Checkable) v).setChecked(true);
+			startYourTrainActionMode((BartRunnerApplication) getApplication());
+		}
+	};
 
 	protected DepartureArrayAdapter getListAdapter() {
 		return mDeparturesAdapter;
@@ -312,10 +358,6 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 		super.onStop();
 		if (mEtdService != null)
 			mEtdService.unregisterListener(this);
-		if (mAlarmPendingObserver != null)
-			((BartRunnerApplication) getApplication())
-					.getAlarmPendingObservable().unregisterObserver(
-							mAlarmPendingObserver);
 		if (mBound)
 			unbindService(mConnection);
 		Ticker.getInstance().stopTicking(this);
@@ -337,7 +379,10 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 			}
 			outState.putParcelableArray("departures", departures);
 			outState.putParcelable("selectedDeparture", mSelectedDeparture);
-			outState.putBoolean("hasActionMode", mActionMode != null);
+			outState.putBoolean("hasDepartureActionMode",
+					isDepartureActionModeActive());
+			outState.putBoolean("hasYourTrainActionMode",
+					isYourTrainActionModeActive());
 			outState.putString("origin", mOrigin.abbreviation);
 			outState.putString("destination", mDestination.abbreviation);
 		}
@@ -366,25 +411,6 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getSupportMenuInflater();
 		inflater.inflate(R.menu.route_menu, menu);
-		final MenuItem cancelAlarmButton = menu
-				.findItem(R.id.cancel_alarm_button);
-		final BartRunnerApplication application = (BartRunnerApplication) getApplication();
-		if (application.isAlarmPending()) {
-			cancelAlarmButton.setVisible(true);
-		}
-		mAlarmPendingObserver = new Observer<Boolean>() {
-			@Override
-			public void onUpdate(final Boolean newValue) {
-				runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						cancelAlarmButton.setVisible(newValue);
-					}
-				});
-			}
-		};
-		application.getAlarmPendingObservable().registerObserver(
-				mAlarmPendingObserver);
 		return true;
 	}
 
@@ -396,11 +422,6 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 					Constants.FAVORITE_CONTENT_URI);
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(intent);
-			return true;
-		} else if (itemId == R.id.cancel_alarm_button) {
-			Intent intent = new Intent(this, NotificationService.class);
-			intent.putExtra("cancelNotifications", true);
-			startService(intent);
 			return true;
 		} else if (itemId == R.id.view_on_bart_site_button) {
 			startActivity(new Intent(
@@ -424,7 +445,7 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 	private void refreshBoardedDeparture() {
 		final Departure boardedDeparture = ((BartRunnerApplication) getApplication())
 				.getBoardedDeparture();
-		final View yourTrainSection = findViewById(R.id.yourTrainSection);
+		final YourTrainLayout yourTrainSection = (YourTrainLayout) findViewById(R.id.yourTrainSection);
 		int currentVisibility = yourTrainSection.getVisibility();
 
 		final boolean boardedDepartureDoesNotApply = boardedDeparture == null
@@ -433,65 +454,43 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 
 		if (boardedDepartureDoesNotApply) {
 			if (currentVisibility != View.GONE) {
-				yourTrainSection.setVisibility(View.GONE);
+				hideYourTrainSection();
 			}
 			return;
 		}
 
-		((TextView) findViewById(R.id.yourTrainDestinationText))
-				.setText(boardedDeparture.getTrainDestination().toString());
-
-		((TextView) findViewById(R.id.yourTrainTrainLengthText))
-				.setText(boardedDeparture.getTrainLengthText());
-
-		ImageView colorBar = (ImageView) findViewById(R.id.yourTrainDestinationColorBar);
-		((GradientDrawable) colorBar.getDrawable()).setColor(Color
-				.parseColor(boardedDeparture.getTrainDestinationColor()));
-		if (boardedDeparture.isBikeAllowed()) {
-			((ImageView) findViewById(R.id.yourTrainBikeIcon))
-					.setVisibility(View.VISIBLE);
-		} else {
-			((ImageView) findViewById(R.id.yourTrainBikeIcon))
-					.setVisibility(View.INVISIBLE);
-		}
-		if (boardedDeparture.getRequiresTransfer()) {
-			((ImageView) findViewById(R.id.yourTrainXferIcon))
-					.setVisibility(View.VISIBLE);
-		} else {
-			((ImageView) findViewById(R.id.yourTrainXferIcon))
-					.setVisibility(View.INVISIBLE);
-		}
-		CountdownTextView departureCountdown = (CountdownTextView) findViewById(R.id.yourTrainDepartureCountdown);
-		CountdownTextView arrivalCountdown = (CountdownTextView) findViewById(R.id.yourTrainArrivalCountdown);
-
-		departureCountdown.setText("Leaves in "
-				+ boardedDeparture.getCountdownText() + " "
-				+ boardedDeparture.getUncertaintyText());
-		departureCountdown.setTextProvider(new TextProvider() {
-			@Override
-			public String getText(long tickNumber) {
-				if (boardedDeparture.hasDeparted()) {
-					return "Departed";
-				} else {
-					return "Leaves in " + boardedDeparture.getCountdownText()
-							+ " " + boardedDeparture.getUncertaintyText();
-				}
-			}
-		});
-
-		arrivalCountdown.setText(boardedDeparture
-				.getEstimatedArrivalMinutesLeftText(this));
-		arrivalCountdown.setTextProvider(new TextProvider() {
-			@Override
-			public String getText(long tickNumber) {
-				return boardedDeparture
-						.getEstimatedArrivalMinutesLeftText(ViewDeparturesActivity.this);
-			}
-		});
+		yourTrainSection.updateFromDeparture(boardedDeparture);
 
 		if (currentVisibility != View.VISIBLE) {
-			yourTrainSection.setVisibility(View.VISIBLE);
+			showYourTrainSection(yourTrainSection);
 		}
+
+		if (mActionMode == null) {
+			for (int i = getListAdapter().getCount() - 1; i >= 0; i--) {
+				if (getListAdapter().getItem(i).equals(boardedDeparture)) {
+					getListView().setSelection(i);
+					final Checkable listItem = (Checkable) getListView()
+							.getChildAt(i);
+					if (listItem != null) {
+						listItem.setChecked(true);
+					}
+					break;
+				}
+			}
+			getListView().requestLayout();
+		}
+
+	}
+
+	private void setBoardedDeparture(Departure selectedDeparture) {
+		final BartRunnerApplication application = (BartRunnerApplication) getApplication();
+		selectedDeparture.setPassengerDestination(mDestination);
+		application.setBoardedDeparture(selectedDeparture);
+		refreshBoardedDeparture();
+
+		// Start the notification service
+		startService(new Intent(ViewDeparturesActivity.this,
+				BoardedDepartureService.class));
 	}
 
 	private void startDepartureActionMode() {
@@ -511,26 +510,14 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 
 		@Override
 		public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+			((Checkable) findViewById(R.id.yourTrainSection)).setChecked(false);
 			return false;
 		}
 
 		@Override
 		public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 			if (item.getItemId() == R.id.boardTrain) {
-				final BartRunnerApplication application = (BartRunnerApplication) getApplication();
-				mSelectedDeparture.setPassengerDestination(mDestination);
-				application.setBoardedDeparture(mSelectedDeparture);
-				refreshBoardedDeparture();
-
-				// Start the notification service
-				startService(new Intent(ViewDeparturesActivity.this,
-						NotificationService.class));
-
-				// Don't prompt for alert if train is about to leave
-				if (mSelectedDeparture.getMeanSecondsLeft() / 60 > 1) {
-					new TrainAlertDialogFragment().show(
-							getSupportFragmentManager(), "dialog");
-				}
+				setBoardedDeparture(mSelectedDeparture);
 
 				mode.finish();
 				return true;
@@ -547,6 +534,158 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 
 	}
 
+	private void startYourTrainActionMode(BartRunnerApplication application) {
+		if (mActionMode == null)
+			mActionMode = startActionMode(new YourTrainActionMode());
+		mActionMode.setTitle(R.string.your_train);
+		if (application.getBoardedDeparture() != null
+				&& application.getBoardedDeparture().isAlarmPending()) {
+			int leadTime = application.getBoardedDeparture()
+					.getAlarmLeadTimeMinutes();
+			mActionMode.setSubtitle(getAlarmSubtitle(leadTime));
+		} else {
+			mActionMode.setSubtitle(null);
+		}
+	}
+
+	private String getAlarmSubtitle(int leadTime) {
+		if (leadTime == 0)
+			return null;
+		return "Alarm " + leadTime + " minute" + (leadTime != 1 ? "s" : "")
+				+ " before departure";
+	}
+
+	private class YourTrainActionMode implements ActionMode.Callback {
+		private Observer<Boolean> mAlarmPendingObserver;
+		private Observer<Integer> mAlarmLeadTimeObserver;
+
+		@Override
+		public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+			// Suppress new "your train" selections
+			getListView().setChoiceMode(ListView.CHOICE_MODE_NONE);
+
+			mode.getMenuInflater()
+					.inflate(R.menu.your_train_context_menu, menu);
+			final MenuItem cancelAlarmButton = menu
+					.findItem(R.id.cancel_alarm_button);
+			final MenuItem setAlarmButton = menu
+					.findItem(R.id.set_alarm_button);
+			final BartRunnerApplication application = (BartRunnerApplication) getApplication();
+			final Departure boardedDeparture = application
+					.getBoardedDeparture();
+			if (boardedDeparture.isAlarmPending()) {
+				cancelAlarmButton.setVisible(true);
+				setAlarmButton.setIcon(R.drawable.ic_action_alarm);
+			} else if (boardedDeparture.getMeanSecondsLeft() > 60) {
+				setAlarmButton.setIcon(R.drawable.ic_action_add_alarm);
+			}
+
+			// Don't allow alarm setting if train is about to leave
+			if (boardedDeparture.getMeanSecondsLeft() / 60 < 1) {
+				menu.findItem(R.id.set_alarm_button).setVisible(false);
+			}
+
+			mAlarmPendingObserver = new Observer<Boolean>() {
+				@Override
+				public void onUpdate(final Boolean newValue) {
+					runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							cancelAlarmButton.setVisible(newValue);
+							if (newValue) {
+								mActionMode
+										.setSubtitle(getAlarmSubtitle(boardedDeparture
+												.getAlarmLeadTimeMinutes()));
+								setAlarmButton
+										.setIcon(R.drawable.ic_action_alarm);
+							} else {
+								mActionMode.setSubtitle(null);
+								setAlarmButton
+										.setIcon(R.drawable.ic_action_add_alarm);
+							}
+						}
+					});
+				}
+			};
+			mAlarmLeadTimeObserver = new Observer<Integer>() {
+				@Override
+				public void onUpdate(final Integer newValue) {
+					runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							mActionMode.setSubtitle(getAlarmSubtitle(newValue));
+						}
+					});
+				}
+			};
+			boardedDeparture.getAlarmPendingObservable().registerObserver(
+					mAlarmPendingObserver);
+			boardedDeparture.getAlarmLeadTimeMinutesObservable()
+					.registerObserver(mAlarmLeadTimeObserver);
+			return true;
+		}
+
+		@Override
+		public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+			getListView().clearChoices();
+			getListView().requestLayout();
+			return false;
+		}
+
+		@Override
+		public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+			final int itemId = item.getItemId();
+			if (itemId == R.id.set_alarm_button) {
+				BartRunnerApplication application = (BartRunnerApplication) getApplication();
+
+				// Don't prompt for alarm if train is about to leave
+				if (application.getBoardedDeparture().getMeanSecondsLeft() > 60) {
+					new TrainAlarmDialogFragment().show(
+							getSupportFragmentManager(), "dialog");
+				}
+
+				return true;
+			} else if (itemId == R.id.cancel_alarm_button) {
+				Intent intent = new Intent(ViewDeparturesActivity.this,
+						BoardedDepartureService.class);
+				intent.putExtra("cancelNotifications", true);
+				startService(intent);
+				return true;
+			} else if (itemId == R.id.delete) {
+				Intent intent = new Intent(ViewDeparturesActivity.this,
+						BoardedDepartureService.class);
+				intent.putExtra("clearBoardedDeparture", true);
+				startService(intent);
+				hideYourTrainSection();
+				mode.finish();
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public void onDestroyActionMode(ActionMode mode) {
+			((Checkable) findViewById(R.id.yourTrainSection)).setChecked(false);
+
+			final BartRunnerApplication application = (BartRunnerApplication) getApplication();
+			final Departure boardedDeparture = application
+					.getBoardedDeparture();
+			if (boardedDeparture != null) {
+				boardedDeparture.getAlarmPendingObservable()
+						.unregisterObserver(mAlarmPendingObserver);
+				boardedDeparture.getAlarmLeadTimeMinutesObservable()
+						.unregisterObserver(mAlarmLeadTimeObserver);
+			}
+
+			mAlarmPendingObserver = null;
+			mAlarmLeadTimeObserver = null;
+			mActionMode = null;
+
+			// Enable new "your train" selections
+			getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+		}
+	}
+
 	@Override
 	public void onETDChanged(final List<Departure> departures) {
 		runOnUiThread(new Runnable() {
@@ -558,6 +697,10 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 					mProgress.setVisibility(View.INVISIBLE);
 					Linkify.addLinks(textView, Linkify.WEB_URLS);
 				} else {
+					// TODO: Figure out why Ticker occasionally stops
+					Ticker.getInstance().startTicking(
+							ViewDeparturesActivity.this);
+
 					// Merge lists
 					if (mDeparturesAdapter.getCount() > 0) {
 						int adapterIndex = -1;
@@ -638,5 +781,25 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 		if (mOrigin == null || mDestination == null)
 			return null;
 		return new StationPair(mOrigin, mDestination);
+	}
+
+	private void hideYourTrainSection() {
+		findViewById(R.id.yourTrainSection).setVisibility(View.GONE);
+	}
+
+	private void showYourTrainSection(final YourTrainLayout yourTrainSection) {
+		yourTrainSection.setVisibility(View.VISIBLE);
+	}
+
+	private boolean isYourTrainActionModeActive() {
+		return mActionMode != null
+				&& mActionMode.getTitle()
+						.equals(getString(R.string.your_train));
+	}
+
+	private boolean isDepartureActionModeActive() {
+		return mActionMode != null
+				&& !mActionMode.getTitle().equals(
+						getString(R.string.your_train));
 	}
 }

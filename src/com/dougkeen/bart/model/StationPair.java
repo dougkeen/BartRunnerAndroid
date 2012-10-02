@@ -2,13 +2,13 @@ package com.dougkeen.bart.model;
 
 import org.apache.commons.lang3.ObjectUtils;
 
-import com.dougkeen.bart.data.CursorUtils;
-import com.dougkeen.bart.data.RoutesColumns;
-
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.dougkeen.bart.data.CursorUtils;
+import com.dougkeen.bart.data.RoutesColumns;
 
 public class StationPair implements Parcelable {
 	public StationPair(Station origin, Station destination) {

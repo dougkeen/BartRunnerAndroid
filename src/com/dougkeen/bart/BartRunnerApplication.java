@@ -17,7 +17,6 @@ import android.util.Log;
 
 import com.dougkeen.bart.model.Constants;
 import com.dougkeen.bart.model.Departure;
-import com.dougkeen.util.Observable;
 
 public class BartRunnerApplication extends Application {
 	private static final int FIVE_MINUTES = 5 * 60 * 1000;
@@ -25,8 +24,6 @@ public class BartRunnerApplication extends Application {
 	private static final String CACHE_FILE_NAME = "lastBoardedDeparture";
 
 	private Departure mBoardedDeparture;
-
-	private Observable<Boolean> mAlarmPending = new Observable<Boolean>(false);
 
 	private boolean mPlayAlarmRingtone;
 
@@ -84,24 +81,42 @@ public class BartRunnerApplication extends Application {
 				}
 			}
 		}
+		if (mBoardedDeparture != null && mBoardedDeparture.hasExpired()) {
+			setBoardedDeparture(null);
+		}
 		return mBoardedDeparture;
 	}
 
 	public void setBoardedDeparture(Departure boardedDeparture) {
 		if (!ObjectUtils.equals(boardedDeparture, mBoardedDeparture)
 				|| ObjectUtils.compare(mBoardedDeparture, boardedDeparture) != 0) {
-			// Cancel any pending alarms for the current departure
-			if (this.mBoardedDeparture != null
-					&& this.mBoardedDeparture.isAlarmPending()) {
-				this.mBoardedDeparture.cancelAlarm(this,
-						(AlarmManager) getSystemService(Context.ALARM_SERVICE));
+			if (this.mBoardedDeparture != null) {
+				this.mBoardedDeparture.getAlarmLeadTimeMinutesObservable()
+						.unregisterAllObservers();
+				this.mBoardedDeparture.getAlarmPendingObservable()
+						.unregisterAllObservers();
+
+				// Cancel any pending alarms for the current departure
+				if (this.mBoardedDeparture.isAlarmPending()) {
+					this.mBoardedDeparture
+							.cancelAlarm(
+									this,
+									(AlarmManager) getSystemService(Context.ALARM_SERVICE));
+				}
 			}
 
 			this.mBoardedDeparture = boardedDeparture;
 
-			if (mBoardedDeparture != null) {
-				File cachedDepartureFile = new File(getCacheDir(),
-						CACHE_FILE_NAME);
+			File cachedDepartureFile = new File(getCacheDir(), CACHE_FILE_NAME);
+			if (mBoardedDeparture == null) {
+				try {
+					cachedDepartureFile.delete();
+				} catch (SecurityException anotherException) {
+					Log.w(Constants.TAG,
+							"Couldn't delete lastBoardedDeparture file",
+							anotherException);
+				}
+			} else {
 				FileOutputStream fileOutputStream = null;
 				try {
 					fileOutputStream = new FileOutputStream(cachedDepartureFile);
@@ -134,17 +149,4 @@ public class BartRunnerApplication extends Application {
 	public void setAlarmMediaPlayer(MediaPlayer alarmMediaPlayer) {
 		this.mAlarmMediaPlayer = alarmMediaPlayer;
 	}
-
-	public boolean isAlarmPending() {
-		return mAlarmPending.getValue();
-	}
-
-	public Observable<Boolean> getAlarmPendingObservable() {
-		return mAlarmPending;
-	}
-
-	public void setAlarmPending(boolean alarmPending) {
-		this.mAlarmPending.setValue(alarmPending);
-	}
-
 }

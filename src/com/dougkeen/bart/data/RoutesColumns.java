@@ -1,5 +1,6 @@
 package com.dougkeen.bart.data;
 
+
 public enum RoutesColumns {
 	_ID("_id", "INTEGER", false),
 	FROM_STATION("FROM_STATION", "TEXT", false),

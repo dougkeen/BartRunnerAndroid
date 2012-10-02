@@ -36,6 +36,10 @@ public class Observable<T> {
 		listeners.remove(observer);
 	}
 
+	public void unregisterAllObservers() {
+		listeners.clear();
+	}
+
 	protected void notifyOfChange(T value) {
 		for (Observer<T> listener : listeners.keySet()) {
 			if (listener != null) {

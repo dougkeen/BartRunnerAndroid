@@ -1,38 +1,30 @@
 package com.dougkeen.bart.services;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
-
-import org.apache.commons.lang3.time.DateFormatUtils;
 
 import android.app.AlarmManager;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Parcelable;
-import android.os.SystemClock;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationCompat.Builder;
-import android.util.Log;
 
 import com.dougkeen.bart.BartRunnerApplication;
-import com.dougkeen.bart.R;
-import com.dougkeen.bart.model.Constants;
 import com.dougkeen.bart.model.Departure;
 import com.dougkeen.bart.model.StationPair;
 import com.dougkeen.bart.services.EtdService.EtdServiceBinder;
 import com.dougkeen.bart.services.EtdService.EtdServiceListener;
+import com.dougkeen.util.Observer;
 
-public class NotificationService extends Service implements EtdServiceListener {
+public class BoardedDepartureService extends Service implements
+		EtdServiceListener {
 
 	private static final int DEPARTURE_NOTIFICATION_ID = 123;
 
@@ -44,22 +36,29 @@ public class NotificationService extends Service implements EtdServiceListener {
 	private StationPair mStationPair;
 	private NotificationManager mNotificationManager;
 	private AlarmManager mAlarmManager;
-	private PendingIntent mNotificationIntent;
 	private Handler mHandler;
 	private boolean mHasShutDown = false;
 
-	public NotificationService() {
+	public BoardedDepartureService() {
 		super();
 	}
 
-	private final class ServiceHandler extends Handler {
-		public ServiceHandler(Looper looper) {
+	private static final class ServiceHandler extends Handler {
+		private final WeakReference<BoardedDepartureService> mServiceRef;
+
+		public ServiceHandler(Looper looper,
+				BoardedDepartureService boardedDepartureService) {
 			super(looper);
+			mServiceRef = new WeakReference<BoardedDepartureService>(
+					boardedDepartureService);
 		}
 
 		@Override
 		public void handleMessage(Message msg) {
-			onHandleIntent((Intent) msg.obj);
+			BoardedDepartureService service = mServiceRef.get();
+			if (service != null) {
+				service.onHandleIntent((Intent) msg.obj);
+			}
 		}
 	}
 
@@ -74,7 +73,8 @@ public class NotificationService extends Service implements EtdServiceListener {
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			mEtdService = ((EtdServiceBinder) service).getService();
 			if (getStationPair() != null) {
-				mEtdService.registerListener(NotificationService.this, false);
+				mEtdService.registerListener(BoardedDepartureService.this,
+						false);
 			}
 			mBound = true;
 		}
@@ -87,7 +87,7 @@ public class NotificationService extends Service implements EtdServiceListener {
 		thread.start();
 
 		mServiceLooper = thread.getLooper();
-		mServiceHandler = new ServiceHandler(mServiceLooper);
+		mServiceHandler = new ServiceHandler(mServiceLooper, this);
 
 		bindService(new Intent(this, EtdService.class), mConnection,
 				Context.BIND_AUTO_CREATE);
@@ -122,17 +122,21 @@ public class NotificationService extends Service implements EtdServiceListener {
 	}
 
 	protected void onHandleIntent(Intent intent) {
-		final Departure boardedDeparture = ((BartRunnerApplication) getApplication())
-				.getBoardedDeparture();
-		if (boardedDeparture == null) {
+		final BartRunnerApplication application = (BartRunnerApplication) getApplication();
+		final Departure boardedDeparture = application.getBoardedDeparture();
+		if (boardedDeparture == null || intent == null) {
 			// Nothing to notify about
 			return;
 		}
-		if (intent.getBooleanExtra("cancelNotifications", false)) {
-			// We want to cancel the alarm/notification
+		if (intent.getBooleanExtra("cancelNotifications", false)
+				|| intent.getBooleanExtra("clearBoardedDeparture", false)) {
+			// We want to cancel the alarm
 			boardedDeparture
 					.cancelAlarm(getApplicationContext(), mAlarmManager);
-			shutDown(false);
+			if (intent.getBooleanExtra("clearBoardedDeparture", false)) {
+				application.setBoardedDeparture(null);
+				shutDown(false);
+			}
 			return;
 		}
 
@@ -148,11 +152,20 @@ public class NotificationService extends Service implements EtdServiceListener {
 			mEtdService.registerListener(this, false);
 		}
 
-		Intent targetIntent = new Intent(Intent.ACTION_VIEW,
-				mStationPair.getUri());
-		targetIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		mNotificationIntent = PendingIntent.getActivity(this, 0, targetIntent,
-				PendingIntent.FLAG_UPDATE_CURRENT);
+		boardedDeparture.getAlarmLeadTimeMinutesObservable().registerObserver(
+				new Observer<Integer>() {
+					@Override
+					public void onUpdate(Integer newValue) {
+						updateNotification();
+					}
+				});
+		boardedDeparture.getAlarmPendingObservable().registerObserver(
+				new Observer<Boolean>() {
+					@Override
+					public void onUpdate(Boolean newValue) {
+						updateNotification();
+					}
+				});
 
 		updateNotification();
 
@@ -179,6 +192,9 @@ public class NotificationService extends Service implements EtdServiceListener {
 							.getUncertaintySeconds() != departure
 							.getUncertaintySeconds())) {
 				boardedDeparture.mergeEstimate(departure);
+				// Also merge back, in case boardedDeparture estimate is better
+				departure.mergeEstimate(boardedDeparture);
+
 				updateAlarm();
 				break;
 			}
@@ -211,8 +227,9 @@ public class NotificationService extends Service implements EtdServiceListener {
 		final Departure boardedDeparture = ((BartRunnerApplication) getApplication())
 				.getBoardedDeparture();
 
-		if (boardedDeparture.hasDeparted()) {
+		if (boardedDeparture == null || boardedDeparture.hasDeparted()) {
 			shutDown(false);
+			return;
 		}
 
 		boardedDeparture.updateAlarm(getApplicationContext(), mAlarmManager);
@@ -280,4 +297,5 @@ public class NotificationService extends Service implements EtdServiceListener {
 		// Doesn't support binding
 		return null;
 	}
+
 }

@@ -18,10 +18,12 @@ import android.text.format.DateFormat;
 import android.util.Log;
 
 import com.dougkeen.bart.R;
-import com.dougkeen.bart.services.NotificationService;
+import com.dougkeen.bart.services.BoardedDepartureService;
+import com.dougkeen.util.Observable;
 
 public class Departure implements Parcelable, Comparable<Departure> {
-	private static final int MINIMUM_MERGE_OVERLAP_MILLIS = 10000;
+	private static final int MINIMUM_MERGE_OVERLAP_MILLIS = 5000;
+	private static final int EXPIRE_MINUTES_AFTER_ARRIVAL = 1;
 
 	public Departure() {
 		super();
@@ -67,8 +69,9 @@ public class Departure implements Parcelable, Comparable<Departure> {
 
 	private long arrivalTimeOverride;
 
-	private int alarmLeadTimeMinutes;
-	private boolean alarmPending;
+	private Observable<Integer> alarmLeadTimeMinutes = new Observable<Integer>(
+			0);
+	private Observable<Boolean> alarmPending = new Observable<Boolean>(false);
 
 	public Station getOrigin() {
 		return origin;
@@ -308,7 +311,7 @@ public class Departure implements Parcelable, Comparable<Departure> {
 	}
 
 	public boolean hasDeparted() {
-		return getMeanSecondsLeft() < 0;
+		return getMeanSecondsLeft() <= 0;
 	}
 
 	public void calculateEstimates(long originalEstimateTime) {
@@ -333,38 +336,43 @@ public class Departure implements Parcelable, Comparable<Departure> {
 			setEstimatedTripTime(departure.getEstimatedTripTime());
 		}
 
+		long newMin = Math.max(getMinEstimate(), departure.getMinEstimate());
+		long newMax = Math.min(getMaxEstimate(), departure.getMaxEstimate());
+
 		if ((getMaxEstimate() - departure.getMinEstimate()) < MINIMUM_MERGE_OVERLAP_MILLIS
 				|| departure.getMaxEstimate() - getMinEstimate() < MINIMUM_MERGE_OVERLAP_MILLIS) {
 			/*
 			 * The estimate must have changed... just use the latest incoming
 			 * values
 			 */
-			setMinEstimate(departure.getMinEstimate());
-			setMaxEstimate(departure.getMaxEstimate());
-			return;
+			newMin = departure.getMinEstimate();
+			newMax = departure.getMaxEstimate();
 		}
 
-		final long newMin = Math.max(getMinEstimate(),
-				departure.getMinEstimate());
-		final long newMax = Math.min(getMaxEstimate(),
-				departure.getMaxEstimate());
-
 		/*
-		 * If the new departure would mark this as departed, and we have < 1
-		 * minute left on a fairly accurate local estimate, ignore the incoming
+		 * If the new departure would mark this as departed, and we have < 60
+		 * seconds left on a fairly accurate local estimate, ignore the incoming
 		 * departure
 		 */
-		if (!wasDeparted && getMeanSecondsLeft(newMin, newMax) < 0
+		if (!wasDeparted && getMeanSecondsLeft(newMin, newMax) <= 0
 				&& getMeanSecondsLeft() < 60 && getUncertaintySeconds() < 30) {
 			Log.d(Constants.TAG,
 					"Skipping estimate merge, since it would make this departure show as 'departed' prematurely");
 			return;
 		}
 
-		if (newMax > newMin) { // We can never have 0 or negative uncertainty
+		if (newMax > newMin) {
+			// We must never have 0 or negative uncertainty
 			setMinEstimate(newMin);
 			setMaxEstimate(newMax);
 		}
+	}
+
+	public boolean hasExpired() {
+		final long now = System.currentTimeMillis();
+		return getMaxEstimate() < now
+				&& getEstimatedArrivalTime() + EXPIRE_MINUTES_AFTER_ARRIVAL
+						* 60000 < now;
 	}
 
 	public int compareTo(Departure another) {
@@ -475,10 +483,18 @@ public class Departure implements Parcelable, Comparable<Departure> {
 	}
 
 	public int getAlarmLeadTimeMinutes() {
+		return alarmLeadTimeMinutes.getValue();
+	}
+
+	public Observable<Integer> getAlarmLeadTimeMinutesObservable() {
 		return alarmLeadTimeMinutes;
 	}
 
 	public boolean isAlarmPending() {
+		return alarmPending.getValue();
+	}
+
+	public Observable<Boolean> getAlarmPendingObservable() {
 		return alarmPending;
 	}
 
@@ -489,7 +505,7 @@ public class Departure implements Parcelable, Comparable<Departure> {
 	}
 
 	private long getAlarmClockTime() {
-		return getMeanEstimate() - alarmLeadTimeMinutes * 60 * 1000;
+		return getMeanEstimate() - alarmLeadTimeMinutes.getValue() * 60 * 1000;
 	}
 
 	public int getSecondsUntilAlarm() {
@@ -497,8 +513,8 @@ public class Departure implements Parcelable, Comparable<Departure> {
 	}
 
 	public void setUpAlarm(int leadTimeMinutes) {
-		this.alarmLeadTimeMinutes = leadTimeMinutes;
-		this.alarmPending = true;
+		this.alarmLeadTimeMinutes.setValue(leadTimeMinutes);
+		this.alarmPending.setValue(true);
 	}
 
 	public void updateAlarm(Context context, AlarmManager alarmManager) {
@@ -509,20 +525,20 @@ public class Departure implements Parcelable, Comparable<Departure> {
 			final PendingIntent alarmIntent = getAlarmIntent(context);
 			alarmManager.cancel(alarmIntent);
 
-			long alertTime = getAlarmClockTime();
+			long alarmTime = getAlarmClockTime();
 
-			alarmManager.set(AlarmManager.RTC_WAKEUP, alertTime, alarmIntent);
+			alarmManager.set(AlarmManager.RTC_WAKEUP, alarmTime, alarmIntent);
 
 			if (Log.isLoggable(Constants.TAG, Log.VERBOSE))
 				Log.v(Constants.TAG,
 						"Scheduling alarm for "
-								+ DateFormatUtils.format(alertTime, "h:mm:ss"));
+								+ DateFormatUtils.format(alarmTime, "h:mm:ss"));
 		}
 	}
 
 	public void cancelAlarm(Context context, AlarmManager alarmManager) {
 		alarmManager.cancel(getAlarmIntent(context));
-		this.alarmPending = false;
+		this.alarmPending.setValue(false);
 	}
 
 	private PendingIntent notificationIntent;
@@ -546,7 +562,7 @@ public class Departure implements Parcelable, Comparable<Departure> {
 						: ""));
 
 		final Intent cancelAlarmIntent = new Intent(context,
-				NotificationService.class);
+				BoardedDepartureService.class);
 		cancelAlarmIntent.putExtra("cancelNotifications", true);
 		Builder notificationBuilder = new NotificationCompat.Builder(context)
 				.setOngoing(true)
@@ -564,7 +580,7 @@ public class Departure implements Parcelable, Comparable<Departure> {
 						"Cancel alarm",
 						PendingIntent.getService(context, 0, cancelAlarmIntent,
 								PendingIntent.FLAG_UPDATE_CURRENT)).setSubText(
-						"Alert " + getAlarmLeadTimeMinutes()
+						"Alarm " + getAlarmLeadTimeMinutes()
 								+ " minutes before departure");
 			}
 		} else if (isAlarmPending()) {
@@ -655,6 +671,6 @@ public class Departure implements Parcelable, Comparable<Departure> {
 	};
 
 	public void notifyAlarmHasBeenHandled() {
-		this.alarmPending = false;
+		this.alarmPending.setValue(false);
 	}
 }

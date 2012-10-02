@@ -13,12 +13,13 @@ import android.support.v4.app.FragmentActivity;
 import com.WazaBe.HoloEverywhere.AlertDialog;
 import com.dougkeen.bart.BartRunnerApplication;
 import com.dougkeen.bart.R;
+import com.dougkeen.bart.model.Departure;
 
-public class TrainAlertDialogFragment extends DialogFragment {
+public class TrainAlarmDialogFragment extends DialogFragment {
 
-	private static final String KEY_LAST_ALERT_LEAD_TIME = "lastAlertLeadTime";
+	private static final String KEY_LAST_ALARM_LEAD_TIME = "lastAlarmLeadTime";
 
-	public TrainAlertDialogFragment() {
+	public TrainAlarmDialogFragment() {
 		super();
 	}
 
@@ -28,7 +29,7 @@ public class TrainAlertDialogFragment extends DialogFragment {
 
 		SharedPreferences preferences = getActivity().getPreferences(
 				Context.MODE_PRIVATE);
-		int lastAlertLeadTime = preferences.getInt(KEY_LAST_ALERT_LEAD_TIME, 5);
+		int lastAlarmLeadTime = preferences.getInt(KEY_LAST_ALARM_LEAD_TIME, 5);
 
 		NumberPicker numberPicker = (NumberPicker) getDialog().findViewById(
 				R.id.numberPicker);
@@ -36,8 +37,8 @@ public class TrainAlertDialogFragment extends DialogFragment {
 		BartRunnerApplication application = (BartRunnerApplication) getActivity()
 				.getApplication();
 
-		final int maxValue = application.getBoardedDeparture()
-				.getMeanSecondsLeft() / 60;
+		final Departure boardedDeparture = application.getBoardedDeparture();
+		final int maxValue = boardedDeparture.getMeanSecondsLeft() / 60;
 
 		String[] displayedValues = new String[maxValue];
 		for (int i = 1; i <= maxValue; i++) {
@@ -47,8 +48,10 @@ public class TrainAlertDialogFragment extends DialogFragment {
 		numberPicker.setMaxValue(maxValue);
 		numberPicker.setDisplayedValues(displayedValues);
 
-		if (maxValue >= lastAlertLeadTime) {
-			numberPicker.setValue(lastAlertLeadTime);
+		if (boardedDeparture.isAlarmPending()) {
+			numberPicker.setValue(boardedDeparture.getAlarmLeadTimeMinutes());
+		} else if (maxValue >= lastAlarmLeadTime) {
+			numberPicker.setValue(lastAlarmLeadTime);
 		} else if (maxValue >= 5) {
 			numberPicker.setValue(5);
 		} else if (maxValue >= 3) {
@@ -63,9 +66,9 @@ public class TrainAlertDialogFragment extends DialogFragment {
 		final FragmentActivity activity = getActivity();
 
 		return new AlertDialog.Builder(activity)
-				.setTitle(R.string.set_up_departure_alert)
+				.setTitle(R.string.set_up_departure_alarm)
 				.setCancelable(true)
-				.setView(R.layout.train_alert_dialog)
+				.setView(R.layout.train_alarm_dialog)
 				.setPositiveButton(R.string.ok,
 						new DialogInterface.OnClickListener() {
 							@Override
@@ -73,23 +76,23 @@ public class TrainAlertDialogFragment extends DialogFragment {
 									int which) {
 								NumberPicker numberPicker = (NumberPicker) getDialog()
 										.findViewById(R.id.numberPicker);
-								final int alertLeadTime = numberPicker
+								final int alarmLeadTime = numberPicker
 										.getValue();
 
 								// Save most recent selection
 								Editor editor = getActivity().getPreferences(
 										Context.MODE_PRIVATE).edit();
-								editor.putInt(KEY_LAST_ALERT_LEAD_TIME,
-										alertLeadTime);
+								editor.putInt(KEY_LAST_ALARM_LEAD_TIME,
+										alarmLeadTime);
 								editor.commit();
 
 								((BartRunnerApplication) getActivity()
 										.getApplication())
 										.getBoardedDeparture().setUpAlarm(
-												alertLeadTime);
+												alarmLeadTime);
 							}
 						})
-				.setNegativeButton(R.string.skip_alert,
+				.setNegativeButton(R.string.cancel,
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog,
 									int whichButton) {

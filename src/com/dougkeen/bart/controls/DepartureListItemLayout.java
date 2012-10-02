@@ -1,11 +1,11 @@
 package com.dougkeen.bart.controls;
 
-import com.dougkeen.bart.R;
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.widget.Checkable;
 import android.widget.RelativeLayout;
+
+import com.dougkeen.bart.R;
 
 public class DepartureListItemLayout extends RelativeLayout implements
 		Checkable {

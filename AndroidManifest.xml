@@ -67,7 +67,7 @@
             android:label="BartRunner data provider" />
 
         <service
-            android:name=".services.NotificationService"
+            android:name=".services.BoardedDepartureService"
             android:exported="false" />
         <service
             android:name=".services.EtdService"

@@ -12,12 +12,12 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.xml.sax.SAXException;
 
-import com.dougkeen.bart.model.Constants;
-import com.dougkeen.bart.model.Station;
-
 import android.os.AsyncTask;
 import android.util.Log;
 import android.util.Xml;
+
+import com.dougkeen.bart.model.Constants;
+import com.dougkeen.bart.model.Station;
 
 public abstract class GetRouteFareTask extends
 		AsyncTask<GetRouteFareTask.Params, Integer, String> {
