@@ -11,7 +11,7 @@ Doug Keen - doug@dougkeen.com
 
 * Christophe Versieux's [HoloEverywhere](https://github.com/ChristopheVersieux/HoloEverywhere) project
 * SimonVT's [android-numberpicker](https://github.com/SimonVT/android-numberpicker) project
-* Jake Wharton's [NineOldAndroids](https://github.com/JakeWharton/NineOldAndroids), and [ActionBarSerlock](https://github.com/JakeWharton/ActionBarSherlock) projects
+* Jake Wharton's [NineOldAndroids](https://github.com/JakeWharton/NineOldAndroids), and [ActionBarSherlock](https://github.com/JakeWharton/ActionBarSherlock) projects
 
 Without the hard work of the above individuals and all the contributors to their projects, BART Runner would look like crap on Android 2.x devices.
 
