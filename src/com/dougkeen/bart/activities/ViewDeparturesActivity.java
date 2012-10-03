@@ -39,6 +39,7 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.dougkeen.bart.BartRunnerApplication;
 import com.dougkeen.bart.R;
+import com.dougkeen.bart.controls.SwipeDismissTouchListener;
 import com.dougkeen.bart.controls.Ticker;
 import com.dougkeen.bart.controls.YourTrainLayout;
 import com.dougkeen.bart.data.DepartureArrayAdapter;
@@ -186,8 +187,21 @@ public class ViewDeparturesActivity extends SActivity implements
 		mMissingDepartureText = findViewById(R.id.missingDepartureText);
 		mMissingDepartureText.setVisibility(View.VISIBLE);
 
-		findViewById(R.id.yourTrainSection).setOnClickListener(
-				mYourTrainSectionClickListener);
+		mYourTrainSection = (YourTrainLayout) findViewById(R.id.yourTrainSection);
+		mYourTrainSection.setOnClickListener(mYourTrainSectionClickListener);
+		mYourTrainSection.setOnTouchListener(new SwipeDismissTouchListener(
+				mYourTrainSection, null,
+				new SwipeDismissTouchListener.OnDismissCallback() {
+					@Override
+					public void onDismiss(View view, Object token) {
+						dismissYourTrainSelection();
+						getListView().clearChoices();
+						getListView().requestLayout();
+						if (isYourTrainActionModeActive()) {
+							mActionMode.finish();
+						}
+					}
+				}));
 
 		refreshBoardedDeparture();
 
@@ -347,6 +361,8 @@ public class ViewDeparturesActivity extends SActivity implements
 
 	private View mMissingDepartureText;
 
+	private YourTrainLayout mYourTrainSection;
+
 	protected DepartureArrayAdapter getListAdapter() {
 		return mDeparturesAdapter;
 	}
@@ -448,8 +464,7 @@ public class ViewDeparturesActivity extends SActivity implements
 	private void refreshBoardedDeparture() {
 		final Departure boardedDeparture = ((BartRunnerApplication) getApplication())
 				.getBoardedDeparture();
-		final YourTrainLayout yourTrainSection = (YourTrainLayout) findViewById(R.id.yourTrainSection);
-		int currentVisibility = yourTrainSection.getVisibility();
+		int currentVisibility = mYourTrainSection.getVisibility();
 
 		final boolean boardedDepartureDoesNotApply = boardedDeparture == null
 				|| boardedDeparture.getStationPair() == null
@@ -462,10 +477,10 @@ public class ViewDeparturesActivity extends SActivity implements
 			return;
 		}
 
-		yourTrainSection.updateFromDeparture(boardedDeparture);
+		mYourTrainSection.updateFromDeparture(boardedDeparture);
 
 		if (currentVisibility != View.VISIBLE) {
-			showYourTrainSection(yourTrainSection);
+			showYourTrainSection(mYourTrainSection);
 		}
 
 		if (mActionMode == null) {
@@ -656,11 +671,7 @@ public class ViewDeparturesActivity extends SActivity implements
 				startService(intent);
 				return true;
 			} else if (itemId == R.id.delete) {
-				Intent intent = new Intent(ViewDeparturesActivity.this,
-						BoardedDepartureService.class);
-				intent.putExtra("clearBoardedDeparture", true);
-				startService(intent);
-				hideYourTrainSection();
+				dismissYourTrainSelection();
 				mode.finish();
 				return true;
 			}
@@ -688,6 +699,14 @@ public class ViewDeparturesActivity extends SActivity implements
 			// Enable new "your train" selections
 			getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 		}
+	}
+
+	private void dismissYourTrainSelection() {
+		Intent intent = new Intent(ViewDeparturesActivity.this,
+				BoardedDepartureService.class);
+		intent.putExtra("clearBoardedDeparture", true);
+		startService(intent);
+		hideYourTrainSection();
 	}
 
 	@Override
