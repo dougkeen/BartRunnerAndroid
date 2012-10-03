@@ -785,6 +785,7 @@ public class ViewDeparturesActivity extends SActivity implements
 			@Override
 			public void run() {
 				mProgress.setVisibility(View.VISIBLE);
+				mMissingDepartureText.setVisibility(View.GONE);
 			}
 		});
 	}
@@ -795,6 +796,7 @@ public class ViewDeparturesActivity extends SActivity implements
 			@Override
 			public void run() {
 				mProgress.setVisibility(View.GONE);
+				mMissingDepartureText.setVisibility(View.VISIBLE);
 			}
 		});
 	}
