@@ -3,13 +3,13 @@ package com.dougkeen.bart.activities;
 import android.os.Bundle;
 import android.webkit.WebView;
 
-import com.actionbarsherlock.app.SherlockActivity;
+import com.WazaBe.HoloEverywhere.sherlock.SActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.dougkeen.bart.R;
 
-public class ViewMapActivity extends SherlockActivity {
+public class ViewMapActivity extends SActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

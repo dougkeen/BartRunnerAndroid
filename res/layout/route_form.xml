@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:holo="http://schemas.android.com/apk/res-auto"
     android:layout_width="300dp"
     android:layout_height="wrap_content"
     android:gravity="center_vertical" >
@@ -17,9 +18,11 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_below="@id/titleDivider"
+        android:drawSelectorOnTop="true"
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
-        android:paddingTop="15dip" />
+        android:paddingTop="15dip"
+        holo:spinnerMode="dialog" />
 
     <TextView
         android:id="@+id/origin_label"
@@ -42,9 +45,11 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_below="@+id/origin_spinner"
+        android:drawSelectorOnTop="true"
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
-        android:paddingTop="15dip" />
+        android:paddingTop="15dip"
+        holo:spinnerMode="dialog" />
 
     <TextView
         android:id="@+id/destination_label"
@@ -61,22 +66,14 @@
         android:textSize="15sp" >
     </TextView>
 
-    <TextView
-        android:id="@+id/return_checkbox_text"
-        android:layout_width="wrap_content"
-        android:layout_height="40dp"
-        android:layout_below="@id/destination_spinner"
-        android:layout_centerHorizontal="true"
-        android:gravity="center_vertical"
-        android:text="@string/also_add_return_route"
-        android:visibility="gone" />
-
     <CheckBox
         android:id="@+id/return_checkbox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/destination_spinner"
-        android:layout_toLeftOf="@id/return_checkbox_text"
+        android:layout_centerHorizontal="true"
+        android:gravity="center_vertical"
+        android:text="@string/also_add_return_route"
         android:visibility="gone" />
 
 </RelativeLayout>

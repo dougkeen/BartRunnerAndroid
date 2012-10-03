@@ -3,12 +3,7 @@
 
     <!-- Base application theme is the default theme. -->
 
-    <style name="AppTheme" parent="@style/Theme.HoloEverywhereDark.Sherlock">
-        <item name="numberPickerUpButtonStyle">@style/NPWidget.Holo.ImageButton.NumberPickerUpButton</item>
-        <item name="numberPickerDownButtonStyle">@style/NPWidget.Holo.ImageButton.NumberPickerDownButton</item>
-        <item name="numberPickerInputTextStyle">@style/NPWidget.Holo.EditText.NumberPickerInputText</item>
-        <item name="numberPickerStyle">@style/NPWidget.Holo.NumberPicker</item>
-    </style>
+    <style name="AppTheme" parent="@style/Holo.Theme.Sherlock"></style>
 
     <style name="ButtonBar">
         <item name="android:layout_width">fill_parent</item>

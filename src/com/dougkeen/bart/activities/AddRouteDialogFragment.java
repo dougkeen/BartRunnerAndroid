@@ -17,17 +17,8 @@ public class AddRouteDialogFragment extends AbstractRouteSelectionFragment {
 	@Override
 	public void onStart() {
 		super.onStart();
-		final View checkboxText = getDialog().findViewById(
-				R.id.return_checkbox_text);
 		final View checkbox = getDialog().findViewById(R.id.return_checkbox);
-		checkboxText.setVisibility(View.VISIBLE);
 		checkbox.setVisibility(View.VISIBLE);
-		checkboxText.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				checkbox.performClick();
-			}
-		});
 	}
 
 	@Override

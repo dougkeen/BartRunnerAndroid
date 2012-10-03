@@ -1,16 +1,18 @@
 package com.dougkeen.bart.activities;
 
-import net.simonvt.widget.NumberPicker;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
+import android.view.View;
 
-import com.WazaBe.HoloEverywhere.AlertDialog;
+import com.WazaBe.HoloEverywhere.LayoutInflater;
+import com.WazaBe.HoloEverywhere.app.AlertDialog;
+import com.WazaBe.HoloEverywhere.app.Dialog;
+import com.WazaBe.HoloEverywhere.app.DialogFragment;
+import com.WazaBe.HoloEverywhere.widget.NumberPicker;
 import com.dougkeen.bart.BartRunnerApplication;
 import com.dougkeen.bart.R;
 import com.dougkeen.bart.model.Departure;
@@ -24,15 +26,24 @@ public class TrainAlarmDialogFragment extends DialogFragment {
 	}
 
 	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setShowsDialog(true);
+	}
+
+	@Override
 	public void onStart() {
 		super.onStart();
+		setUpNumberPickerValues(getDialog());
+	}
 
+	private void setUpNumberPickerValues(Dialog dialog) {
 		SharedPreferences preferences = getActivity().getPreferences(
 				Context.MODE_PRIVATE);
 		int lastAlarmLeadTime = preferences.getInt(KEY_LAST_ALARM_LEAD_TIME, 5);
 
-		NumberPicker numberPicker = (NumberPicker) getDialog().findViewById(
-				R.id.numberPicker);
+		NumberPicker numberPicker = (NumberPicker) dialog
+				.findViewById(R.id.numberPicker);
 
 		BartRunnerApplication application = (BartRunnerApplication) getActivity()
 				.getApplication();
@@ -65,10 +76,13 @@ public class TrainAlarmDialogFragment extends DialogFragment {
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
 		final FragmentActivity activity = getActivity();
 
+		final View dialogView = LayoutInflater.inflate(activity,
+				R.layout.train_alarm_dialog);
+
 		return new AlertDialog.Builder(activity)
 				.setTitle(R.string.set_up_departure_alarm)
 				.setCancelable(true)
-				.setView(R.layout.train_alarm_dialog)
+				.setView(dialogView)
 				.setPositiveButton(R.string.ok,
 						new DialogInterface.OnClickListener() {
 							@Override

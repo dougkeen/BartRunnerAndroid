@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -18,10 +17,12 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListAdapter;
-import android.widget.TextView;
 
-import com.WazaBe.HoloEverywhere.AlertDialog;
-import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.WazaBe.HoloEverywhere.widget.TextView;
+
+import com.WazaBe.HoloEverywhere.app.AlertDialog;
+import com.WazaBe.HoloEverywhere.app.DialogFragment;
+import com.WazaBe.HoloEverywhere.sherlock.SActivity;
 import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
@@ -36,7 +37,7 @@ import com.dougkeen.bart.model.Station;
 import com.dougkeen.bart.model.StationPair;
 import com.dougkeen.bart.networktasks.GetRouteFareTask;
 
-public class RoutesListActivity extends SherlockFragmentActivity implements
+public class RoutesListActivity extends SActivity implements
 		LoaderCallbacks<Cursor> {
 	private static final int FAVORITES_LOADER_ID = 0;
 
@@ -107,7 +108,8 @@ public class RoutesListActivity extends SherlockFragmentActivity implements
 					public void onClick(View v) {
 						DialogFragment dialog = new QuickRouteDialogFragment(
 								getString(R.string.quick_departure_lookup));
-						dialog.show(getSupportFragmentManager(), "dialog");
+						dialog.show(getSupportFragmentManager()
+								.beginTransaction());
 					}
 				});
 
@@ -283,8 +285,8 @@ public class RoutesListActivity extends SherlockFragmentActivity implements
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int itemId = item.getItemId();
 		if (itemId == R.id.add_favorite_menu_button) {
-			new AddRouteDialogFragment(getString(R.string.add_route)).show(
-					getSupportFragmentManager(), "dialog");
+			new AddRouteDialogFragment(getString(R.string.add_route))
+					.show(getSupportFragmentManager().beginTransaction());
 			return true;
 		} else if (itemId == R.id.view_system_map_button) {
 			startActivity(new Intent(this, ViewMapActivity.class));

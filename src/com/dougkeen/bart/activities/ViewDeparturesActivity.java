@@ -27,12 +27,12 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Checkable;
-import android.widget.ListView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.WazaBe.HoloEverywhere.sherlock.SActivity;
+import com.WazaBe.HoloEverywhere.widget.ListView;
+import com.WazaBe.HoloEverywhere.widget.ProgressBar;
+import com.WazaBe.HoloEverywhere.widget.TextView;
+import com.WazaBe.HoloEverywhere.widget.Toast;
 import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
@@ -54,7 +54,7 @@ import com.dougkeen.bart.services.EtdService.EtdServiceListener;
 import com.dougkeen.util.Observer;
 import com.dougkeen.util.WakeLocker;
 
-public class ViewDeparturesActivity extends SherlockFragmentActivity implements
+public class ViewDeparturesActivity extends SActivity implements
 		EtdServiceListener {
 
 	private static final int LOADER_ID = 123;
@@ -183,7 +183,8 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 		listView.setOnItemClickListener(mListItemClickListener);
 		listView.setOnItemLongClickListener(mListItemLongClickListener);
 
-		findViewById(R.id.missingDepartureText).setVisibility(View.VISIBLE);
+		mMissingDepartureText = findViewById(R.id.missingDepartureText);
+		mMissingDepartureText.setVisibility(View.VISIBLE);
 
 		findViewById(R.id.yourTrainSection).setOnClickListener(
 				mYourTrainSectionClickListener);
@@ -343,6 +344,8 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 			startYourTrainActionMode((BartRunnerApplication) getApplication());
 		}
 	};
+
+	private View mMissingDepartureText;
 
 	protected DepartureArrayAdapter getListAdapter() {
 		return mDeparturesAdapter;
@@ -640,8 +643,9 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 
 				// Don't prompt for alarm if train is about to leave
 				if (application.getBoardedDeparture().getMeanSecondsLeft() > 60) {
-					new TrainAlarmDialogFragment().show(
-							getSupportFragmentManager(), "dialog");
+					new TrainAlarmDialogFragment()
+							.show(getSupportFragmentManager()
+									.beginTransaction());
 				}
 
 				return true;
@@ -694,7 +698,7 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 				if (departures.isEmpty()) {
 					final TextView textView = mEmptyView;
 					textView.setText(R.string.no_data_message);
-					mProgress.setVisibility(View.INVISIBLE);
+					mProgress.setVisibility(View.GONE);
 					Linkify.addLinks(textView, Linkify.WEB_URLS);
 				} else {
 					// TODO: Figure out why Ticker occasionally stops
@@ -771,7 +775,7 @@ public class ViewDeparturesActivity extends SherlockFragmentActivity implements
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				mProgress.setVisibility(View.INVISIBLE);
+				mProgress.setVisibility(View.GONE);
 			}
 		});
 	}
