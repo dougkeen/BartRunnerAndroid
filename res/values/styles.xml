@@ -104,9 +104,4 @@
         <item name="android:layout_marginRight">87dp</item>
         <item name="android:layout_marginBottom">5dp</item>
     </style>
-
-    <style name="bottomButton">
-        <item name="android:background">#222</item>
-    </style>
-
 </resources>
