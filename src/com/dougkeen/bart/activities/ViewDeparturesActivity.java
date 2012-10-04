@@ -591,6 +591,13 @@ public class ViewDeparturesActivity extends SActivity implements
 			final BartRunnerApplication application = (BartRunnerApplication) getApplication();
 			final Departure boardedDeparture = application
 					.getBoardedDeparture();
+
+			if (boardedDeparture == null) {
+				mode.finish();
+				refreshBoardedDeparture();
+				return true;
+			}
+
 			if (boardedDeparture.isAlarmPending()) {
 				cancelAlarmButton.setVisible(true);
 				setAlarmButton.setIcon(R.drawable.ic_action_alarm);

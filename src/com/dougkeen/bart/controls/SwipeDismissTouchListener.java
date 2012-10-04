@@ -59,11 +59,6 @@ import static com.nineoldandroids.view.ViewPropertyAnimator.animate;
  * 		}));
  * </pre>
  * 
- * <p>
- * This class Requires API level 12 or later due to use of
- * {@link android.view.ViewPropertyAnimator}.
- * </p>
- * 
  * @see SwipeDismissListViewTouchListener
  */
 public class SwipeDismissTouchListener implements View.OnTouchListener {
