@@ -39,7 +39,7 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.dougkeen.bart.BartRunnerApplication;
 import com.dougkeen.bart.R;
-import com.dougkeen.bart.controls.SwipeDismissTouchListener;
+import com.dougkeen.bart.controls.SwipeHelper;
 import com.dougkeen.bart.controls.Ticker;
 import com.dougkeen.bart.controls.YourTrainLayout;
 import com.dougkeen.bart.data.DepartureArrayAdapter;
@@ -189,9 +189,8 @@ public class ViewDeparturesActivity extends SActivity implements
 
 		mYourTrainSection = (YourTrainLayout) findViewById(R.id.yourTrainSection);
 		mYourTrainSection.setOnClickListener(mYourTrainSectionClickListener);
-		mYourTrainSection.setOnTouchListener(new SwipeDismissTouchListener(
-				mYourTrainSection, null,
-				new SwipeDismissTouchListener.OnDismissCallback() {
+		mSwipeHelper = new SwipeHelper(mYourTrainSection, null,
+				new SwipeHelper.OnDismissCallback() {
 					@Override
 					public void onDismiss(View view, Object token) {
 						dismissYourTrainSelection();
@@ -201,7 +200,8 @@ public class ViewDeparturesActivity extends SActivity implements
 							mActionMode.finish();
 						}
 					}
-				}));
+				});
+		mYourTrainSection.setOnTouchListener(mSwipeHelper);
 
 		refreshBoardedDeparture();
 
@@ -363,6 +363,8 @@ public class ViewDeparturesActivity extends SActivity implements
 
 	private YourTrainLayout mYourTrainSection;
 
+	private SwipeHelper mSwipeHelper;
+
 	protected DepartureArrayAdapter getListAdapter() {
 		return mDeparturesAdapter;
 	}
@@ -480,7 +482,7 @@ public class ViewDeparturesActivity extends SActivity implements
 		mYourTrainSection.updateFromDeparture(boardedDeparture);
 
 		if (currentVisibility != View.VISIBLE) {
-			showYourTrainSection(mYourTrainSection);
+			showYourTrainSection();
 		}
 
 		if (mActionMode == null) {
@@ -678,7 +680,7 @@ public class ViewDeparturesActivity extends SActivity implements
 				startService(intent);
 				return true;
 			} else if (itemId == R.id.delete) {
-				dismissYourTrainSelection();
+				mSwipeHelper.dismissWithAnimation(true);
 				mode.finish();
 				return true;
 			}
@@ -770,9 +772,35 @@ public class ViewDeparturesActivity extends SActivity implements
 					refreshBoardedDeparture();
 
 					getListAdapter().notifyDataSetChanged();
+
+					refreshListSelection();
 				}
 			}
 		});
+	}
+
+	private void refreshListSelection() {
+		getListView().clearChoices();
+		final Departure targetDeparture;
+		if (isDepartureActionModeActive() && mSelectedDeparture != null) {
+			targetDeparture = mSelectedDeparture;
+		} else {
+			targetDeparture = ((BartRunnerApplication) getApplication())
+					.getBoardedDeparture();
+		}
+		for (int i = getListAdapter().getCount() - 1; i >= 0; i--) {
+			if (getListAdapter().getItem(i).equals(targetDeparture)) {
+				final int selectedIndex = i;
+				getListView().post(new Runnable() {
+					@Override
+					public void run() {
+						getListView().setSelection(selectedIndex);
+					}
+				});
+				break;
+			}
+		}
+		getListView().requestLayout();
 	}
 
 	@Override
@@ -816,11 +844,12 @@ public class ViewDeparturesActivity extends SActivity implements
 	}
 
 	private void hideYourTrainSection() {
-		findViewById(R.id.yourTrainSection).setVisibility(View.GONE);
+		mYourTrainSection.setVisibility(View.GONE);
 	}
 
-	private void showYourTrainSection(final YourTrainLayout yourTrainSection) {
-		yourTrainSection.setVisibility(View.VISIBLE);
+	private void showYourTrainSection() {
+		mYourTrainSection.setVisibility(View.VISIBLE);
+		mSwipeHelper.showWithAnimation();
 	}
 
 	private boolean isYourTrainActionModeActive() {

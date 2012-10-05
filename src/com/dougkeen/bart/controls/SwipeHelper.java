@@ -1,4 +1,5 @@
 /*
+ * Copyright 2012 Doug Keen
  * Copyright 2012 Roman Nurik
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,23 +19,27 @@
 
 package com.dougkeen.bart.controls;
 
+import static com.nineoldandroids.view.ViewHelper.setAlpha;
+import static com.nineoldandroids.view.ViewHelper.setTranslationX;
+import static com.nineoldandroids.view.ViewPropertyAnimator.animate;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
+import android.view.View.MeasureSpec;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+
+import com.dougkeen.bart.model.Constants;
 import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.AnimatorListenerAdapter;
 import com.nineoldandroids.animation.ValueAnimator;
 
-import static com.nineoldandroids.view.ViewHelper.setAlpha;
-import static com.nineoldandroids.view.ViewHelper.setTranslationX;
-import static com.nineoldandroids.view.ViewPropertyAnimator.animate;
-
 /**
- * A {@link android.view.View.OnTouchListener} that makes any {@link View}
- * dismissable when the user swipes (drags her finger) horizontally across the
- * view.
+ * A utility class for animating the dismissal of a view (with 'onDismiss'
+ * callback). Also, a {@link android.view.View.OnTouchListener} that makes any
+ * {@link View} dismissable when the user swipes (drags her finger) horizontally
+ * across the view.
  * 
  * <p>
  * <em>For {@link android.widget.ListView} list items that don't manage their own touch events
@@ -49,10 +54,10 @@ import static com.nineoldandroids.view.ViewPropertyAnimator.animate;
  * </p>
  * 
  * <pre>
- * view.setOnTouchListener(new SwipeDismissTouchListener(view, null, // Optional
- * 																	// token/cookie
- * 																	// object
- * 		new SwipeDismissTouchListener.OnDismissCallback() {
+ * view.setOnTouchListener(new SwipeDismisser(view, null, // Optional
+ * 														// token/cookie
+ * 														// object
+ * 		new SwipeDismisser.OnDismissCallback() {
  * 			public void onDismiss(View view, Object token) {
  * 				parent.removeView(view);
  * 			}
@@ -61,7 +66,7 @@ import static com.nineoldandroids.view.ViewPropertyAnimator.animate;
  * 
  * @see SwipeDismissListViewTouchListener
  */
-public class SwipeDismissTouchListener implements View.OnTouchListener {
+public class SwipeHelper implements View.OnTouchListener {
 	// Cached ViewConfiguration and system-wide constant values
 	private int mSlop;
 	private int mMinFlingVelocity;
@@ -81,9 +86,8 @@ public class SwipeDismissTouchListener implements View.OnTouchListener {
 	private float mTranslationX;
 
 	/**
-	 * The callback interface used by {@link SwipeDismissTouchListener} to
-	 * inform its client about a successful dismissal of the view for which it
-	 * was created.
+	 * The callback interface used by {@link SwipeHelper} to inform its
+	 * client about a successful dismissal of the view for which it was created.
 	 */
 	public interface OnDismissCallback {
 		/**
@@ -110,8 +114,7 @@ public class SwipeDismissTouchListener implements View.OnTouchListener {
 	 *            The callback to trigger when the user has indicated that she
 	 *            would like to dismiss this view.
 	 */
-	public SwipeDismissTouchListener(View view, Object token,
-			OnDismissCallback callback) {
+	public SwipeHelper(View view, Object token, OnDismissCallback callback) {
 		ViewConfiguration vc = ViewConfiguration.get(view.getContext());
 		mSlop = vc.getScaledTouchSlop();
 		mMinFlingVelocity = vc.getScaledMinimumFlingVelocity();
@@ -125,6 +128,7 @@ public class SwipeDismissTouchListener implements View.OnTouchListener {
 
 	@Override
 	public boolean onTouch(View view, MotionEvent motionEvent) {
+		Log.v(Constants.TAG, "onTouch()");
 		// offset because the view is translated during swipe
 		motionEvent.offsetLocation(mTranslationX, 0);
 
@@ -164,15 +168,7 @@ public class SwipeDismissTouchListener implements View.OnTouchListener {
 			}
 			if (dismiss) {
 				// dismiss
-				animate(mView)
-						.translationX(dismissRight ? mViewWidth : -mViewWidth)
-						.alpha(0).setDuration(mAnimationTime)
-						.setListener(new AnimatorListenerAdapter() {
-							@Override
-							public void onAnimationEnd(Animator animation) {
-								performDismiss();
-							}
-						});
+				dismissWithAnimation(dismissRight);
 			} else {
 				// cancel
 				animate(mView).translationX(0).alpha(1)
@@ -222,6 +218,17 @@ public class SwipeDismissTouchListener implements View.OnTouchListener {
 		return false;
 	}
 
+	public void dismissWithAnimation(boolean dismissRight) {
+		animate(mView).translationX(dismissRight ? mViewWidth : -mViewWidth)
+				.alpha(0).setDuration(mAnimationTime)
+				.setListener(new AnimatorListenerAdapter() {
+					@Override
+					public void onAnimationEnd(Animator animation) {
+						performDismiss();
+					}
+				});
+	}
+
 	private void performDismiss() {
 		// Animate the dismissed view to zero-height and then fire the dismiss
 		// callback.
@@ -244,6 +251,48 @@ public class SwipeDismissTouchListener implements View.OnTouchListener {
 				setTranslationX(mView, 0);
 				lp.height = originalHeight;
 				mView.setLayoutParams(lp);
+			}
+		});
+
+		animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+			@Override
+			public void onAnimationUpdate(ValueAnimator valueAnimator) {
+				lp.height = (Integer) valueAnimator.getAnimatedValue();
+				mView.setLayoutParams(lp);
+			}
+		});
+
+		animator.start();
+	}
+
+	public void showWithAnimation() {
+		final int measureSpec = MeasureSpec.makeMeasureSpec(
+				ViewGroup.LayoutParams.WRAP_CONTENT, MeasureSpec.EXACTLY);
+		mView.measure(measureSpec, measureSpec);
+		mViewWidth = mView.getMeasuredWidth();
+		final int viewHeight = mView.getMeasuredHeight();
+		setAlpha(mView, 0f);
+
+		final ViewGroup.LayoutParams lp = mView.getLayoutParams();
+		lp.width = mViewWidth;
+
+		setTranslationX(mView, mViewWidth);
+
+		// Grow space
+		ValueAnimator animator = ValueAnimator.ofInt(1, viewHeight)
+				.setDuration(mAnimationTime);
+
+		animator.addListener(new AnimatorListenerAdapter() {
+			@Override
+			public void onAnimationEnd(Animator animation) {
+				// Reset view presentation
+				// mView.requestLayout();
+
+				// Swipe view into space that opened up
+				animate(mView).translationX(0).alpha(1)
+						.setDuration(mAnimationTime)
+						.setListener(new AnimatorListenerAdapter() {
+						});
 			}
 		});
 
