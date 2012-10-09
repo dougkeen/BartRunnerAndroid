@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcelable;
+import android.os.Vibrator;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -243,6 +244,10 @@ public class ViewDeparturesActivity extends SActivity implements
 		if (application.getAlarmMediaPlayer() == null) {
 			tryToPlayRingtone(alarmSound);
 		}
+		final Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+		if (vibrator.hasVibrator()) {
+			vibrator.vibrate(new long[] { 0, 500, 500 }, 1);
+		}
 		mHandler.postDelayed(new Runnable() {
 			@Override
 			public void run() {
@@ -270,6 +275,10 @@ public class ViewDeparturesActivity extends SActivity implements
 		final MediaPlayer mediaPlayer = application.getAlarmMediaPlayer();
 		application.setAlarmSounding(false);
 		application.setAlarmMediaPlayer(null);
+		final Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+		if (vibrator.hasVibrator()) {
+			vibrator.cancel();
+		}
 		try {
 			if (mediaPlayer != null && mediaPlayer.isPlaying()) {
 				mediaPlayer.stop();
