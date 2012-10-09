@@ -18,8 +18,10 @@ public class NetworkUtils {
 		final HttpParams params = client.getParams();
 		HttpConnectionParams.setConnectionTimeout(params,
 				NetworkUtils.CONNECTION_TIMEOUT_MILLIS);
-		HttpConnectionParams.setSoTimeout(params, NetworkUtils.CONNECTION_TIMEOUT_MILLIS);
-		ConnManagerParams.setTimeout(params, NetworkUtils.CONNECTION_TIMEOUT_MILLIS);
+		HttpConnectionParams.setSoTimeout(params,
+				NetworkUtils.CONNECTION_TIMEOUT_MILLIS);
+		ConnManagerParams.setTimeout(params,
+				NetworkUtils.CONNECTION_TIMEOUT_MILLIS);
 		return client;
 	}
 

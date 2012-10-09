@@ -1,6 +1,5 @@
 package com.dougkeen.bart.data;
 
-
 public enum RoutesColumns {
 	_ID("_id", "INTEGER", false),
 	FROM_STATION("FROM_STATION", "TEXT", false),
@@ -10,7 +9,6 @@ public enum RoutesColumns {
 	AVERAGE_TRIP_SAMPLE_COUNT("AVE_TRIP_SAMPLE_COUNT", "INTEGER", true),
 	AVERAGE_TRIP_LENGTH("AVE_TRIP_LENGTH", "INTEGER", true);
 
-	
 	// This class cannot be instantiated
 	private RoutesColumns(String string, String type, Boolean nullable) {
 		this.string = string;
@@ -23,6 +21,6 @@ public enum RoutesColumns {
 	public final Boolean nullable;
 
 	protected String getColumnDef() {
-		return string + " " + sqliteType + (nullable?"":" NOT NULL");
+		return string + " " + sqliteType + (nullable ? "" : " NOT NULL");
 	}
 }

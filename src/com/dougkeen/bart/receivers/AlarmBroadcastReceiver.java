@@ -24,7 +24,8 @@ public class AlarmBroadcastReceiver extends BroadcastReceiver {
 
 		application.setPlayAlarmRingtone(true);
 
-		Intent targetIntent = new Intent(Intent.ACTION_VIEW, boardedDeparture.getStationPair().getUri());
+		Intent targetIntent = new Intent(Intent.ACTION_VIEW, boardedDeparture
+				.getStationPair().getUri());
 		targetIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
 		context.startActivity(targetIntent);

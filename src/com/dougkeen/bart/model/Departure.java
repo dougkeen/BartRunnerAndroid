@@ -17,6 +17,7 @@ import android.support.v4.app.NotificationCompat.Builder;
 import android.text.format.DateFormat;
 import android.util.Log;
 
+import com.dougkeen.bart.BartRunnerApplication;
 import com.dougkeen.bart.R;
 import com.dougkeen.bart.services.BoardedDepartureService;
 import com.dougkeen.util.Observable;
@@ -463,7 +464,8 @@ public class Departure implements Parcelable, Comparable<Departure> {
 			if (origin != null && origin.longStationLinger && beganAsDeparted) {
 				builder.append("At station");
 			} else {
-				builder.append("Departed");
+				builder.append(BartRunnerApplication.getAppContext().getString(
+						R.string.leaving));
 			}
 		} else {
 			builder.append(secondsLeft / 60);

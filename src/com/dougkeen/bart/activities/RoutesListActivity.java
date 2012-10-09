@@ -18,11 +18,10 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListAdapter;
 
-import com.WazaBe.HoloEverywhere.widget.TextView;
-
 import com.WazaBe.HoloEverywhere.app.AlertDialog;
 import com.WazaBe.HoloEverywhere.app.DialogFragment;
 import com.WazaBe.HoloEverywhere.sherlock.SActivity;
+import com.WazaBe.HoloEverywhere.widget.TextView;
 import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;

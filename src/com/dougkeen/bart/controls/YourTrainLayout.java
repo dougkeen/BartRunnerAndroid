@@ -95,7 +95,7 @@ public class YourTrainLayout extends RelativeLayout implements Checkable {
 			@Override
 			public String getText(long tickNumber) {
 				if (boardedDeparture.hasDeparted()) {
-					return "Departed";
+					return getContext().getString(R.string.leaving);
 				} else {
 					return "Leaves in " + boardedDeparture.getCountdownText()
 							+ " " + boardedDeparture.getUncertaintyText();

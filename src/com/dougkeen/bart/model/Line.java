@@ -89,10 +89,12 @@ public enum Line {
 		return lines;
 	}
 
-	public static Collection<Line> getLinesWithStations(Station station1, Station station2) {
+	public static Collection<Line> getLinesWithStations(Station station1,
+			Station station2) {
 		Collection<Line> lines = new ArrayList<Line>();
 		for (Line line : Line.values()) {
-			if (line.stations.contains(station1) && line.stations.contains(station2)) {
+			if (line.stations.contains(station1)
+					&& line.stations.contains(station2)) {
 				lines.add(line);
 			}
 		}
