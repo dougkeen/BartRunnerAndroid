@@ -135,7 +135,7 @@ public class ViewDeparturesActivity extends SActivity implements
 							if (mBound && mEtdService != null)
 								mEtdService.registerListener(
 										ViewDeparturesActivity.this, false);
-							refreshBoardedDeparture();
+							refreshBoardedDeparture(false);
 
 							getSupportLoaderManager().destroyLoader(LOADER_ID);
 						}
@@ -201,7 +201,7 @@ public class ViewDeparturesActivity extends SActivity implements
 				});
 		mYourTrainSection.setOnTouchListener(mSwipeHelper);
 
-		refreshBoardedDeparture();
+		refreshBoardedDeparture(false);
 
 		getSupportActionBar().setHomeButtonEnabled(true);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -423,7 +423,7 @@ public class ViewDeparturesActivity extends SActivity implements
 			getWindow()
 					.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 			Ticker.getInstance().startTicking(this);
-			refreshBoardedDeparture();
+			refreshBoardedDeparture(false);
 		}
 	}
 
@@ -462,7 +462,7 @@ public class ViewDeparturesActivity extends SActivity implements
 		}
 	}
 
-	private void refreshBoardedDeparture() {
+	private void refreshBoardedDeparture(boolean animate) {
 		final Departure boardedDeparture = ((BartRunnerApplication) getApplication())
 				.getBoardedDeparture();
 		int currentVisibility = mYourTrainSection.getVisibility();
@@ -481,7 +481,7 @@ public class ViewDeparturesActivity extends SActivity implements
 		mYourTrainSection.updateFromDeparture(boardedDeparture);
 
 		if (currentVisibility != View.VISIBLE) {
-			showYourTrainSection();
+			showYourTrainSection(animate);
 		}
 	}
 
@@ -489,7 +489,7 @@ public class ViewDeparturesActivity extends SActivity implements
 		final BartRunnerApplication application = (BartRunnerApplication) getApplication();
 		selectedDeparture.setPassengerDestination(mDestination);
 		application.setBoardedDeparture(selectedDeparture);
-		refreshBoardedDeparture();
+		refreshBoardedDeparture(true);
 
 		// Start the notification service
 		startService(new Intent(ViewDeparturesActivity.this,
@@ -576,7 +576,7 @@ public class ViewDeparturesActivity extends SActivity implements
 
 			if (boardedDeparture == null) {
 				mode.finish();
-				refreshBoardedDeparture();
+				refreshBoardedDeparture(true);
 				return true;
 			}
 
@@ -746,7 +746,7 @@ public class ViewDeparturesActivity extends SActivity implements
 						}
 					}
 
-					refreshBoardedDeparture();
+					refreshBoardedDeparture(true);
 
 					getListAdapter().notifyDataSetChanged();
 
@@ -824,9 +824,11 @@ public class ViewDeparturesActivity extends SActivity implements
 		mYourTrainSection.setVisibility(View.GONE);
 	}
 
-	private void showYourTrainSection() {
+	private void showYourTrainSection(boolean animate) {
 		mYourTrainSection.setVisibility(View.VISIBLE);
-		mSwipeHelper.showWithAnimation();
+		if (animate) {
+			mSwipeHelper.showWithAnimation();
+		}
 	}
 
 	private boolean isYourTrainActionModeActive() {
