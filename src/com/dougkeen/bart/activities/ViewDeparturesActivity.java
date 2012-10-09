@@ -66,6 +66,7 @@ public class ViewDeparturesActivity extends SActivity implements
 	private Station mDestination;
 
 	private Departure mSelectedDeparture;
+	private View mSelectedRow;
 
 	private DepartureArrayAdapter mDeparturesAdapter;
 
@@ -180,7 +181,6 @@ public class ViewDeparturesActivity extends SActivity implements
 		setListAdapter(mDeparturesAdapter);
 		final ListView listView = getListView();
 		listView.setEmptyView(findViewById(android.R.id.empty));
-		listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 		listView.setOnItemClickListener(mListItemClickListener);
 		listView.setOnItemLongClickListener(mListItemLongClickListener);
 
@@ -194,8 +194,6 @@ public class ViewDeparturesActivity extends SActivity implements
 					@Override
 					public void onDismiss(View view, Object token) {
 						dismissYourTrainSelection();
-						getListView().clearChoices();
-						getListView().requestLayout();
 						if (isYourTrainActionModeActive()) {
 							mActionMode.finish();
 						}
@@ -345,7 +343,8 @@ public class ViewDeparturesActivity extends SActivity implements
 				int position, long id) {
 			mWasLongClick = true;
 			mSelectedDeparture = (Departure) getListAdapter().getItem(position);
-			view.setSelected(true);
+			mSelectedRow = view;
+			((Checkable) mSelectedRow).setChecked(true);
 			startDepartureActionMode();
 			return false;
 		}
@@ -484,22 +483,6 @@ public class ViewDeparturesActivity extends SActivity implements
 		if (currentVisibility != View.VISIBLE) {
 			showYourTrainSection();
 		}
-
-		if (mActionMode == null) {
-			for (int i = getListAdapter().getCount() - 1; i >= 0; i--) {
-				if (getListAdapter().getItem(i).equals(boardedDeparture)) {
-					getListView().setSelection(i);
-					final Checkable listItem = (Checkable) getListView()
-							.getChildAt(i);
-					if (listItem != null) {
-						listItem.setChecked(true);
-					}
-					break;
-				}
-			}
-			getListView().requestLayout();
-		}
-
 	}
 
 	private void setBoardedDeparture(Departure selectedDeparture) {
@@ -547,8 +530,8 @@ public class ViewDeparturesActivity extends SActivity implements
 
 		@Override
 		public void onDestroyActionMode(ActionMode mode) {
-			getListView().clearChoices();
-			getListView().requestLayout();
+			((Checkable) mSelectedRow).setChecked(false);
+			mSelectedRow = null;
 			mActionMode = null;
 		}
 
@@ -581,9 +564,6 @@ public class ViewDeparturesActivity extends SActivity implements
 
 		@Override
 		public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-			// Suppress new "your train" selections
-			getListView().setChoiceMode(ListView.CHOICE_MODE_NONE);
-
 			mode.getMenuInflater()
 					.inflate(R.menu.your_train_context_menu, menu);
 			final MenuItem cancelAlarmButton = menu
@@ -704,9 +684,6 @@ public class ViewDeparturesActivity extends SActivity implements
 			mAlarmPendingObserver = null;
 			mAlarmLeadTimeObserver = null;
 			mActionMode = null;
-
-			// Enable new "your train" selections
-			getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 		}
 	}
 
