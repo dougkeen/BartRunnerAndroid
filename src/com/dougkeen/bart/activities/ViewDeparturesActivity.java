@@ -176,7 +176,7 @@ public class ViewDeparturesActivity extends SActivity implements
 					&& mSelectedDeparture != null) {
 				((Checkable) findViewById(R.id.yourTrainSection))
 						.setChecked(true);
-				startYourTrainActionMode(bartRunnerApplication);
+				startYourTrainActionMode();
 			}
 		}
 		setListAdapter(mDeparturesAdapter);
@@ -245,9 +245,7 @@ public class ViewDeparturesActivity extends SActivity implements
 			tryToPlayRingtone(alarmSound);
 		}
 		final Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
-		if (vibrator.hasVibrator()) {
-			vibrator.vibrate(new long[] { 0, 500, 500 }, 1);
-		}
+		vibrator.vibrate(new long[] { 0, 500, 500 }, 1);
 		mHandler.postDelayed(new Runnable() {
 			@Override
 			public void run() {
@@ -276,9 +274,7 @@ public class ViewDeparturesActivity extends SActivity implements
 		application.setAlarmSounding(false);
 		application.setAlarmMediaPlayer(null);
 		final Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
-		if (vibrator.hasVibrator()) {
-			vibrator.cancel();
-		}
+		vibrator.cancel();
 		try {
 			if (mediaPlayer != null && mediaPlayer.isPlaying()) {
 				mediaPlayer.stop();
@@ -363,7 +359,7 @@ public class ViewDeparturesActivity extends SActivity implements
 		@Override
 		public void onClick(View v) {
 			((Checkable) v).setChecked(true);
-			startYourTrainActionMode((BartRunnerApplication) getApplication());
+			startYourTrainActionMode();
 		}
 	};
 
@@ -472,26 +468,26 @@ public class ViewDeparturesActivity extends SActivity implements
 	}
 
 	private void refreshBoardedDeparture(boolean animate) {
-		final Departure boardedDeparture = ((BartRunnerApplication) getApplication())
-				.getBoardedDeparture();
+		final Departure boardedDeparture = getBoardedDeparture();
 		int currentVisibility = mYourTrainSection.getVisibility();
 
-		final boolean boardedDepartureDoesNotApply = boardedDeparture == null
-				|| boardedDeparture.getStationPair() == null
-				|| !boardedDeparture.getStationPair().equals(getStationPair());
-
-		if (boardedDepartureDoesNotApply) {
+		if (!doesDepartureApply(boardedDeparture)) {
 			if (currentVisibility != View.GONE) {
 				hideYourTrainSection();
 			}
 			return;
 		}
 
-		mYourTrainSection.updateFromDeparture(boardedDeparture);
+		mYourTrainSection.updateFromBoardedDeparture();
 
 		if (currentVisibility != View.VISIBLE) {
 			showYourTrainSection(animate);
 		}
+	}
+
+	private boolean doesDepartureApply(final Departure departure) {
+		return departure != null && departure.getStationPair() != null
+				&& departure.getStationPair().equals(getStationPair());
 	}
 
 	private void setBoardedDeparture(Departure selectedDeparture) {
@@ -546,14 +542,13 @@ public class ViewDeparturesActivity extends SActivity implements
 
 	}
 
-	private void startYourTrainActionMode(BartRunnerApplication application) {
+	private void startYourTrainActionMode() {
 		if (mActionMode == null)
 			mActionMode = startActionMode(new YourTrainActionMode());
 		mActionMode.setTitle(R.string.your_train);
-		if (application.getBoardedDeparture() != null
-				&& application.getBoardedDeparture().isAlarmPending()) {
-			int leadTime = application.getBoardedDeparture()
-					.getAlarmLeadTimeMinutes();
+		Departure boardedDeparture = getBoardedDeparture();
+		if (boardedDeparture != null && boardedDeparture.isAlarmPending()) {
+			int leadTime = boardedDeparture.getAlarmLeadTimeMinutes();
 			mActionMode.setSubtitle(getAlarmSubtitle(leadTime));
 		} else {
 			mActionMode.setSubtitle(null);
@@ -579,9 +574,7 @@ public class ViewDeparturesActivity extends SActivity implements
 					.findItem(R.id.cancel_alarm_button);
 			final MenuItem setAlarmButton = menu
 					.findItem(R.id.set_alarm_button);
-			final BartRunnerApplication application = (BartRunnerApplication) getApplication();
-			final Departure boardedDeparture = application
-					.getBoardedDeparture();
+			final Departure boardedDeparture = getBoardedDeparture();
 
 			if (boardedDeparture == null) {
 				mode.finish();
@@ -652,10 +645,8 @@ public class ViewDeparturesActivity extends SActivity implements
 		public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 			final int itemId = item.getItemId();
 			if (itemId == R.id.set_alarm_button) {
-				BartRunnerApplication application = (BartRunnerApplication) getApplication();
-
 				// Don't prompt for alarm if train is about to leave
-				if (application.getBoardedDeparture().getMeanSecondsLeft() > 60) {
+				if (getBoardedDeparture().getMeanSecondsLeft() > 60) {
 					new TrainAlarmDialogFragment()
 							.show(getSupportFragmentManager()
 									.beginTransaction());
@@ -680,9 +671,7 @@ public class ViewDeparturesActivity extends SActivity implements
 		public void onDestroyActionMode(ActionMode mode) {
 			((Checkable) findViewById(R.id.yourTrainSection)).setChecked(false);
 
-			final BartRunnerApplication application = (BartRunnerApplication) getApplication();
-			final Departure boardedDeparture = application
-					.getBoardedDeparture();
+			final Departure boardedDeparture = getBoardedDeparture();
 			if (boardedDeparture != null) {
 				boardedDeparture.getAlarmPendingObservable()
 						.unregisterObserver(mAlarmPendingObserver);
@@ -719,10 +708,18 @@ public class ViewDeparturesActivity extends SActivity implements
 					Ticker.getInstance().startTicking(
 							ViewDeparturesActivity.this);
 
+					Departure boardedDeparture = getBoardedDeparture();
+					boolean boardedDepartureFound = false;
+
 					// Merge lists
 					if (mDeparturesAdapter.getCount() > 0) {
 						int adapterIndex = -1;
 						for (Departure departure : departures) {
+							if (!boardedDepartureFound
+									&& departure.equals(boardedDeparture)) {
+								boardedDepartureFound = true;
+							}
+
 							adapterIndex++;
 							Departure existingDeparture = null;
 							if (adapterIndex < mDeparturesAdapter.getCount()) {
@@ -755,6 +752,11 @@ public class ViewDeparturesActivity extends SActivity implements
 						}
 					}
 
+					if (doesDepartureApply(boardedDeparture)
+							&& !boardedDepartureFound) {
+						boardedDeparture.setListedInETDs(false);
+					}
+
 					refreshBoardedDeparture(true);
 
 					getListAdapter().notifyDataSetChanged();
@@ -771,8 +773,7 @@ public class ViewDeparturesActivity extends SActivity implements
 		if (isDepartureActionModeActive() && mSelectedDeparture != null) {
 			targetDeparture = mSelectedDeparture;
 		} else {
-			targetDeparture = ((BartRunnerApplication) getApplication())
-					.getBoardedDeparture();
+			targetDeparture = getBoardedDeparture();
 		}
 		for (int i = getListAdapter().getCount() - 1; i >= 0; i--) {
 			if (getListAdapter().getItem(i).equals(targetDeparture)) {
@@ -850,5 +851,9 @@ public class ViewDeparturesActivity extends SActivity implements
 		return mActionMode != null
 				&& !mActionMode.getTitle().equals(
 						getString(R.string.your_train));
+	}
+
+	private Departure getBoardedDeparture() {
+		return ((BartRunnerApplication) getApplication()).getBoardedDeparture();
 	}
 }

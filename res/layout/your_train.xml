@@ -3,6 +3,18 @@
     xmlns:bart="http://schemas.android.com/apk/res/com.dougkeen.bart" >
 
     <TextView
+        android:id="@+id/alarmText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:drawableLeft="@drawable/ic_action_alarm"
+        android:gravity="center_vertical"
+        android:textSize="16dp"
+        android:visibility="gone" >
+    </TextView>
+
+    <TextView
         android:id="@+id/yourTrainHeader"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

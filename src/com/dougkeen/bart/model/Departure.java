@@ -74,6 +74,8 @@ public class Departure implements Parcelable, Comparable<Departure> {
 			0);
 	private Observable<Boolean> alarmPending = new Observable<Boolean>(false);
 
+	private boolean listedInETDs = true;
+
 	public Station getOrigin() {
 		return origin;
 	}
@@ -463,9 +465,12 @@ public class Departure implements Parcelable, Comparable<Departure> {
 		if (hasDeparted()) {
 			if (origin != null && origin.longStationLinger && beganAsDeparted) {
 				builder.append("At station");
-			} else {
+			} else if (isListedInETDs()) {
 				builder.append(BartRunnerApplication.getAppContext().getString(
 						R.string.leaving));
+			} else {
+				builder.append(BartRunnerApplication.getAppContext().getString(
+						R.string.departed));
 			}
 		} else {
 			builder.append(secondsLeft / 60);
@@ -482,6 +487,14 @@ public class Departure implements Parcelable, Comparable<Departure> {
 		} else {
 			return "(±" + getUncertaintySeconds() + "s)";
 		}
+	}
+
+	public boolean isListedInETDs() {
+		return listedInETDs;
+	}
+
+	public void setListedInETDs(boolean listedInETDs) {
+		this.listedInETDs = listedInETDs;
 	}
 
 	public int getAlarmLeadTimeMinutes() {

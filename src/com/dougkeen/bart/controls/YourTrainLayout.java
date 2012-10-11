@@ -1,5 +1,6 @@
 package com.dougkeen.bart.controls;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
@@ -11,9 +12,11 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.dougkeen.bart.BartRunnerApplication;
 import com.dougkeen.bart.R;
 import com.dougkeen.bart.model.Departure;
 import com.dougkeen.bart.model.TextProvider;
+import com.dougkeen.util.Observer;
 
 public class YourTrainLayout extends RelativeLayout implements Checkable {
 
@@ -37,6 +40,28 @@ public class YourTrainLayout extends RelativeLayout implements Checkable {
 	}
 
 	private boolean mChecked;
+
+	private Departure mDeparture;
+
+	private final Observer<Integer> mAlarmLeadObserver = new Observer<Integer>() {
+		@Override
+		public void onUpdate(Integer newValue) {
+			final Activity context = (Activity) getContext();
+			if (context != null) {
+				context.runOnUiThread(mUpdateAlarmIndicatorRunnable);
+			}
+		}
+	};
+
+	private final Observer<Boolean> mAlarmPendingObserver = new Observer<Boolean>() {
+		@Override
+		public void onUpdate(Boolean newValue) {
+			final Activity context = (Activity) getContext();
+			if (context != null) {
+				context.runOnUiThread(mUpdateAlarmIndicatorRunnable);
+			}
+		}
+	};
 
 	@Override
 	public boolean isChecked() {
@@ -64,7 +89,27 @@ public class YourTrainLayout extends RelativeLayout implements Checkable {
 		setChecked(!isChecked());
 	}
 
-	public void updateFromDeparture(final Departure boardedDeparture) {
+	public void updateFromBoardedDeparture() {
+		final Departure boardedDeparture = ((BartRunnerApplication) ((Activity) getContext())
+				.getApplication()).getBoardedDeparture();
+		if (boardedDeparture == null)
+			return;
+
+		if (!boardedDeparture.equals(mDeparture)) {
+			if (mDeparture != null) {
+				mDeparture.getAlarmLeadTimeMinutesObservable()
+						.unregisterObserver(mAlarmLeadObserver);
+				mDeparture.getAlarmPendingObservable().unregisterObserver(
+						mAlarmPendingObserver);
+			}
+			boardedDeparture.getAlarmLeadTimeMinutesObservable()
+					.registerObserver(mAlarmLeadObserver);
+			boardedDeparture.getAlarmPendingObservable().registerObserver(
+					mAlarmPendingObserver);
+		}
+
+		mDeparture = boardedDeparture;
+
 		((TextView) findViewById(R.id.yourTrainDestinationText))
 				.setText(boardedDeparture.getTrainDestination().toString());
 
@@ -88,6 +133,9 @@ public class YourTrainLayout extends RelativeLayout implements Checkable {
 			((ImageView) findViewById(R.id.yourTrainXferIcon))
 					.setVisibility(View.INVISIBLE);
 		}
+
+		updateAlarmIndicator();
+
 		CountdownTextView departureCountdown = (CountdownTextView) findViewById(R.id.yourTrainDepartureCountdown);
 		CountdownTextView arrivalCountdown = (CountdownTextView) findViewById(R.id.yourTrainArrivalCountdown);
 
@@ -95,7 +143,7 @@ public class YourTrainLayout extends RelativeLayout implements Checkable {
 			@Override
 			public String getText(long tickNumber) {
 				if (boardedDeparture.hasDeparted()) {
-					return getContext().getString(R.string.leaving);
+					return boardedDeparture.getCountdownText();
 				} else {
 					return "Leaves in " + boardedDeparture.getCountdownText()
 							+ " " + boardedDeparture.getUncertaintyText();
@@ -117,4 +165,21 @@ public class YourTrainLayout extends RelativeLayout implements Checkable {
 
 		setBackground();
 	}
+
+	private void updateAlarmIndicator() {
+		if (!mDeparture.isAlarmPending()) {
+			findViewById(R.id.alarmText).setVisibility(GONE);
+		} else {
+			findViewById(R.id.alarmText).setVisibility(VISIBLE);
+			((TextView) findViewById(R.id.alarmText)).setText(String
+					.valueOf(mDeparture.getAlarmLeadTimeMinutes()));
+		}
+	}
+
+	private final Runnable mUpdateAlarmIndicatorRunnable = new Runnable() {
+		@Override
+		public void run() {
+			updateAlarmIndicator();
+		}
+	};
 }

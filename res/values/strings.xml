@@ -43,5 +43,5 @@
     <string name="cancel_alarm">Cancel alarm</string>
     <string name="set_alarm">Set alarm</string>
     <string name="leaving">Leaving</string>
-
-</resources>
+    <string name="departed">Departed</string>
+</resources>
