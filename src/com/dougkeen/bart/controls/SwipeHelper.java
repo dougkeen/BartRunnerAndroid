@@ -247,7 +247,13 @@ public class SwipeHelper implements View.OnTouchListener {
 			public void onAnimationEnd(Animator animation) {
 				mCallback.onDismiss(mView, mToken);
 				// Reset view presentation
-				setAlpha(mView, 1f);
+
+				/*
+				 * Alpha stays at 0, otherwise Android 2.x leaves weird
+				 * artifacts
+				 */
+				// setAlpha(mView, 1f);
+
 				setTranslationX(mView, 0);
 				lp.height = originalHeight;
 				mView.setLayoutParams(lp);

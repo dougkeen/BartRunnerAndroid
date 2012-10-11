@@ -346,6 +346,9 @@ public class ViewDeparturesActivity extends SActivity implements
 		@Override
 		public boolean onItemLongClick(AdapterView<?> adapterView, View view,
 				int position, long id) {
+			if (mSelectedRow != null) {
+				((Checkable) mSelectedRow).setChecked(false);
+			}
 			mWasLongClick = true;
 			mSelectedDeparture = (Departure) getListAdapter().getItem(position);
 			mSelectedRow = view;
@@ -760,34 +763,9 @@ public class ViewDeparturesActivity extends SActivity implements
 					refreshBoardedDeparture(true);
 
 					getListAdapter().notifyDataSetChanged();
-
-					refreshListSelection();
 				}
 			}
 		});
-	}
-
-	private void refreshListSelection() {
-		getListView().clearChoices();
-		final Departure targetDeparture;
-		if (isDepartureActionModeActive() && mSelectedDeparture != null) {
-			targetDeparture = mSelectedDeparture;
-		} else {
-			targetDeparture = getBoardedDeparture();
-		}
-		for (int i = getListAdapter().getCount() - 1; i >= 0; i--) {
-			if (getListAdapter().getItem(i).equals(targetDeparture)) {
-				final int selectedIndex = i;
-				getListView().post(new Runnable() {
-					@Override
-					public void run() {
-						getListView().setSelection(selectedIndex);
-					}
-				});
-				break;
-			}
-		}
-		getListView().requestLayout();
 	}
 
 	@Override
