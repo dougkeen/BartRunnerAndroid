@@ -195,7 +195,7 @@ public class ViewDeparturesActivity extends SActivity implements
 					@Override
 					public void onDismiss(View view, Object token) {
 						dismissYourTrainSelection();
-						if (isYourTrainActionModeActive()) {
+						if (mActionMode != null) {
 							mActionMode.finish();
 						}
 					}
