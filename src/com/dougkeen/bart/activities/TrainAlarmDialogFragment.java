@@ -1,5 +1,6 @@
 package com.dougkeen.bart.activities;
 
+import net.simonvt.widget.NumberPicker;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -12,7 +13,6 @@ import com.WazaBe.HoloEverywhere.LayoutInflater;
 import com.WazaBe.HoloEverywhere.app.AlertDialog;
 import com.WazaBe.HoloEverywhere.app.Dialog;
 import com.WazaBe.HoloEverywhere.app.DialogFragment;
-import com.WazaBe.HoloEverywhere.widget.NumberPicker;
 import com.dougkeen.bart.BartRunnerApplication;
 import com.dougkeen.bart.R;
 import com.dougkeen.bart.model.Departure;

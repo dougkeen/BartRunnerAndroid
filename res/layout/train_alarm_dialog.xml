@@ -5,12 +5,12 @@
     android:layout_height="match_parent"
     android:orientation="horizontal" >
 
-    <NumberPicker
+    <net.simonvt.widget.NumberPicker
         android:id="@+id/numberPicker"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1" >
-    </NumberPicker>
+    </net.simonvt.widget.NumberPicker>
 
     <TextView
         android:id="@+id/textView1"
