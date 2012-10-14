@@ -67,7 +67,6 @@ public class ViewDeparturesActivity extends SActivity implements
 	private Station mDestination;
 
 	private Departure mSelectedDeparture;
-	private View mSelectedRow;
 
 	private DepartureArrayAdapter mDeparturesAdapter;
 
@@ -165,8 +164,8 @@ public class ViewDeparturesActivity extends SActivity implements
 				mDeparturesAdapter.notifyDataSetChanged();
 			}
 			if (savedInstanceState.containsKey("selectedDeparture")) {
-				mSelectedDeparture = (Departure) savedInstanceState
-						.getParcelable("selectedDeparture");
+				setSelectedDeparture((Departure) savedInstanceState
+						.getParcelable("selectedDeparture"));
 			}
 			if (savedInstanceState.getBoolean("hasDepartureActionMode")
 					&& mSelectedDeparture != null) {
@@ -225,6 +224,17 @@ public class ViewDeparturesActivity extends SActivity implements
 								}
 							}).show();
 		}
+	}
+
+	private void setSelectedDeparture(Departure departure) {
+		if (mSelectedDeparture != null && !mSelectedDeparture.equals(departure)) {
+			mSelectedDeparture.setSelected(false);
+		}
+		if (departure != null) {
+			departure.setSelected(true);
+		}
+		mSelectedDeparture = departure;
+		mDeparturesAdapter.notifyDataSetChanged();
 	}
 
 	private void soundTheAlarm() {
@@ -335,9 +345,8 @@ public class ViewDeparturesActivity extends SActivity implements
 				 * Otherwise select the clicked departure as the one the user
 				 * wants to board
 				 */
-				mSelectedDeparture = (Departure) getListAdapter().getItem(
-						position);
-				setBoardedDeparture(mSelectedDeparture);
+				setBoardedDeparture((Departure) getListAdapter().getItem(
+						position));
 			}
 		}
 	};
@@ -346,13 +355,8 @@ public class ViewDeparturesActivity extends SActivity implements
 		@Override
 		public boolean onItemLongClick(AdapterView<?> adapterView, View view,
 				int position, long id) {
-			if (mSelectedRow != null) {
-				((Checkable) mSelectedRow).setChecked(false);
-			}
 			mWasLongClick = true;
-			mSelectedDeparture = (Departure) getListAdapter().getItem(position);
-			mSelectedRow = view;
-			((Checkable) mSelectedRow).setChecked(true);
+			setSelectedDeparture((Departure) getListAdapter().getItem(position));
 			startDepartureActionMode();
 			return false;
 		}
@@ -538,8 +542,7 @@ public class ViewDeparturesActivity extends SActivity implements
 
 		@Override
 		public void onDestroyActionMode(ActionMode mode) {
-			((Checkable) mSelectedRow).setChecked(false);
-			mSelectedRow = null;
+			setSelectedDeparture(null);
 			mActionMode = null;
 		}
 

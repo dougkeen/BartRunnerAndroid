@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
+import android.widget.Checkable;
 import android.widget.ImageView;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
@@ -66,6 +67,9 @@ public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
 		}
 
 		final Departure departure = getItem(position);
+
+		((Checkable) view).setChecked(departure.isSelected());
+
 		((TextView) view.findViewById(R.id.destinationText)).setText(departure
 				.getTrainDestination().toString());
 

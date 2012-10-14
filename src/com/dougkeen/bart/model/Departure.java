@@ -76,6 +76,8 @@ public class Departure implements Parcelable, Comparable<Departure> {
 
 	private boolean listedInETDs = true;
 
+	private boolean selected;
+
 	public Station getOrigin() {
 		return origin;
 	}
@@ -495,6 +497,14 @@ public class Departure implements Parcelable, Comparable<Departure> {
 
 	public void setListedInETDs(boolean listedInETDs) {
 		this.listedInETDs = listedInETDs;
+	}
+
+	public boolean isSelected() {
+		return selected;
+	}
+
+	public void setSelected(boolean selected) {
+		this.selected = selected;
 	}
 
 	public int getAlarmLeadTimeMinutes() {
