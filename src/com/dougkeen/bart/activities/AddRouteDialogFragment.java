@@ -4,12 +4,18 @@ import android.content.ContentValues;
 import android.view.View;
 import android.widget.CheckBox;
 
+import com.dougkeen.bart.BartRunnerApplication;
 import com.dougkeen.bart.R;
 import com.dougkeen.bart.data.RoutesColumns;
 import com.dougkeen.bart.model.Constants;
 import com.dougkeen.bart.model.Station;
 
 public class AddRouteDialogFragment extends AbstractRouteSelectionFragment {
+	public AddRouteDialogFragment() {
+		super(BartRunnerApplication.getAppContext().getString(
+				R.string.add_route));
+	}
+
 	public AddRouteDialogFragment(String title) {
 		super(title);
 	}
