@@ -77,10 +77,12 @@ public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
 				.findViewById(R.id.trainLengthText);
 		initTextSwitcher(textSwitcher);
 
+		final String arrivesAtDestinationPrefix = getContext().getString(
+				R.string.arrives_at_destination);
 		final String estimatedArrivalTimeText = departure
 				.getEstimatedArrivalTimeText(getContext());
 		if (!StringUtils.isBlank(estimatedArrivalTimeText)) {
-			textSwitcher.setCurrentText("Est. arrival "
+			textSwitcher.setCurrentText(arrivesAtDestinationPrefix
 					+ estimatedArrivalTimeText);
 		} else {
 			textSwitcher.setCurrentText(departure.getTrainLengthText());
@@ -96,7 +98,8 @@ public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
 					if (StringUtils.isBlank(estimatedArrivalTimeText)) {
 						return "";
 					} else {
-						return "Est. arrival " + estimatedArrivalTimeText;
+						return arrivesAtDestinationPrefix
+								+ estimatedArrivalTimeText;
 					}
 				}
 			}

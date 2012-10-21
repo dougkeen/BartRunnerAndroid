@@ -44,4 +44,5 @@
     <string name="set_alarm">Set alarm</string>
     <string name="leaving">Leaving</string>
     <string name="departed">Departed</string>
+    <string name="arrives_at_destination">Arrive @ dest. ~</string>
 </resources>
