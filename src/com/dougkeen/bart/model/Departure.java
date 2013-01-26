@@ -315,6 +315,15 @@ public class Departure implements Parcelable, Comparable<Departure> {
 		}
 	}
 
+	public String getEstimatedDepartureTimeText(Context context) {
+		if (getMeanEstimate() > 0) {
+			return DateFormat.getTimeFormat(context).format(
+					new Date(getMeanEstimate()));
+		} else {
+			return "";
+		}
+	}
+
 	public boolean hasDeparted() {
 		return getMeanSecondsLeft() <= 0;
 	}

@@ -196,8 +196,11 @@ public class FavoritesArrayAdapter extends ArrayAdapter<StationPair> {
 			uncertaintyTextSwitcher.setTextProvider(new TextProvider() {
 				@Override
 				public String getText(long tickNumber) {
-					if (tickNumber % 4 <= 1) {
+					if (tickNumber % 6 <= 1) {
 						return pair.getFare();
+					} else if (tickNumber % 6 <= 3) {
+						return etdListener.getFirstDeparture()
+								.getEstimatedDepartureTimeText(getContext());
 					} else {
 						return etdListener.getFirstDeparture()
 								.getUncertaintyText();

@@ -75,7 +75,7 @@ public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
 
 		TimedTextSwitcher textSwitcher = (TimedTextSwitcher) view
 				.findViewById(R.id.trainLengthText);
-		initTextSwitcher(textSwitcher);
+		initTextSwitcher(textSwitcher, R.layout.train_length_arrival_textview);
 
 		final String arrivesAtDestinationPrefix = getContext().getString(
 				R.string.arrives_at_destination);
@@ -118,8 +118,23 @@ public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
 				return departure.getCountdownText();
 			}
 		});
-		((TextView) view.findViewById(R.id.uncertainty)).setText(departure
-				.getUncertaintyText());
+
+		TimedTextSwitcher uncertaintySwitcher = (TimedTextSwitcher) view
+				.findViewById(R.id.uncertainty);
+		initTextSwitcher(uncertaintySwitcher, R.layout.uncertainty_textview);
+
+		uncertaintySwitcher.setTextProvider(new TextProvider() {
+			@Override
+			public String getText(long tickNumber) {
+				if (tickNumber % 4 == 0) {
+					return departure.getUncertaintyText();
+				} else {
+					return departure
+							.getEstimatedDepartureTimeText(getContext());
+				}
+			}
+		});
+
 		if (departure.isBikeAllowed()) {
 			((ImageView) view.findViewById(R.id.bikeIcon))
 					.setVisibility(View.VISIBLE);
@@ -138,12 +153,13 @@ public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
 		return view;
 	}
 
-	private void initTextSwitcher(TextSwitcher textSwitcher) {
+	private void initTextSwitcher(TextSwitcher textSwitcher,
+			final int layoutView) {
 		if (textSwitcher.getInAnimation() == null) {
 			textSwitcher.setFactory(new ViewFactory() {
 				public View makeView() {
 					return LayoutInflater.from(getContext()).inflate(
-							R.layout.train_length_arrival_textview, null);
+							layoutView, null);
 				}
 			});
 
