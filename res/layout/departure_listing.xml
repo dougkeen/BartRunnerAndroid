@@ -28,8 +28,7 @@
 
         <ImageView
             android:id="@+id/bikeIcon"
-            style="@style/BikeIcon"
-            android:src="@drawable/bike" />
+            style="@style/BikeIcon" />
 
         <com.dougkeen.bart.controls.CountdownTextView
             android:id="@+id/countdown"

@@ -13,5 +13,11 @@
         android:showAsAction="ifRoom|withText"
         android:title="@string/view_system_map">
     </item>
+    <item
+        android:id="@+id/elevator_button"
+        android:icon="@drawable/ic_action_elevator"
+        android:showAsAction="ifRoom|withText"
+        android:title="Check elevator status">
+    </item>
 
 </menu>

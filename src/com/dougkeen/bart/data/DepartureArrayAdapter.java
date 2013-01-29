@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,33 +28,48 @@ import com.dougkeen.bart.model.TextProvider;
 
 public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
 
+	private Drawable noBikeDrawable;
+	private Drawable bikeDrawable;
+
 	public DepartureArrayAdapter(Context context, int textViewResourceId,
 			Departure[] objects) {
 		super(context, textViewResourceId, objects);
+		assignBikeDrawables();
+	}
+
+	private void assignBikeDrawables() {
+		noBikeDrawable = getContext().getResources().getDrawable(
+				R.drawable.nobike);
+		bikeDrawable = getContext().getResources().getDrawable(R.drawable.bike);
 	}
 
 	public DepartureArrayAdapter(Context context, int resource,
 			int textViewResourceId, Departure[] objects) {
 		super(context, resource, textViewResourceId, objects);
+		assignBikeDrawables();
 	}
 
 	public DepartureArrayAdapter(Context context, int resource,
 			int textViewResourceId, List<Departure> objects) {
 		super(context, resource, textViewResourceId, objects);
+		assignBikeDrawables();
 	}
 
 	public DepartureArrayAdapter(Context context, int resource,
 			int textViewResourceId) {
 		super(context, resource, textViewResourceId);
+		assignBikeDrawables();
 	}
 
 	public DepartureArrayAdapter(Context context, int textViewResourceId,
 			List<Departure> objects) {
 		super(context, textViewResourceId, objects);
+		assignBikeDrawables();
 	}
 
 	public DepartureArrayAdapter(Context context, int textViewResourceId) {
 		super(context, textViewResourceId);
+		assignBikeDrawables();
 	}
 
 	@Override
@@ -135,12 +151,11 @@ public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
 			}
 		});
 
+		ImageView bikeIcon = (ImageView) view.findViewById(R.id.bikeIcon);
 		if (departure.isBikeAllowed()) {
-			((ImageView) view.findViewById(R.id.bikeIcon))
-					.setVisibility(View.VISIBLE);
+			bikeIcon.setImageDrawable(bikeDrawable);
 		} else {
-			((ImageView) view.findViewById(R.id.bikeIcon))
-					.setVisibility(View.INVISIBLE);
+			bikeIcon.setImageDrawable(noBikeDrawable);
 		}
 		if (departure.getRequiresTransfer()) {
 			((ImageView) view.findViewById(R.id.xferIcon))

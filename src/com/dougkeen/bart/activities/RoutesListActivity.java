@@ -13,14 +13,17 @@ import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListAdapter;
 
 import com.WazaBe.HoloEverywhere.app.AlertDialog;
+import com.WazaBe.HoloEverywhere.app.AlertDialog.Builder;
 import com.WazaBe.HoloEverywhere.app.DialogFragment;
 import com.WazaBe.HoloEverywhere.sherlock.SActivity;
+import com.WazaBe.HoloEverywhere.widget.ListView;
 import com.WazaBe.HoloEverywhere.widget.TextView;
 import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
@@ -28,16 +31,33 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.dougkeen.bart.R;
 import com.dougkeen.bart.controls.Ticker;
+import com.dougkeen.bart.controls.Ticker.TickSubscriber;
 import com.dougkeen.bart.data.CursorUtils;
 import com.dougkeen.bart.data.FavoritesArrayAdapter;
 import com.dougkeen.bart.data.RoutesColumns;
+import com.dougkeen.bart.model.Alert;
+import com.dougkeen.bart.model.Alert.AlertList;
 import com.dougkeen.bart.model.Constants;
 import com.dougkeen.bart.model.Station;
 import com.dougkeen.bart.model.StationPair;
+import com.dougkeen.bart.networktasks.AlertsClient;
+import com.dougkeen.bart.networktasks.ElevatorClient;
 import com.dougkeen.bart.networktasks.GetRouteFareTask;
+import com.googlecode.androidannotations.annotations.AfterViews;
+import com.googlecode.androidannotations.annotations.Background;
+import com.googlecode.androidannotations.annotations.Click;
+import com.googlecode.androidannotations.annotations.EActivity;
+import com.googlecode.androidannotations.annotations.ItemClick;
+import com.googlecode.androidannotations.annotations.ItemLongClick;
+import com.googlecode.androidannotations.annotations.UiThread;
+import com.googlecode.androidannotations.annotations.ViewById;
+import com.googlecode.androidannotations.annotations.rest.RestService;
 
+@EActivity(R.layout.main)
 public class RoutesListActivity extends SActivity implements
-		LoaderCallbacks<Cursor> {
+		LoaderCallbacks<Cursor>, TickSubscriber {
+	private static final String NO_DELAYS_REPORTED = "No delays reported";
+
 	private static final int FAVORITES_LOADER_ID = 0;
 
 	private static final TimeZone PACIFIC_TIME = TimeZone
@@ -52,11 +72,52 @@ public class RoutesListActivity extends SActivity implements
 
 	private FavoritesArrayAdapter mRoutesAdapter;
 
-	/** Called when the activity is first created. */
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.main);
+	@RestService
+	AlertsClient alertsClient;
+
+	@RestService
+	ElevatorClient elevatorClient;
+
+	@ViewById(android.R.id.list)
+	ListView listView;
+
+	@ViewById(R.id.quickLookupButton)
+	Button quickLookupButton;
+
+	@ViewById(R.id.alertMessages)
+	TextView alertMessages;
+
+	@Click(R.id.quickLookupButton)
+	void quickLookupButtonClick() {
+		DialogFragment dialog = new QuickRouteDialogFragment(
+				getString(R.string.quick_departure_lookup));
+		dialog.show(getSupportFragmentManager().beginTransaction());
+	}
+
+	@ItemClick(android.R.id.list)
+	void listItemClicked(StationPair item) {
+		startActivity(new Intent(Intent.ACTION_VIEW,
+				ContentUris.withAppendedId(Constants.FAVORITE_CONTENT_URI,
+						item.getId())));
+	}
+
+	@ItemLongClick(android.R.id.list)
+	void listItemLongClick(StationPair item) {
+		if (mActionMode != null) {
+			mActionMode.finish();
+		}
+
+		mCurrentlySelectedUri = ContentUris.withAppendedId(
+				Constants.FAVORITE_CONTENT_URI, item.getId());
+
+		mCurrentlySelectedOrigin = item.getOrigin();
+		mCurrentlySelectedDestination = item.getDestination();
+
+		startContextualActionMode();
+	}
+
+	@AfterViews
+	void afterViews() {
 		setTitle(R.string.favorite_routes);
 
 		mRoutesAdapter = new FavoritesArrayAdapter(this,
@@ -65,52 +126,18 @@ public class RoutesListActivity extends SActivity implements
 		getSupportLoaderManager().initLoader(FAVORITES_LOADER_ID, null, this);
 
 		setListAdapter(mRoutesAdapter);
-		getListView().setOnItemClickListener(
-				new AdapterView.OnItemClickListener() {
-					@Override
-					public void onItemClick(AdapterView<?> l, View v,
-							int position, long id) {
-						;
-						startActivity(new Intent(Intent.ACTION_VIEW,
-								ContentUris.withAppendedId(
-										Constants.FAVORITE_CONTENT_URI,
-										getListAdapter().getItem(position)
-												.getId())));
-					}
-				});
-		getListView().setEmptyView(findViewById(android.R.id.empty));
-		getListView().setOnItemLongClickListener(
-				new AdapterView.OnItemLongClickListener() {
-					@Override
-					public boolean onItemLongClick(AdapterView<?> parent,
-							View view, int position, long id) {
-						if (mActionMode != null) {
-							mActionMode.finish();
-						}
 
-						StationPair item = getListAdapter().getItem(position);
+		listView.setEmptyView(findViewById(android.R.id.empty));
 
-						mCurrentlySelectedUri = ContentUris.withAppendedId(
-								Constants.FAVORITE_CONTENT_URI, item.getId());
+		if (mCurrentAlerts != null) {
+			showAlertMessage(mCurrentAlerts);
+		}
+	}
 
-						mCurrentlySelectedOrigin = item.getOrigin();
-						mCurrentlySelectedDestination = item.getDestination();
-
-						startContextualActionMode();
-						return true;
-					}
-				});
-
-		((Button) findViewById(R.id.quickLookupButton))
-				.setOnClickListener(new View.OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						DialogFragment dialog = new QuickRouteDialogFragment(
-								getString(R.string.quick_departure_lookup));
-						dialog.show(getSupportFragmentManager()
-								.beginTransaction());
-					}
-				});
+	/** Called when the activity is first created. */
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
 
 		if (savedInstanceState != null) {
 			if (savedInstanceState.getString("currentlySelectedOrigin") != null) {
@@ -130,7 +157,10 @@ public class RoutesListActivity extends SActivity implements
 			if (savedInstanceState.getBoolean("hasActionMode")) {
 				startContextualActionMode();
 			}
+			mCurrentAlerts = savedInstanceState.getString("currentAlerts");
 		}
+
+		Ticker.getInstance().addSubscriber(this, getApplicationContext());
 	}
 
 	@Override
@@ -162,9 +192,8 @@ public class RoutesListActivity extends SActivity implements
 		// Nothing to do
 	}
 
-	@SuppressWarnings("unchecked")
 	private AdapterView<ListAdapter> getListView() {
-		return (AdapterView<ListAdapter>) findViewById(android.R.id.list);
+		return listView;
 	}
 
 	protected FavoritesArrayAdapter getListAdapter() {
@@ -233,6 +262,7 @@ public class RoutesListActivity extends SActivity implements
 					mCurrentlySelectedDestination.abbreviation);
 		outState.putParcelable("currentlySelectedUri", mCurrentlySelectedUri);
 		outState.putBoolean("hasActionMode", mActionMode != null);
+		outState.putString("currentAlerts", mCurrentAlerts);
 	}
 
 	@Override
@@ -281,6 +311,11 @@ public class RoutesListActivity extends SActivity implements
 		return super.onCreateOptionsMenu(menu);
 	}
 
+	private MenuItem elevatorMenuItem;
+	private View origElevatorActionView;
+
+	private String mCurrentAlerts;
+
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int itemId = item.getItemId();
 		if (itemId == R.id.add_favorite_menu_button) {
@@ -290,9 +325,84 @@ public class RoutesListActivity extends SActivity implements
 		} else if (itemId == R.id.view_system_map_button) {
 			startActivity(new Intent(this, ViewMapActivity.class));
 			return true;
+		} else if (itemId == R.id.elevator_button) {
+			elevatorMenuItem = item;
+			fetchElevatorInfo();
+			origElevatorActionView = elevatorMenuItem.getActionView();
+			elevatorMenuItem.setActionView(R.layout.progress_spinner);
+			return true;
 		} else {
 			return super.onOptionsItemSelected(item);
 		}
+	}
+
+	@Background
+	void fetchAlerts() {
+		Log.d(TAG, "Fetching alerts");
+		AlertList alertList = alertsClient.getAlerts();
+		if (alertList.hasAlerts()) {
+			StringBuilder alertText = new StringBuilder();
+			boolean firstAlert = true;
+			for (Alert alert : alertList.getAlerts()) {
+				if (!firstAlert) {
+					alertText.append("\n\n");
+				}
+				alertText.append(alert.getPostedTime()).append("\n");
+				alertText.append(alert.getDescription());
+				firstAlert = false;
+			}
+			showAlertMessage(alertText.toString());
+		} else if (alertList.areNoDelaysReported()) {
+			showAlertMessage(NO_DELAYS_REPORTED);
+		} else {
+			hideAlertMessage();
+		}
+	}
+
+	@UiThread
+	void hideAlertMessage() {
+		mCurrentAlerts = null;
+		alertMessages.setVisibility(View.GONE);
+	}
+
+	@UiThread
+	void showAlertMessage(String messageText) {
+		if (messageText == null) {
+			hideAlertMessage();
+			return;
+		} else if (messageText == NO_DELAYS_REPORTED) {
+			alertMessages.setCompoundDrawablesWithIntrinsicBounds(
+					R.drawable.ic_allgood, 0, 0, 0);
+		} else {
+			alertMessages.setCompoundDrawablesWithIntrinsicBounds(
+					R.drawable.ic_warn, 0, 0, 0);
+		}
+		mCurrentAlerts = messageText;
+		alertMessages.setText(messageText);
+		alertMessages.setVisibility(View.VISIBLE);
+	}
+
+	@Background
+	void fetchElevatorInfo() {
+		String elevatorMessage = elevatorClient.getElevatorMessage();
+		if (elevatorMessage != null) {
+			showElevatorMessage(elevatorMessage);
+		}
+		resetElevatorMenuGraphic();
+	}
+
+	@UiThread
+	void resetElevatorMenuGraphic() {
+		invalidateOptionsMenu();
+		elevatorMenuItem.setActionView(origElevatorActionView);
+	}
+
+	@UiThread
+	void showElevatorMessage(String message) {
+		Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage(message);
+		builder.setTitle("Elevator status");
+		builder.show();
 	}
 
 	private void startContextualActionMode() {
@@ -357,5 +467,15 @@ public class RoutesListActivity extends SActivity implements
 			mActionMode = null;
 		}
 
+	}
+
+	@Override
+	public int getTickInterval() {
+		return 90;
+	}
+
+	@Override
+	public void onTick(long mTickCount) {
+		fetchAlerts();
 	}
 }

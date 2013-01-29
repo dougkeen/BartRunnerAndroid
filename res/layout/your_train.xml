@@ -45,8 +45,7 @@
         android:id="@+id/yourTrainBikeIcon"
         style="@style/BikeIcon"
         android:layout_below="@id/yourTrainHeader"
-        android:layout_toRightOf="@id/yourTrainDestinationText"
-        android:src="@drawable/bike" />
+        android:layout_toRightOf="@id/yourTrainDestinationText" />
 
     <ImageView
         android:id="@+id/yourTrainXferIcon"

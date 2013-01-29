@@ -119,12 +119,13 @@ public class YourTrainLayout extends RelativeLayout implements Checkable {
 		ImageView colorBar = (ImageView) findViewById(R.id.yourTrainDestinationColorBar);
 		((GradientDrawable) colorBar.getDrawable()).setColor(Color
 				.parseColor(boardedDeparture.getTrainDestinationColor()));
+		ImageView bikeIcon = (ImageView) findViewById(R.id.yourTrainBikeIcon);
 		if (boardedDeparture.isBikeAllowed()) {
-			((ImageView) findViewById(R.id.yourTrainBikeIcon))
-					.setVisibility(View.VISIBLE);
+			bikeIcon.setImageDrawable(getResources().getDrawable(
+					R.drawable.bike));
 		} else {
-			((ImageView) findViewById(R.id.yourTrainBikeIcon))
-					.setVisibility(View.INVISIBLE);
+			bikeIcon.setImageDrawable(getResources().getDrawable(
+					R.drawable.nobike));
 		}
 		if (boardedDeparture.getRequiresTransfer()) {
 			((ImageView) findViewById(R.id.yourTrainXferIcon))
