@@ -434,6 +434,15 @@ public class ViewDeparturesActivity extends SActivity implements
 		if (hasFocus) {
 			getWindow()
 					.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+			mHandler.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					if (getWindow() != null)
+						getWindow().clearFlags(
+								WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+				}
+			}, 10 * 60 * 1000);
 			Ticker.getInstance().startTicking(this);
 			refreshBoardedDeparture(false);
 		}
