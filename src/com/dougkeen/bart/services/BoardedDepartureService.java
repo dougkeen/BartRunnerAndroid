@@ -109,7 +109,7 @@ public class BoardedDepartureService extends Service implements
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		mHasShutDown = false;
 		onStart(intent, startId);
-		return START_STICKY;
+		return START_REDELIVER_INTENT;
 	}
 
 	@Override
@@ -122,10 +122,21 @@ public class BoardedDepartureService extends Service implements
 	}
 
 	protected void onHandleIntent(Intent intent) {
+		if (intent == null)
+			return;
+
 		final BartRunnerApplication application = (BartRunnerApplication) getApplication();
-		final Departure boardedDeparture = application.getBoardedDeparture();
-		if (boardedDeparture == null || intent == null) {
+		final Departure boardedDeparture;
+		if (intent.hasExtra("departure")) {
+			boardedDeparture = intent.getExtras().getParcelable("departure");
+		} else {
+			boardedDeparture = application.getBoardedDeparture();
+		}
+		if (boardedDeparture == null) {
 			// Nothing to notify about
+			if (mNotificationManager != null) {
+				mNotificationManager.cancel(DEPARTURE_NOTIFICATION_ID);
+			}
 			return;
 		}
 		if (intent.getBooleanExtra("cancelNotifications", false)

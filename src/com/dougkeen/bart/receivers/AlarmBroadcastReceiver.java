@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.dougkeen.bart.BartRunnerApplication;
+import com.dougkeen.bart.activities.ViewDeparturesActivity;
+import com.dougkeen.bart.model.Constants;
 import com.dougkeen.bart.model.Departure;
 import com.dougkeen.util.WakeLocker;
 
@@ -24,8 +26,9 @@ public class AlarmBroadcastReceiver extends BroadcastReceiver {
 
 		application.setPlayAlarmRingtone(true);
 
-		Intent targetIntent = new Intent(Intent.ACTION_VIEW, boardedDeparture
-				.getStationPair().getUri());
+		Intent targetIntent = new Intent(context, ViewDeparturesActivity.class);
+		targetIntent.putExtra(Constants.STATION_PAIR_EXTRA,
+				boardedDeparture.getStationPair());
 		targetIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
 		context.startActivity(targetIntent);

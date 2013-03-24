@@ -19,6 +19,7 @@ import android.util.Log;
 
 import com.dougkeen.bart.BartRunnerApplication;
 import com.dougkeen.bart.R;
+import com.dougkeen.bart.activities.ViewDeparturesActivity;
 import com.dougkeen.bart.services.BoardedDepartureService;
 import com.dougkeen.util.Observable;
 
@@ -533,8 +534,10 @@ public class Departure implements Parcelable, Comparable<Departure> {
 	}
 
 	private PendingIntent getAlarmIntent(Context context) {
-		return PendingIntent.getBroadcast(context, 0, new Intent(
-				Constants.ACTION_ALARM, getStationPair().getUri()),
+		Intent intent = new Intent(context, ViewDeparturesActivity.class);
+		intent.putExtra(Constants.STATION_PAIR_EXTRA, getStationPair());
+		intent.setAction(Constants.ACTION_ALARM);
+		return PendingIntent.getBroadcast(context, 0, intent,
 				PendingIntent.FLAG_UPDATE_CURRENT);
 	}
 
@@ -579,8 +582,10 @@ public class Departure implements Parcelable, Comparable<Departure> {
 
 	private PendingIntent getNotificationIntent(Context context) {
 		if (notificationIntent == null) {
-			Intent targetIntent = new Intent(Intent.ACTION_VIEW,
-					getStationPair().getUri());
+			Intent targetIntent = new Intent(context,
+					ViewDeparturesActivity.class);
+			targetIntent.putExtra(Constants.STATION_PAIR_EXTRA,
+					getStationPair());
 			targetIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			notificationIntent = PendingIntent.getActivity(context, 0,
 					targetIntent, PendingIntent.FLAG_UPDATE_CURRENT);
