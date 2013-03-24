@@ -10,20 +10,15 @@ import java.util.WeakHashMap;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import android.app.Service;
-import android.content.ContentValues;
 import android.content.Intent;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
-import android.support.v4.content.CursorLoader;
 import android.util.Log;
 
 import com.dougkeen.bart.BartRunnerApplication;
 import com.dougkeen.bart.R;
-import com.dougkeen.bart.data.RoutesColumns;
 import com.dougkeen.bart.model.Constants;
 import com.dougkeen.bart.model.Departure;
 import com.dougkeen.bart.model.RealTimeDepartures;
@@ -33,7 +28,9 @@ import com.dougkeen.bart.model.Station;
 import com.dougkeen.bart.model.StationPair;
 import com.dougkeen.bart.networktasks.GetRealTimeDeparturesTask;
 import com.dougkeen.bart.networktasks.GetScheduleInformationTask;
+import com.googlecode.androidannotations.annotations.EService;
 
+@EService
 public class EtdService extends Service {
 
 	private IBinder mBinder;
@@ -106,19 +103,13 @@ public class EtdService extends Service {
 	private class EtdServiceEngine {
 		private static final int UNCERTAINTY_THRESHOLD = 17;
 
-		private Uri mUri;
-
 		private final StationPair mStationPair;
 
 		private boolean mIgnoreDepartureDirection = false;
 
 		private boolean mPendingEtdRequest = false;
 
-		private int mAverageTripLength;
-		private int mAverageTripSampleCount;
-
-		// We'll only use the keys
-		private WeakHashMap<EtdServiceListener, Boolean> mListeners;
+		private Map<EtdServiceListener, Boolean> mListeners;
 
 		private boolean mLimitToFirstNonDeparted = true;
 
@@ -134,24 +125,9 @@ public class EtdService extends Service {
 
 		public EtdServiceEngine(final StationPair route) {
 			mStationPair = route;
-			mListeners = new WeakHashMap<EtdService.EtdServiceListener, Boolean>();
+			mListeners = new HashMap<EtdService.EtdServiceListener, Boolean>();
 			mRunnableQueue = new Handler();
 			mLatestDepartures = new ArrayList<Departure>();
-
-			mUri = Constants.ARBITRARY_ROUTE_CONTENT_URI_ROOT.buildUpon()
-					.appendPath(mStationPair.getOrigin().abbreviation)
-					.appendPath(mStationPair.getDestination().abbreviation)
-					.build();
-
-			Cursor cursor = new CursorLoader(EtdService.this, mUri,
-					new String[] { RoutesColumns.AVERAGE_TRIP_LENGTH.string,
-							RoutesColumns.AVERAGE_TRIP_SAMPLE_COUNT.string },
-					null, null, null).loadInBackground();
-			if (cursor.moveToFirst()) {
-				mAverageTripLength = cursor.getInt(0);
-				mAverageTripSampleCount = cursor.getInt(1);
-			}
-			cursor.close();
 		}
 
 		protected void registerListener(EtdServiceListener listener,
@@ -238,8 +214,7 @@ public class EtdService extends Service {
 			};
 			mGetDeparturesTask = task;
 			Log.v(Constants.TAG, "Fetching data from server");
-			task.execute(new StationPair(mStationPair.getOrigin(), mStationPair
-					.getDestination()));
+			task.execute(mStationPair);
 			notifyListenersOfRequestStart();
 		}
 
@@ -271,8 +246,7 @@ public class EtdService extends Service {
 			};
 			Log.i(Constants.TAG, "Fetching data from server");
 			mGetScheduleInformationTask = task;
-			task.execute(new StationPair(mStationPair.getOrigin(), mStationPair
-					.getDestination()));
+			task.execute(mStationPair);
 		}
 
 		protected void applyScheduleInformation(ScheduleInformation result) {
@@ -363,7 +337,8 @@ public class EtdService extends Service {
 						departure.setEstimatedTripTime(localAverageLength);
 					} else if (!departure.hasEstimatedTripTime()) {
 						// Otherwise just assume the global average
-						departure.setEstimatedTripTime(mAverageTripLength);
+						departure.setEstimatedTripTime(mStationPair
+								.getAverageTripLength());
 					}
 				} else if (departure.getRequiresTransfer()
 						&& !departure.hasAnyArrivalEstimate()) {
@@ -381,20 +356,16 @@ public class EtdService extends Service {
 
 			// Update global average
 			if (mLatestScheduleInfo.getTripCountForAverage() > 0) {
-				int newAverageSampleCount = mAverageTripSampleCount
+				int newAverageSampleCount = mStationPair
+						.getAverageTripSampleCount()
 						+ mLatestScheduleInfo.getTripCountForAverage();
-				int newAverage = (mAverageTripLength * mAverageTripSampleCount + localAverageLength
+				int newAverage = (mStationPair.getAverageTripLength()
+						* mStationPair.getAverageTripSampleCount() + localAverageLength
 						* mLatestScheduleInfo.getTripCountForAverage())
 						/ newAverageSampleCount;
 
-				ContentValues contentValues = new ContentValues();
-				contentValues.put(RoutesColumns.AVERAGE_TRIP_LENGTH.string,
-						newAverage);
-				contentValues.put(
-						RoutesColumns.AVERAGE_TRIP_SAMPLE_COUNT.string,
-						newAverageSampleCount);
-
-				getContentResolver().update(mUri, contentValues, null, null);
+				mStationPair.setAverageTripLength(newAverage);
+				mStationPair.setAverageTripSampleCount(newAverageSampleCount);
 			}
 
 			/*

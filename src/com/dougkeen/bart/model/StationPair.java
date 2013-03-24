@@ -3,25 +3,21 @@ package com.dougkeen.bart.model;
 import org.apache.commons.lang3.ObjectUtils;
 
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.dougkeen.bart.data.CursorUtils;
 import com.dougkeen.bart.data.RoutesColumns;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class StationPair implements Parcelable {
-	public StationPair(Station origin, Station destination) {
+	@JsonCreator
+	public StationPair(@JsonProperty("origin") Station origin,
+			@JsonProperty("destination") Station destination) {
 		super();
 		this.origin = origin;
 		this.destination = destination;
-	}
-
-	public StationPair(Long id, Station origin, Station destination) {
-		super();
-		this.origin = origin;
-		this.destination = destination;
-		this.id = id;
 	}
 
 	public StationPair(Parcel in) {
@@ -34,22 +30,22 @@ public class StationPair implements Parcelable {
 						RoutesColumns.FROM_STATION)),
 				Station.getByAbbreviation(CursorUtils.getString(cursor,
 						RoutesColumns.TO_STATION)));
-		pair.id = CursorUtils.getLong(cursor, RoutesColumns._ID);
 		pair.fare = CursorUtils.getString(cursor, RoutesColumns.FARE);
 		pair.fareLastUpdated = CursorUtils.getLong(cursor,
 				RoutesColumns.FARE_LAST_UPDATED);
+		pair.averageTripLength = CursorUtils.getInteger(cursor,
+				RoutesColumns.AVERAGE_TRIP_LENGTH);
+		pair.averageTripSampleCount = CursorUtils.getInteger(cursor,
+				RoutesColumns.AVERAGE_TRIP_SAMPLE_COUNT);
 		return pair;
 	}
 
-	private Long id;
 	private Station origin;
 	private Station destination;
 	private String fare;
-	private Long fareLastUpdated;
-
-	public Long getId() {
-		return id;
-	}
+	private long fareLastUpdated;
+	private int averageTripLength;
+	private int averageTripSampleCount;
 
 	public Station getOrigin() {
 		return origin;
@@ -67,27 +63,33 @@ public class StationPair implements Parcelable {
 		this.fare = fare;
 	}
 
-	public Long getFareLastUpdated() {
+	public long getFareLastUpdated() {
 		return fareLastUpdated;
 	}
 
-	public void setFareLastUpdated(Long fareLastUpdated) {
+	public void setFareLastUpdated(long fareLastUpdated) {
 		this.fareLastUpdated = fareLastUpdated;
+	}
+
+	public int getAverageTripLength() {
+		return averageTripLength;
+	}
+
+	public void setAverageTripLength(int averageTripLength) {
+		this.averageTripLength = averageTripLength;
+	}
+
+	public int getAverageTripSampleCount() {
+		return averageTripSampleCount;
+	}
+
+	public void setAverageTripSampleCount(int averageTripSampleCount) {
+		this.averageTripSampleCount = averageTripSampleCount;
 	}
 
 	public boolean isBetweenStations(Station station1, Station station2) {
 		return (origin.equals(station1) && destination.equals(station2))
 				|| (origin.equals(station2) && destination.equals(station1));
-	}
-
-	public Uri getUri() {
-		if (getOrigin() != null && getDestination() != null) {
-			return Constants.ARBITRARY_ROUTE_CONTENT_URI_ROOT.buildUpon()
-					.appendPath(getOrigin().abbreviation)
-					.appendPath(getDestination().abbreviation).build();
-		} else {
-			return null;
-		}
 	}
 
 	@Override

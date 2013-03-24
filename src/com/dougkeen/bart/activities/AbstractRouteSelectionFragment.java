@@ -30,6 +30,13 @@ public abstract class AbstractRouteSelectionFragment extends DialogFragment {
 	}
 
 	@Override
+	public void setArguments(Bundle args) {
+		super.setArguments(args);
+		if (args.containsKey("title"))
+			mTitle = args.getString("title");
+	}
+
+	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setShowsDialog(true);

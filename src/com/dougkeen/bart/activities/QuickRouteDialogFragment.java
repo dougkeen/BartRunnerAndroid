@@ -14,10 +14,6 @@ public class QuickRouteDialogFragment extends AbstractRouteSelectionFragment {
 				R.string.quick_departure_lookup));
 	}
 
-	public QuickRouteDialogFragment(String title) {
-		super(title);
-	}
-
 	@Override
 	protected void onOkButtonClick(Station origin, Station destination) {
 		startActivity(new Intent(Intent.ACTION_VIEW,

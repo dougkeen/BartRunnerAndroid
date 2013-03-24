@@ -1,31 +1,32 @@
 package com.dougkeen.bart.data;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
 
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
+
+import com.dougkeen.bart.BartRunnerApplication;
+import com.dougkeen.bart.model.StationPair;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
 	private static final String DATABASE_NAME = "bart.dougkeen.db";
-	private static final int DATABASE_VERSION = 4;
+	private static final int DATABASE_VERSION = 6;
 
 	public static final String FAVORITES_TABLE_NAME = "Favorites";
 
+	private BartRunnerApplication app;
+	
 	public DatabaseHelper(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
+		app = (BartRunnerApplication) context.getApplicationContext();
 	}
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		createFavoritesTable(db);
 	}
 
 	private void createFavoritesTable(SQLiteDatabase db) {
@@ -45,54 +46,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		try {
 			createFavoritesTable(db);
 
-			List<String> columns = getColumns(db, FAVORITES_TABLE_NAME);
+			Cursor query = db.query(FAVORITES_TABLE_NAME, RoutesColumns.all(),
+					null, null, null, null, null);
 
-			db.execSQL("ALTER TABLE " + FAVORITES_TABLE_NAME
-					+ " RENAME TO temp_" + FAVORITES_TABLE_NAME);
+			List<StationPair> favorites = new ArrayList<StationPair>();
 
-			createFavoritesTable(db);
+			while (query.moveToNext()) {
+				favorites.add(StationPair.createFromCursor(query));
+			}
 
-			columns.retainAll(getColumns(db, FAVORITES_TABLE_NAME));
+			query.close();
 
-			String cols = StringUtils.join(columns, ",");
-			db.execSQL(String.format(
-					"INSERT INTO %s (%s) SELECT %s from temp_%s",
-					FAVORITES_TABLE_NAME, cols, cols, FAVORITES_TABLE_NAME));
+			new FavoritesPersistence(app).persist(favorites);
 
-			db.execSQL("DROP TABLE temp_" + FAVORITES_TABLE_NAME);
+			db.execSQL("DROP TABLE " + FAVORITES_TABLE_NAME);
 
 			db.setTransactionSuccessful();
 		} finally {
 			db.endTransaction();
 		}
-	}
-
-	public static List<String> getColumns(SQLiteDatabase db, String tableName) {
-		List<String> ar = null;
-		Cursor c = null;
-		try {
-			c = db.rawQuery("select * from " + tableName + " limit 1", null);
-			if (c != null) {
-				ar = new ArrayList<String>(Arrays.asList(c.getColumnNames()));
-			}
-		} catch (Exception e) {
-			Log.v(tableName, e.getMessage(), e);
-			e.printStackTrace();
-		} finally {
-			if (c != null)
-				c.close();
-		}
-		return ar;
-	}
-
-	public static String join(List<String> list, String delim) {
-		StringBuilder buf = new StringBuilder();
-		int num = list.size();
-		for (int i = 0; i < num; i++) {
-			if (i != 0)
-				buf.append(delim);
-			buf.append((String) list.get(i));
-		}
-		return buf.toString();
 	}
 }

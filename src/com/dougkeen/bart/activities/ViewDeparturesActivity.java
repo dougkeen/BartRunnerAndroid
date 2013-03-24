@@ -9,7 +9,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.database.Cursor;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -18,9 +17,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcelable;
 import android.os.Vibrator;
-import android.support.v4.app.LoaderManager.LoaderCallbacks;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
 import android.text.format.DateFormat;
 import android.text.util.Linkify;
 import android.util.Log;
@@ -44,27 +40,21 @@ import com.dougkeen.bart.controls.SwipeHelper;
 import com.dougkeen.bart.controls.Ticker;
 import com.dougkeen.bart.controls.YourTrainLayout;
 import com.dougkeen.bart.data.DepartureArrayAdapter;
-import com.dougkeen.bart.data.RoutesColumns;
 import com.dougkeen.bart.model.Constants;
 import com.dougkeen.bart.model.Departure;
-import com.dougkeen.bart.model.Station;
 import com.dougkeen.bart.model.StationPair;
 import com.dougkeen.bart.services.BoardedDepartureService;
 import com.dougkeen.bart.services.EtdService;
 import com.dougkeen.bart.services.EtdService.EtdServiceBinder;
 import com.dougkeen.bart.services.EtdService.EtdServiceListener;
+import com.dougkeen.bart.services.EtdService_;
 import com.dougkeen.util.Observer;
 import com.dougkeen.util.WakeLocker;
 
 public class ViewDeparturesActivity extends SActivity implements
 		EtdServiceListener {
 
-	private static final int LOADER_ID = 123;
-
-	private Uri mUri;
-
-	private Station mOrigin;
-	private Station mDestination;
+	private StationPair mStationPair;
 
 	private Departure mSelectedDeparture;
 
@@ -89,63 +79,7 @@ public class ViewDeparturesActivity extends SActivity implements
 
 		final Intent intent = getIntent();
 
-		String action = intent.getAction();
-
-		if (Intent.ACTION_VIEW.equals(action)) {
-			mUri = intent.getData();
-		}
-
-		final Uri uri = mUri;
-
 		final BartRunnerApplication bartRunnerApplication = (BartRunnerApplication) getApplication();
-
-		if (savedInstanceState != null
-				&& savedInstanceState.containsKey("origin")
-				&& savedInstanceState.containsKey("destination")) {
-			mOrigin = Station.getByAbbreviation(savedInstanceState
-					.getString("origin"));
-			mDestination = Station.getByAbbreviation(savedInstanceState
-					.getString("destination"));
-			setListTitle();
-		} else {
-			getSupportLoaderManager().initLoader(LOADER_ID, null,
-					new LoaderCallbacks<Cursor>() {
-						@Override
-						public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-							return new CursorLoader(
-									ViewDeparturesActivity.this, uri,
-									new String[] {
-											RoutesColumns.FROM_STATION.string,
-											RoutesColumns.TO_STATION.string },
-									null, null, null);
-						}
-
-						@Override
-						public void onLoadFinished(Loader<Cursor> loader,
-								Cursor cursor) {
-							if (!cursor.moveToFirst()) {
-								Log.wtf(Constants.TAG,
-										"Couldn't find Route record for the current Activity");
-							}
-							mOrigin = Station.getByAbbreviation(cursor
-									.getString(0));
-							mDestination = Station.getByAbbreviation(cursor
-									.getString(1));
-							setListTitle();
-							if (mBound && mEtdService != null)
-								mEtdService.registerListener(
-										ViewDeparturesActivity.this, false);
-							refreshBoardedDeparture(false);
-
-							getSupportLoaderManager().destroyLoader(LOADER_ID);
-						}
-
-						@Override
-						public void onLoaderReset(Loader<Cursor> loader) {
-							// ignore
-						}
-					});
-		}
 
 		mEmptyView = (TextView) findViewById(android.R.id.empty);
 		mEmptyView.setText(R.string.departure_wait_message);
@@ -154,6 +88,43 @@ public class ViewDeparturesActivity extends SActivity implements
 
 		mDeparturesAdapter = new DepartureArrayAdapter(this,
 				R.layout.departure_listing);
+
+		setListAdapter(mDeparturesAdapter);
+		final ListView listView = getListView();
+		listView.setEmptyView(findViewById(android.R.id.empty));
+		listView.setOnItemClickListener(mListItemClickListener);
+		listView.setOnItemLongClickListener(mListItemLongClickListener);
+
+		mMissingDepartureText = findViewById(R.id.missingDepartureText);
+		mMissingDepartureText.setVisibility(View.VISIBLE);
+
+		mYourTrainSection = (YourTrainLayout) findViewById(R.id.yourTrainSection);
+		mYourTrainSection.setOnClickListener(mYourTrainSectionClickListener);
+		mSwipeHelper = new SwipeHelper(mYourTrainSection, null,
+				new SwipeHelper.OnDismissCallback() {
+					@Override
+					public void onDismiss(View view, Object token) {
+						dismissYourTrainSelection();
+						if (mActionMode != null) {
+							mActionMode.finish();
+						}
+					}
+				});
+		mYourTrainSection.setOnTouchListener(mSwipeHelper);
+
+		if (savedInstanceState != null
+				&& savedInstanceState.containsKey("stationPair")) {
+			mStationPair = savedInstanceState.getParcelable("stationPair");
+			setListTitle();
+		} else {
+			mStationPair = intent.getExtras().getParcelable(
+					Constants.STATION_PAIR_EXTRA);
+			setListTitle();
+			if (mBound && mEtdService != null)
+				mEtdService
+						.registerListener(ViewDeparturesActivity.this, false);
+			refreshBoardedDeparture(false);
+		}
 
 		if (savedInstanceState != null) {
 			if (savedInstanceState.containsKey("departures")) {
@@ -178,29 +149,6 @@ public class ViewDeparturesActivity extends SActivity implements
 				startYourTrainActionMode();
 			}
 		}
-		setListAdapter(mDeparturesAdapter);
-		final ListView listView = getListView();
-		listView.setEmptyView(findViewById(android.R.id.empty));
-		listView.setOnItemClickListener(mListItemClickListener);
-		listView.setOnItemLongClickListener(mListItemLongClickListener);
-
-		mMissingDepartureText = findViewById(R.id.missingDepartureText);
-		mMissingDepartureText.setVisibility(View.VISIBLE);
-
-		mYourTrainSection = (YourTrainLayout) findViewById(R.id.yourTrainSection);
-		mYourTrainSection.setOnClickListener(mYourTrainSectionClickListener);
-		mSwipeHelper = new SwipeHelper(mYourTrainSection, null,
-				new SwipeHelper.OnDismissCallback() {
-					@Override
-					public void onDismiss(View view, Object token) {
-						dismissYourTrainSelection();
-						if (mActionMode != null) {
-							mActionMode.finish();
-						}
-					}
-				});
-		mYourTrainSection.setOnTouchListener(mSwipeHelper);
-
 		refreshBoardedDeparture(false);
 
 		getSupportActionBar().setHomeButtonEnabled(true);
@@ -297,8 +245,9 @@ public class ViewDeparturesActivity extends SActivity implements
 	}
 
 	private void setListTitle() {
-		((TextView) findViewById(R.id.listTitle)).setText(mOrigin.name + " to "
-				+ mDestination.name);
+		((TextView) findViewById(R.id.listTitle))
+				.setText(mStationPair.getOrigin().name + " to "
+						+ mStationPair.getDestination().name);
 	}
 
 	private ListView getListView() {
@@ -399,7 +348,7 @@ public class ViewDeparturesActivity extends SActivity implements
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		if (mOrigin != null || mDestination != null) {
+		if (mStationPair != null) {
 			/*
 			 * If origin or destination are null, this thing was never
 			 * initialized in the first place, so there's really nothing to save
@@ -415,15 +364,14 @@ public class ViewDeparturesActivity extends SActivity implements
 					isDepartureActionModeActive());
 			outState.putBoolean("hasYourTrainActionMode",
 					isYourTrainActionModeActive());
-			outState.putString("origin", mOrigin.abbreviation);
-			outState.putString("destination", mDestination.abbreviation);
+			outState.putParcelable("stationPair", mStationPair);
 		}
 	}
 
 	@Override
 	protected void onStart() {
 		super.onStart();
-		bindService(new Intent(this, EtdService.class), mConnection,
+		bindService(EtdService_.intent(this).get(), mConnection,
 				Context.BIND_AUTO_CREATE);
 		Ticker.getInstance().startTicking(this);
 	}
@@ -459,10 +407,8 @@ public class ViewDeparturesActivity extends SActivity implements
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int itemId = item.getItemId();
 		if (itemId == android.R.id.home) {
-			Intent intent = new Intent(Intent.ACTION_VIEW,
-					Constants.FAVORITE_CONTENT_URI);
-			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			startActivity(intent);
+			RoutesListActivity_.intent(this)
+					.flags(Intent.FLAG_ACTIVITY_CLEAR_TOP).start();
 			return true;
 		} else if (itemId == R.id.view_on_bart_site_button) {
 			startActivity(new Intent(
@@ -471,9 +417,9 @@ public class ViewDeparturesActivity extends SActivity implements
 							+ DateFormat.format("h:mmaa",
 									System.currentTimeMillis())
 							+ "&orig="
-							+ mOrigin.abbreviation
+							+ mStationPair.getOrigin().abbreviation
 							+ "&dest="
-							+ mDestination.abbreviation)));
+							+ mStationPair.getDestination().abbreviation)));
 			return true;
 		} else if (itemId == R.id.view_system_map_button) {
 			startActivity(new Intent(this, ViewMapActivity.class));
@@ -508,13 +454,16 @@ public class ViewDeparturesActivity extends SActivity implements
 
 	private void setBoardedDeparture(Departure selectedDeparture) {
 		final BartRunnerApplication application = (BartRunnerApplication) getApplication();
-		selectedDeparture.setPassengerDestination(mDestination);
+		selectedDeparture
+				.setPassengerDestination(mStationPair.getDestination());
 		application.setBoardedDeparture(selectedDeparture);
 		refreshBoardedDeparture(true);
 
 		// Start the notification service
-		startService(new Intent(ViewDeparturesActivity.this,
-				BoardedDepartureService.class));
+		final Intent intent = new Intent(ViewDeparturesActivity.this,
+				BoardedDepartureService.class);
+		intent.putExtra("departure", selectedDeparture);
+		startService(intent);
 	}
 
 	private void startDepartureActionMode() {
@@ -815,9 +764,7 @@ public class ViewDeparturesActivity extends SActivity implements
 
 	@Override
 	public StationPair getStationPair() {
-		if (mOrigin == null || mDestination == null)
-			return null;
-		return new StationPair(mOrigin, mDestination);
+		return mStationPair;
 	}
 
 	private void hideYourTrainSection() {

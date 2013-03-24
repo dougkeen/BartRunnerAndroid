@@ -89,7 +89,7 @@ public class BoardedDepartureService extends Service implements
 		mServiceLooper = thread.getLooper();
 		mServiceHandler = new ServiceHandler(mServiceLooper, this);
 
-		bindService(new Intent(this, EtdService.class), mConnection,
+		bindService(EtdService_.intent(this).get(), mConnection,
 				Context.BIND_AUTO_CREATE);
 		mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		mAlarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);

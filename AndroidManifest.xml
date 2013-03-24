@@ -14,7 +14,7 @@
         android:targetSdkVersion="14" />
 
     <application
-        android:name=".BartRunnerApplication"
+        android:name=".BartRunnerApplication_"
         android:icon="@drawable/icon"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
@@ -61,17 +61,11 @@
             android:label="@string/system_map" >
         </activity>
 
-        <provider
-            android:name=".data.BartContentProvider"
-            android:authorities="com.dougkeen.bart.dataprovider"
-            android:exported="false"
-            android:label="BartRunner data provider" />
-
         <service
             android:name=".services.BoardedDepartureService"
             android:exported="false" />
         <service
-            android:name=".services.EtdService"
+            android:name=".services.EtdService_"
             android:exported="false" />
 
         <receiver

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -15,9 +16,16 @@ import android.media.MediaPlayer;
 import android.os.Parcel;
 import android.util.Log;
 
+import com.dougkeen.bart.data.DatabaseHelper;
+import com.dougkeen.bart.data.FavoritesPersistence;
 import com.dougkeen.bart.model.Constants;
 import com.dougkeen.bart.model.Departure;
+import com.dougkeen.bart.model.Station;
+import com.dougkeen.bart.model.StationPair;
+import com.googlecode.androidannotations.annotations.Bean;
+import com.googlecode.androidannotations.annotations.EApplication;
 
+@EApplication
 public class BartRunnerApplication extends Application {
 	private static final int FIVE_MINUTES = 5 * 60 * 1000;
 
@@ -32,6 +40,53 @@ public class BartRunnerApplication extends Application {
 	private MediaPlayer mAlarmMediaPlayer;
 
 	private static Context context;
+
+	@Bean
+	FavoritesPersistence favoritesPersistenceContext;
+
+	private List<StationPair> favorites;
+
+	public void saveFavorites() {
+		if (favorites != null) {
+			favoritesPersistenceContext.persist(favorites);
+		}
+	}
+
+	public List<StationPair> getFavorites() {
+		if (favorites == null) {
+			favorites = favoritesPersistenceContext.restore();
+			if (favorites.isEmpty()) {
+				// Upgrade database, in case favorites are still in there
+				new DatabaseHelper(this).getReadableDatabase().close();
+				favorites = favoritesPersistenceContext.restore();
+			}
+		}
+		return favorites;
+	}
+
+	public void setFavorites(List<StationPair> favorites) {
+		this.favorites = favorites;
+	}
+
+	public StationPair getFavorite(Station origin, Station destination) {
+		for (StationPair favorite : getFavorites()) {
+			if (origin.equals(favorite.getOrigin())
+					&& destination.equals(favorite.getDestination())) {
+				return favorite;
+			}
+		}
+		return null;
+	}
+
+	public void addFavorite(StationPair favorite) {
+		getFavorites().add(favorite);
+		saveFavorites();
+	}
+
+	public void removeFavorite(StationPair favorite) {
+		getFavorites().remove(favorite);
+		saveFavorites();
+	}
 
 	@Override
 	public void onCreate() {
@@ -59,12 +114,13 @@ public class BartRunnerApplication extends Application {
 				InputStream inputStream = null;
 				try {
 					inputStream = new FileInputStream(cachedDepartureFile);
-					byte[] byteArray = IOUtils.toByteArray(inputStream);
-					Parcel parcel = Parcel.obtain();
+					final byte[] byteArray = IOUtils.toByteArray(inputStream);
+					final Parcel parcel = Parcel.obtain();
 					parcel.unmarshall(byteArray, 0, byteArray.length);
 					parcel.setDataPosition(0);
 					Departure lastBoardedDeparture = Departure.CREATOR
 							.createFromParcel(parcel);
+					parcel.recycle();
 
 					/*
 					 * Check if the cached one is relatively recent. If so,

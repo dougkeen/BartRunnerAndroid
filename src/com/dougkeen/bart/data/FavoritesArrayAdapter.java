@@ -9,9 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.content.ServiceConnection;
-import android.database.Cursor;
 import android.os.IBinder;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,6 +30,7 @@ import com.dougkeen.bart.model.TextProvider;
 import com.dougkeen.bart.services.EtdService;
 import com.dougkeen.bart.services.EtdService.EtdServiceBinder;
 import com.dougkeen.bart.services.EtdService.EtdServiceListener;
+import com.dougkeen.bart.services.EtdService_;
 
 public class FavoritesArrayAdapter extends ArrayAdapter<StationPair> {
 
@@ -82,10 +81,11 @@ public class FavoritesArrayAdapter extends ArrayAdapter<StationPair> {
 		return !mEtdListeners.isEmpty();
 	}
 
-	public FavoritesArrayAdapter(Context context, int textViewResourceId) {
-		super(context, textViewResourceId);
+	public FavoritesArrayAdapter(Context context, int textViewResourceId,
+			List<StationPair> objects) {
+		super(context, textViewResourceId, objects);
 		mHostActivity = (Activity) context;
-		mHostActivity.bindService(new Intent(mHostActivity, EtdService.class),
+		mHostActivity.bindService(EtdService_.intent(mHostActivity).get(),
 				mConnection, Context.BIND_AUTO_CREATE);
 	}
 
@@ -116,42 +116,6 @@ public class FavoritesArrayAdapter extends ArrayAdapter<StationPair> {
 	public void clear() {
 		super.clear();
 		clearEtdListeners();
-	}
-
-	public void updateFromCursor(Cursor cursor) {
-		if (!cursor.moveToFirst()) {
-			clear();
-		}
-		for (int i = 0; i < getCount(); i++) {
-			StationPair adapterItem = getItem(i);
-			if (cursor.isAfterLast()) {
-				while (i < getCount()) {
-					remove(getItem(i));
-				}
-			} else {
-				StationPair cursorItem = StationPair.createFromCursor(cursor);
-				while (!cursorItem.equals(adapterItem)) {
-					remove(adapterItem);
-					if (i < getCount()) {
-						adapterItem = getItem(i);
-					} else {
-						break;
-					}
-				}
-				if (cursorItem.equals(adapterItem)
-						&& !cursorItem.fareEquals(adapterItem)) {
-					adapterItem.setFare(cursorItem.getFare());
-					adapterItem.setFareLastUpdated(cursorItem
-							.getFareLastUpdated());
-					notifyDataSetChanged();
-				}
-				cursor.moveToNext();
-			}
-		}
-		while (!cursor.isAfterLast()) {
-			add(StationPair.createFromCursor(cursor));
-			cursor.moveToNext();
-		}
 	}
 
 	@Override

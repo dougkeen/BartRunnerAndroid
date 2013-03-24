@@ -3,16 +3,10 @@ package com.dougkeen.bart.activities;
 import java.util.Calendar;
 import java.util.TimeZone;
 
-import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.LoaderManager.LoaderCallbacks;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -29,24 +23,24 @@ import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.dougkeen.bart.BartRunnerApplication;
 import com.dougkeen.bart.R;
 import com.dougkeen.bart.controls.Ticker;
 import com.dougkeen.bart.controls.Ticker.TickSubscriber;
-import com.dougkeen.bart.data.CursorUtils;
 import com.dougkeen.bart.data.FavoritesArrayAdapter;
-import com.dougkeen.bart.data.RoutesColumns;
 import com.dougkeen.bart.model.Alert;
 import com.dougkeen.bart.model.Alert.AlertList;
 import com.dougkeen.bart.model.Constants;
-import com.dougkeen.bart.model.Station;
 import com.dougkeen.bart.model.StationPair;
 import com.dougkeen.bart.networktasks.AlertsClient;
 import com.dougkeen.bart.networktasks.ElevatorClient;
 import com.dougkeen.bart.networktasks.GetRouteFareTask;
 import com.googlecode.androidannotations.annotations.AfterViews;
+import com.googlecode.androidannotations.annotations.App;
 import com.googlecode.androidannotations.annotations.Background;
 import com.googlecode.androidannotations.annotations.Click;
 import com.googlecode.androidannotations.annotations.EActivity;
+import com.googlecode.androidannotations.annotations.InstanceState;
 import com.googlecode.androidannotations.annotations.ItemClick;
 import com.googlecode.androidannotations.annotations.ItemLongClick;
 import com.googlecode.androidannotations.annotations.UiThread;
@@ -54,23 +48,24 @@ import com.googlecode.androidannotations.annotations.ViewById;
 import com.googlecode.androidannotations.annotations.rest.RestService;
 
 @EActivity(R.layout.main)
-public class RoutesListActivity extends SActivity implements
-		LoaderCallbacks<Cursor>, TickSubscriber {
+public class RoutesListActivity extends SActivity implements TickSubscriber {
 	private static final String NO_DELAYS_REPORTED = "No delays reported";
-
-	private static final int FAVORITES_LOADER_ID = 0;
 
 	private static final TimeZone PACIFIC_TIME = TimeZone
 			.getTimeZone("America/Los_Angeles");
 
-	private Uri mCurrentlySelectedUri;
+	@InstanceState
+	StationPair mCurrentlySelectedStationPair;
 
-	private Station mCurrentlySelectedOrigin;
-	private Station mCurrentlySelectedDestination;
+	@InstanceState
+	String mCurrentAlerts;
 
 	private ActionMode mActionMode;
 
 	private FavoritesArrayAdapter mRoutesAdapter;
+
+	@App
+	BartRunnerApplication app;
 
 	@RestService
 	AlertsClient alertsClient;
@@ -89,16 +84,16 @@ public class RoutesListActivity extends SActivity implements
 
 	@Click(R.id.quickLookupButton)
 	void quickLookupButtonClick() {
-		DialogFragment dialog = new QuickRouteDialogFragment(
-				getString(R.string.quick_departure_lookup));
+		DialogFragment dialog = new QuickRouteDialogFragment();
 		dialog.show(getSupportFragmentManager().beginTransaction());
 	}
 
 	@ItemClick(android.R.id.list)
 	void listItemClicked(StationPair item) {
-		startActivity(new Intent(Intent.ACTION_VIEW,
-				ContentUris.withAppendedId(Constants.FAVORITE_CONTENT_URI,
-						item.getId())));
+		Intent intent = new Intent(RoutesListActivity.this,
+				ViewDeparturesActivity.class);
+		intent.putExtra(Constants.STATION_PAIR_EXTRA, item);
+		startActivity(intent);
 	}
 
 	@ItemLongClick(android.R.id.list)
@@ -107,11 +102,7 @@ public class RoutesListActivity extends SActivity implements
 			mActionMode.finish();
 		}
 
-		mCurrentlySelectedUri = ContentUris.withAppendedId(
-				Constants.FAVORITE_CONTENT_URI, item.getId());
-
-		mCurrentlySelectedOrigin = item.getOrigin();
-		mCurrentlySelectedDestination = item.getDestination();
+		mCurrentlySelectedStationPair = item;
 
 		startContextualActionMode();
 	}
@@ -121,9 +112,7 @@ public class RoutesListActivity extends SActivity implements
 		setTitle(R.string.favorite_routes);
 
 		mRoutesAdapter = new FavoritesArrayAdapter(this,
-				R.layout.favorite_listing);
-
-		getSupportLoaderManager().initLoader(FAVORITES_LOADER_ID, null, this);
+				R.layout.favorite_listing, app.getFavorites());
 
 		setListAdapter(mRoutesAdapter);
 
@@ -132,6 +121,9 @@ public class RoutesListActivity extends SActivity implements
 		if (mCurrentAlerts != null) {
 			showAlertMessage(mCurrentAlerts);
 		}
+
+		startEtdListeners();
+		refreshFares();
 	}
 
 	/** Called when the activity is first created. */
@@ -140,56 +132,12 @@ public class RoutesListActivity extends SActivity implements
 		super.onCreate(savedInstanceState);
 
 		if (savedInstanceState != null) {
-			if (savedInstanceState.getString("currentlySelectedOrigin") != null) {
-				mCurrentlySelectedOrigin = Station
-						.getByAbbreviation(savedInstanceState
-								.getString("currentlySelectedOrigin"));
-			}
-			if (savedInstanceState.getString("currentlySelectedDestination") != null) {
-				mCurrentlySelectedDestination = Station
-						.getByAbbreviation(savedInstanceState
-								.getString("currentlySelectedDestination"));
-			}
-			if (savedInstanceState.getParcelable("currentlySelectedUri") != null) {
-				mCurrentlySelectedUri = (Uri) savedInstanceState
-						.getParcelable("currentlySelectedUri");
-			}
 			if (savedInstanceState.getBoolean("hasActionMode")) {
 				startContextualActionMode();
 			}
-			mCurrentAlerts = savedInstanceState.getString("currentAlerts");
 		}
 
 		Ticker.getInstance().addSubscriber(this, getApplicationContext());
-	}
-
-	@Override
-	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-		return new CursorLoader(this, Constants.FAVORITE_CONTENT_URI,
-				new String[] { RoutesColumns._ID.string,
-						RoutesColumns.FROM_STATION.string,
-						RoutesColumns.TO_STATION.string,
-						RoutesColumns.FARE.string,
-						RoutesColumns.FARE_LAST_UPDATED.string,
-						RoutesColumns.AVERAGE_TRIP_SAMPLE_COUNT.string,
-						RoutesColumns.AVERAGE_TRIP_LENGTH.string }, null, null,
-				RoutesColumns._ID.string);
-	}
-
-	@Override
-	public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-		if (cursor.getCount() == 0) {
-			((TextView) findViewById(android.R.id.empty))
-					.setText(R.string.empty_favorites_list_message);
-		}
-		mRoutesAdapter.updateFromCursor(cursor);
-		refreshFares(cursor);
-		findViewById(R.id.progress).setVisibility(View.GONE);
-	}
-
-	@Override
-	public void onLoaderReset(Loader<Cursor> loader) {
-		// Nothing to do
 	}
 
 	private AdapterView<ListAdapter> getListView() {
@@ -205,70 +153,59 @@ public class RoutesListActivity extends SActivity implements
 		getListView().setAdapter(mRoutesAdapter);
 	}
 
-	private void refreshFares(Cursor cursor) {
-		if (cursor.moveToFirst()) {
-			do {
-				final Station orig = Station.getByAbbreviation(CursorUtils
-						.getString(cursor, RoutesColumns.FROM_STATION));
-				final Station dest = Station.getByAbbreviation(CursorUtils
-						.getString(cursor, RoutesColumns.TO_STATION));
-				final Long id = CursorUtils.getLong(cursor, RoutesColumns._ID);
-				final Long lastUpdateMillis = CursorUtils.getLong(cursor,
-						RoutesColumns.FARE_LAST_UPDATED);
+	void addFavorite(StationPair pair) {
+		mRoutesAdapter.add(pair);
+	}
 
-				Calendar now = Calendar.getInstance();
-				Calendar lastUpdate = Calendar.getInstance();
-				lastUpdate.setTimeInMillis(lastUpdateMillis);
+	private void refreshFares() {
+		for (int i = getListAdapter().getCount() - 1; i >= 0; i--) {
+			final StationPair stationPair = getListAdapter().getItem(i);
 
-				now.setTimeZone(PACIFIC_TIME);
-				lastUpdate.setTimeZone(PACIFIC_TIME);
+			Calendar now = Calendar.getInstance();
+			Calendar lastUpdate = Calendar.getInstance();
+			lastUpdate.setTimeInMillis(stationPair.getFareLastUpdated());
 
-				// Update every day
-				if (now.get(Calendar.DAY_OF_YEAR) != lastUpdate
-						.get(Calendar.DAY_OF_YEAR)) {
-					GetRouteFareTask fareTask = new GetRouteFareTask() {
-						@Override
-						public void onResult(String fare) {
-							ContentValues values = new ContentValues();
-							values.put(RoutesColumns.FARE.string, fare);
-							values.put(RoutesColumns.FARE_LAST_UPDATED.string,
-									System.currentTimeMillis());
+			now.setTimeZone(PACIFIC_TIME);
+			lastUpdate.setTimeZone(PACIFIC_TIME);
 
-							getContentResolver()
-									.update(ContentUris.withAppendedId(
-											Constants.FAVORITE_CONTENT_URI, id),
-											values, null, null);
-						}
+			// Update every day
+			if (now.get(Calendar.DAY_OF_YEAR) != lastUpdate
+					.get(Calendar.DAY_OF_YEAR)
+					|| now.get(Calendar.YEAR) != lastUpdate.get(Calendar.YEAR)) {
+				GetRouteFareTask fareTask = new GetRouteFareTask() {
+					@Override
+					public void onResult(String fare) {
+						stationPair.setFare(fare);
+						stationPair.setFareLastUpdated(System
+								.currentTimeMillis());
+						getListAdapter().notifyDataSetChanged();
+					}
 
-						@Override
-						public void onError(Exception exception) {
-							// Ignore... we can do this later
-						}
-					};
-					fareTask.execute(new GetRouteFareTask.Params(orig, dest));
-				}
-			} while (cursor.moveToNext());
+					@Override
+					public void onError(Exception exception) {
+						// Ignore... we can do this later
+					}
+				};
+				fareTask.execute(new GetRouteFareTask.Params(stationPair
+						.getOrigin(), stationPair.getDestination()));
+			}
 		}
 	}
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		if (mCurrentlySelectedOrigin != null)
-			outState.putString("currentlySelectedOrigin",
-					mCurrentlySelectedOrigin.abbreviation);
-		if (mCurrentlySelectedDestination != null)
-			outState.putString("currentlySelectedDestination",
-					mCurrentlySelectedDestination.abbreviation);
-		outState.putParcelable("currentlySelectedUri", mCurrentlySelectedUri);
 		outState.putBoolean("hasActionMode", mActionMode != null);
-		outState.putString("currentAlerts", mCurrentAlerts);
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
 		Ticker.getInstance().startTicking(this);
+		startEtdListeners();
+	}
+
+	private void startEtdListeners() {
 		if (mRoutesAdapter != null && !mRoutesAdapter.isEmpty()
 				&& !mRoutesAdapter.areEtdListenersActive()) {
 			mRoutesAdapter.setUpEtdListeners();
@@ -287,6 +224,8 @@ public class RoutesListActivity extends SActivity implements
 	protected void onStop() {
 		super.onStop();
 		Ticker.getInstance().stopTicking(this);
+		app.saveFavorites();
+
 	}
 
 	@Override
@@ -314,13 +253,11 @@ public class RoutesListActivity extends SActivity implements
 	private MenuItem elevatorMenuItem;
 	private View origElevatorActionView;
 
-	private String mCurrentAlerts;
-
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int itemId = item.getItemId();
 		if (itemId == R.id.add_favorite_menu_button) {
-			new AddRouteDialogFragment(getString(R.string.add_route))
-					.show(getSupportFragmentManager().beginTransaction());
+			new AddRouteDialogFragment().show(getSupportFragmentManager()
+					.beginTransaction());
 			return true;
 		} else if (itemId == R.id.view_system_map_button) {
 			startActivity(new Intent(this, ViewMapActivity.class));
@@ -393,7 +330,7 @@ public class RoutesListActivity extends SActivity implements
 
 	@UiThread
 	void resetElevatorMenuGraphic() {
-		invalidateOptionsMenu();
+		ActivityCompat.invalidateOptionsMenu(this);
 		elevatorMenuItem.setActionView(origElevatorActionView);
 	}
 
@@ -407,8 +344,9 @@ public class RoutesListActivity extends SActivity implements
 
 	private void startContextualActionMode() {
 		mActionMode = startActionMode(new RouteActionMode());
-		mActionMode.setTitle(mCurrentlySelectedOrigin.name);
-		mActionMode.setSubtitle("to " + mCurrentlySelectedDestination.name);
+		mActionMode.setTitle(mCurrentlySelectedStationPair.getOrigin().name);
+		mActionMode.setSubtitle("to "
+				+ mCurrentlySelectedStationPair.getDestination().name);
 	}
 
 	private final class RouteActionMode implements ActionMode.Callback {
@@ -426,8 +364,11 @@ public class RoutesListActivity extends SActivity implements
 		@Override
 		public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 			if (item.getItemId() == R.id.view) {
-				startActivity(new Intent(Intent.ACTION_VIEW,
-						mCurrentlySelectedUri));
+				Intent intent = new Intent(RoutesListActivity.this,
+						ViewDeparturesActivity.class);
+				intent.putExtra(Constants.STATION_PAIR_EXTRA,
+						mCurrentlySelectedStationPair);
+				startActivity(intent);
 				mode.finish();
 				return true;
 			} else if (item.getItemId() == R.id.delete) {
@@ -439,11 +380,9 @@ public class RoutesListActivity extends SActivity implements
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog,
 									int which) {
-								getContentResolver().delete(
-										mCurrentlySelectedUri, null, null);
-								mCurrentlySelectedUri = null;
-								mCurrentlySelectedOrigin = null;
-								mCurrentlySelectedDestination = null;
+								getListAdapter().remove(
+										mCurrentlySelectedStationPair);
+								mCurrentlySelectedStationPair = null;
 								mActionMode.finish();
 								dialog.dismiss();
 							}
