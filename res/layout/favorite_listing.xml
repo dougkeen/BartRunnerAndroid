@@ -6,6 +6,15 @@
     android:paddingLeft="5dp"
     android:paddingRight="5dp" >
 
+    <ImageView
+        android:id="@+id/dragHandle"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:contentDescription="Drag handle"
+        android:src="@drawable/drag_handle" />
+
     <com.dougkeen.bart.controls.CountdownTextView
         android:id="@+id/countdownText"
         style="@style/DepartureCountdownText"
@@ -25,15 +34,16 @@
     <TextView
         android:id="@+id/originText"
         style="@style/FavoriteListingTextView"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:layout_toLeftOf="@id/countdownText"
+        android:layout_toRightOf="@id/dragHandle"
         android:text="Origin" />
 
     <TextView
         android:id="@+id/to"
         style="@style/FavoriteListingTextView"
         android:layout_below="@id/originText"
+        android:layout_toRightOf="@id/dragHandle"
         android:paddingLeft="15dp"
         android:paddingRight="8dp"
         android:text="to" />

@@ -112,6 +112,11 @@ public class FavoritesArrayAdapter extends ArrayAdapter<StationPair> {
 		}
 	}
 
+	public void move(StationPair object, int to) {
+		super.remove(object);
+		super.insert(object, to);
+	}
+
 	@Override
 	public void clear() {
 		super.clear();

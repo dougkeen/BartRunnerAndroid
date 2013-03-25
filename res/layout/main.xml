@@ -1,15 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res/com.dougkeen.bart"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:gravity="center"
     android:orientation="vertical" >
 
-    <ListView
+    <com.mobeta.android.dslv.DragSortListView
         android:id="@android:id/list"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1" />
+        android:layout_margin="3dp"
+        android:layout_weight="1"
+        android:dividerHeight="1dp"
+        android:padding="3dp"
+        app:collapsed_height="1dp"
+        app:drag_enabled="true"
+        app:drag_handle_id="@id/dragHandle"
+        app:drag_scroll_start="0.33"
+        app:drag_start_mode="onDown"
+        app:float_alpha="0.6"
+        app:remove_enabled="true"
+        app:remove_mode="flingRemove"
+        app:slide_shuffle_speed="0.3" />
 
     <TextView
         android:id="@android:id/empty"

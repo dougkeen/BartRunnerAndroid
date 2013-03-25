@@ -17,7 +17,6 @@ import com.WazaBe.HoloEverywhere.app.AlertDialog;
 import com.WazaBe.HoloEverywhere.app.AlertDialog.Builder;
 import com.WazaBe.HoloEverywhere.app.DialogFragment;
 import com.WazaBe.HoloEverywhere.sherlock.SActivity;
-import com.WazaBe.HoloEverywhere.widget.ListView;
 import com.WazaBe.HoloEverywhere.widget.TextView;
 import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
@@ -46,6 +45,7 @@ import com.googlecode.androidannotations.annotations.ItemLongClick;
 import com.googlecode.androidannotations.annotations.UiThread;
 import com.googlecode.androidannotations.annotations.ViewById;
 import com.googlecode.androidannotations.annotations.rest.RestService;
+import com.mobeta.android.dslv.DragSortListView;
 
 @EActivity(R.layout.main)
 public class RoutesListActivity extends SActivity implements TickSubscriber {
@@ -74,7 +74,7 @@ public class RoutesListActivity extends SActivity implements TickSubscriber {
 	ElevatorClient elevatorClient;
 
 	@ViewById(android.R.id.list)
-	ListView listView;
+	DragSortListView listView;
 
 	@ViewById(R.id.quickLookupButton)
 	Button quickLookupButton;
@@ -107,6 +107,27 @@ public class RoutesListActivity extends SActivity implements TickSubscriber {
 		startContextualActionMode();
 	}
 
+	private DragSortListView.DropListener onDrop = new DragSortListView.DropListener() {
+		@Override
+		public void drop(int from, int to) {
+			if (from == to)
+				return;
+
+			StationPair item = mRoutesAdapter.getItem(from);
+
+			mRoutesAdapter.move(item, to);
+			mRoutesAdapter.notifyDataSetChanged();
+		}
+	};
+
+	private DragSortListView.RemoveListener onRemove = new DragSortListView.RemoveListener() {
+		@Override
+		public void remove(int which) {
+			mRoutesAdapter.remove(mRoutesAdapter.getItem(which));
+			mRoutesAdapter.notifyDataSetChanged();
+		}
+	};
+
 	@AfterViews
 	void afterViews() {
 		setTitle(R.string.favorite_routes);
@@ -117,6 +138,9 @@ public class RoutesListActivity extends SActivity implements TickSubscriber {
 		setListAdapter(mRoutesAdapter);
 
 		listView.setEmptyView(findViewById(android.R.id.empty));
+
+		listView.setDropListener(onDrop);
+		listView.setRemoveListener(onRemove);
 
 		if (mCurrentAlerts != null) {
 			showAlertMessage(mCurrentAlerts);

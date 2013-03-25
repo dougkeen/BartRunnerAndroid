@@ -43,6 +43,7 @@ public class StationPair implements Parcelable {
 	private Station origin;
 	private Station destination;
 	private String fare;
+
 	private long fareLastUpdated;
 	private int averageTripLength;
 	private int averageTripSampleCount;
@@ -124,6 +125,12 @@ public class StationPair implements Parcelable {
 		if (origin != other.origin)
 			return false;
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "StationPair [origin=" + origin + ", destination=" + destination
+				+ "]";
 	}
 
 	@Override
