@@ -7,7 +7,7 @@
     <ImageView
         android:id="@+id/destinationColorBar"
         android:layout_width="wrap_content"
-        android:layout_height="45dp"
+        android:layout_height="64dp"
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
         android:src="@drawable/basic_rectangle" />
@@ -45,19 +45,32 @@
         android:layout_below="@id/topRow"
         android:src="@drawable/xfer" />
 
-    <com.dougkeen.bart.controls.TimedTextSwitcher
+    <TextView
         android:id="@+id/trainLengthText"
+        style="@style/DepartureUncertaintyText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/topRow"
-        android:layout_toRightOf="@id/destinationColorBar"
-        bart:tickInterval="1" />
+        android:layout_toRightOf="@id/destinationColorBar" />
 
-    <com.dougkeen.bart.controls.TimedTextSwitcher
+    <TextView
         android:id="@+id/uncertainty"
         style="@style/DepartureUncertaintyText"
         android:layout_alignParentRight="true"
-        android:layout_below="@id/topRow"
-        bart:tickInterval="1" />
+        android:layout_below="@id/topRow" />
+
+    <TextView
+        android:id="@+id/estimatedArrival"
+        style="@style/DepartureUncertaintyText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/trainLengthText"
+        android:layout_toRightOf="@id/destinationColorBar" />
+
+    <TextView
+        android:id="@+id/departureTime"
+        style="@style/DepartureUncertaintyText"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/uncertainty" />
 
 </merge>

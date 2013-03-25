@@ -89,37 +89,48 @@ public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
 		((TextView) view.findViewById(R.id.destinationText)).setText(departure
 				.getTrainDestination().toString());
 
-		TimedTextSwitcher textSwitcher = (TimedTextSwitcher) view
-				.findViewById(R.id.trainLengthText);
-		initTextSwitcher(textSwitcher, R.layout.train_length_arrival_textview);
-
 		final String arrivesAtDestinationPrefix = getContext().getString(
 				R.string.arrives_at_destination);
 		final String estimatedArrivalTimeText = departure
 				.getEstimatedArrivalTimeText(getContext());
-		if (!StringUtils.isBlank(estimatedArrivalTimeText)) {
-			textSwitcher.setCurrentText(arrivesAtDestinationPrefix
+
+		TextView estimatedArrival = (TextView) view
+				.findViewById(R.id.estimatedArrival);
+		if (estimatedArrival != null) {
+			((TextView) view.findViewById(R.id.trainLengthText))
+					.setText(departure.getTrainLengthText());
+			estimatedArrival.setText(arrivesAtDestinationPrefix
 					+ estimatedArrivalTimeText);
 		} else {
-			textSwitcher.setCurrentText(departure.getTrainLengthText());
-		}
-		textSwitcher.setTextProvider(new TextProvider() {
-			@Override
-			public String getText(long tickNumber) {
-				if (tickNumber % 4 == 0) {
-					return departure.getTrainLengthText();
-				} else {
-					final String estimatedArrivalTimeText = departure
-							.getEstimatedArrivalTimeText(getContext());
-					if (StringUtils.isBlank(estimatedArrivalTimeText)) {
-						return "";
+			TimedTextSwitcher textSwitcher = (TimedTextSwitcher) view
+					.findViewById(R.id.trainLengthText);
+			initTextSwitcher(textSwitcher,
+					R.layout.train_length_arrival_textview);
+
+			if (!StringUtils.isBlank(estimatedArrivalTimeText)) {
+				textSwitcher.setCurrentText(arrivesAtDestinationPrefix
+						+ estimatedArrivalTimeText);
+			} else {
+				textSwitcher.setCurrentText(departure.getTrainLengthText());
+			}
+			textSwitcher.setTextProvider(new TextProvider() {
+				@Override
+				public String getText(long tickNumber) {
+					if (tickNumber % 4 == 0) {
+						return departure.getTrainLengthText();
 					} else {
-						return arrivesAtDestinationPrefix
-								+ estimatedArrivalTimeText;
+						final String estimatedArrivalTimeText = departure
+								.getEstimatedArrivalTimeText(getContext());
+						if (StringUtils.isBlank(estimatedArrivalTimeText)) {
+							return "";
+						} else {
+							return arrivesAtDestinationPrefix
+									+ estimatedArrivalTimeText;
+						}
 					}
 				}
-			}
-		});
+			});
+		}
 
 		ImageView colorBar = (ImageView) view
 				.findViewById(R.id.destinationColorBar);
@@ -135,22 +146,32 @@ public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
 			}
 		});
 
-		TimedTextSwitcher uncertaintySwitcher = (TimedTextSwitcher) view
-				.findViewById(R.id.uncertainty);
-		initTextSwitcher(uncertaintySwitcher, R.layout.uncertainty_textview);
+		TextView departureTime = (TextView) view
+				.findViewById(R.id.departureTime);
 
-		uncertaintySwitcher.setTextProvider(new TextProvider() {
-			@Override
-			public String getText(long tickNumber) {
-				if (tickNumber % 4 == 0) {
-					return departure.getUncertaintyText();
-				} else {
-					return departure
-							.getEstimatedDepartureTimeText(getContext());
+		if (departureTime != null) {
+			((TextView) view.findViewById(R.id.uncertainty)).setText(departure
+					.getUncertaintyText());
+			departureTime.setText(departure
+					.getEstimatedDepartureTimeText(getContext()));
+		} else {
+			TimedTextSwitcher uncertaintySwitcher = (TimedTextSwitcher) view
+					.findViewById(R.id.uncertainty);
+			initTextSwitcher(uncertaintySwitcher, R.layout.uncertainty_textview);
+
+			uncertaintySwitcher.setTextProvider(new TextProvider() {
+				@Override
+				public String getText(long tickNumber) {
+					if (tickNumber % 4 == 0) {
+						return departure.getUncertaintyText();
+					} else {
+						return departure
+								.getEstimatedDepartureTimeText(getContext());
+					}
 				}
-			}
-		});
-
+			});
+		}
+		
 		ImageView bikeIcon = (ImageView) view.findViewById(R.id.bikeIcon);
 		if (departure.isBikeAllowed()) {
 			bikeIcon.setImageDrawable(bikeDrawable);
