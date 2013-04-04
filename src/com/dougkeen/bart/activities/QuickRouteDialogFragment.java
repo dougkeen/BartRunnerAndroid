@@ -6,6 +6,7 @@ import com.dougkeen.bart.BartRunnerApplication;
 import com.dougkeen.bart.R;
 import com.dougkeen.bart.model.Constants;
 import com.dougkeen.bart.model.Station;
+import com.dougkeen.bart.model.StationPair;
 
 public class QuickRouteDialogFragment extends AbstractRouteSelectionFragment {
 
@@ -16,9 +17,9 @@ public class QuickRouteDialogFragment extends AbstractRouteSelectionFragment {
 
 	@Override
 	protected void onOkButtonClick(Station origin, Station destination) {
-		startActivity(new Intent(Intent.ACTION_VIEW,
-				Constants.ARBITRARY_ROUTE_CONTENT_URI_ROOT.buildUpon()
-						.appendPath(origin.abbreviation)
-						.appendPath(destination.abbreviation).build()));
+		Intent intent = new Intent(getActivity(), ViewDeparturesActivity.class);
+		intent.putExtra(Constants.STATION_PAIR_EXTRA, new StationPair(origin,
+				destination));
+		startActivity(intent);
 	}
 }
