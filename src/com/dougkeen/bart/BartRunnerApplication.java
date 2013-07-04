@@ -107,6 +107,10 @@ public class BartRunnerApplication extends Application {
 	}
 
 	public Departure getBoardedDeparture() {
+		return getBoardedDeparture(false);
+	}
+
+	public Departure getBoardedDeparture(boolean useOldCache) {
 		if (mBoardedDeparture == null) {
 			// see if there's a saved one
 			File cachedDepartureFile = new File(getCacheDir(), CACHE_FILE_NAME);
@@ -123,12 +127,13 @@ public class BartRunnerApplication extends Application {
 					parcel.recycle();
 
 					/*
-					 * Check if the cached one is relatively recent. If so,
-					 * restore that to the application context
+					 * Ooptionally check if the cached one is relatively recent.
+					 * If so, restore that to the application context
 					 */
 					long now = System.currentTimeMillis();
-					if (lastBoardedDeparture.getEstimatedArrivalTime() >= now
-							- FIVE_MINUTES
+					if (useOldCache
+							|| lastBoardedDeparture.getEstimatedArrivalTime() >= now
+									- FIVE_MINUTES
 							|| lastBoardedDeparture.getMeanEstimate() >= now
 									- 2 * FIVE_MINUTES) {
 						mBoardedDeparture = lastBoardedDeparture;

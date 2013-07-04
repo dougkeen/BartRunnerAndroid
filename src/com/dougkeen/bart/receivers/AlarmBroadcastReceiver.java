@@ -16,7 +16,7 @@ public class AlarmBroadcastReceiver extends BroadcastReceiver {
 	public void onReceive(Context context, Intent intent) {
 		BartRunnerApplication application = (BartRunnerApplication) context
 				.getApplicationContext();
-		final Departure boardedDeparture = application.getBoardedDeparture();
+		final Departure boardedDeparture = application.getBoardedDeparture(true);
 		if (boardedDeparture == null) {
 			// Nothing to notify about
 			return;
