@@ -295,8 +295,8 @@ public class ViewDeparturesActivity extends Activity implements
 				 * Otherwise select the clicked departure as the one the user
 				 * wants to board
 				 */
-				setBoardedDeparture((Departure) getListAdapter().getItem(
-						position));
+				setBoardedDeparture(
+						(Departure) getListAdapter().getItem(position), true);
 			}
 		}
 	};
@@ -454,6 +454,11 @@ public class ViewDeparturesActivity extends Activity implements
 	}
 
 	private void setBoardedDeparture(Departure selectedDeparture) {
+		setBoardedDeparture(selectedDeparture, false);
+	}
+
+	private void setBoardedDeparture(Departure selectedDeparture,
+			boolean startActionMode) {
 		final BartRunnerApplication application = (BartRunnerApplication) getApplication();
 		selectedDeparture
 				.setPassengerDestination(mStationPair.getDestination());
@@ -465,6 +470,11 @@ public class ViewDeparturesActivity extends Activity implements
 				BoardedDepartureService.class);
 		intent.putExtra("departure", selectedDeparture);
 		startService(intent);
+
+		if (startActionMode) {
+			((Checkable) mYourTrainSection).setChecked(true);
+			startYourTrainActionMode();
+		}
 	}
 
 	private void startDepartureActionMode() {
@@ -491,7 +501,7 @@ public class ViewDeparturesActivity extends Activity implements
 		@Override
 		public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 			if (item.getItemId() == R.id.boardTrain) {
-				setBoardedDeparture(mSelectedDeparture);
+				setBoardedDeparture(mSelectedDeparture, false);
 
 				mode.finish();
 				return true;
