@@ -1,6 +1,11 @@
 package com.dougkeen.bart.activities;
 
-import net.simonvt.widget.NumberPicker;
+import org.holoeverywhere.LayoutInflater;
+import org.holoeverywhere.app.AlertDialog;
+import org.holoeverywhere.app.Dialog;
+import org.holoeverywhere.app.DialogFragment;
+import org.holoeverywhere.widget.NumberPicker;
+
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -9,10 +14,6 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.View;
 
-import com.WazaBe.HoloEverywhere.LayoutInflater;
-import com.WazaBe.HoloEverywhere.app.AlertDialog;
-import com.WazaBe.HoloEverywhere.app.Dialog;
-import com.WazaBe.HoloEverywhere.app.DialogFragment;
 import com.dougkeen.bart.BartRunnerApplication;
 import com.dougkeen.bart.R;
 import com.dougkeen.bart.model.Departure;

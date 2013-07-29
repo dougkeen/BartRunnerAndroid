@@ -1,15 +1,16 @@
 package com.dougkeen.bart.activities;
 
+import org.holoeverywhere.app.Activity;
+
 import android.os.Bundle;
 import android.webkit.WebView;
 
-import com.WazaBe.HoloEverywhere.sherlock.SActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.dougkeen.bart.R;
 
-public class ViewMapActivity extends SActivity {
+public class ViewMapActivity extends Activity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

@@ -10,7 +10,7 @@
         android:layout_width="fill_parent"
         android:layout_height="2dip"
         android:layout_alignParentTop="true"
-        android:background="@color/abs__holo_blue_light" />
+        android:background="#ff33b5e5" />
 
     <Spinner
         android:id="@+id/origin_spinner"

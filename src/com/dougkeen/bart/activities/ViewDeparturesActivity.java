@@ -2,6 +2,12 @@ package com.dougkeen.bart.activities;
 
 import java.util.List;
 
+import org.holoeverywhere.app.Activity;
+import org.holoeverywhere.widget.ListView;
+import org.holoeverywhere.widget.ProgressBar;
+import org.holoeverywhere.widget.TextView;
+import org.holoeverywhere.widget.Toast;
+
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.ComponentName;
@@ -25,11 +31,6 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Checkable;
 
-import com.WazaBe.HoloEverywhere.sherlock.SActivity;
-import com.WazaBe.HoloEverywhere.widget.ListView;
-import com.WazaBe.HoloEverywhere.widget.ProgressBar;
-import com.WazaBe.HoloEverywhere.widget.TextView;
-import com.WazaBe.HoloEverywhere.widget.Toast;
 import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
@@ -51,7 +52,7 @@ import com.dougkeen.bart.services.EtdService_;
 import com.dougkeen.util.Observer;
 import com.dougkeen.util.WakeLocker;
 
-public class ViewDeparturesActivity extends SActivity implements
+public class ViewDeparturesActivity extends Activity implements
 		EtdServiceListener {
 
 	private StationPair mStationPair;

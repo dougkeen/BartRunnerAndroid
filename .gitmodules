@@ -1,0 +1,9 @@
+[submodule "holoeverywhere"]
+	path = holoeverywhere
+	url = https://github.com/Prototik/HoloEverywhere.git
+[submodule "nineoldandroids"]
+	path = nineoldandroids
+	url = https://github.com/JakeWharton/NineOldAndroids
+[submodule "drag-sort-listview"]
+	path = drag-sort-listview
+	url = https://github.com/bauerca/drag-sort-listview

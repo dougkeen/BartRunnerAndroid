@@ -8,9 +8,9 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.holoeverywhere.app.Application;
 
 import android.app.AlarmManager;
-import android.app.Application;
 import android.content.Context;
 import android.media.MediaPlayer;
 import android.os.Parcel;

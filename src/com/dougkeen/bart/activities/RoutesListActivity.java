@@ -3,6 +3,12 @@ package com.dougkeen.bart.activities;
 import java.util.Calendar;
 import java.util.TimeZone;
 
+import org.holoeverywhere.app.Activity;
+import org.holoeverywhere.app.AlertDialog;
+import org.holoeverywhere.app.AlertDialog.Builder;
+import org.holoeverywhere.app.DialogFragment;
+import org.holoeverywhere.widget.TextView;
+
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,11 +19,6 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListAdapter;
 
-import com.WazaBe.HoloEverywhere.app.AlertDialog;
-import com.WazaBe.HoloEverywhere.app.AlertDialog.Builder;
-import com.WazaBe.HoloEverywhere.app.DialogFragment;
-import com.WazaBe.HoloEverywhere.sherlock.SActivity;
-import com.WazaBe.HoloEverywhere.widget.TextView;
 import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
@@ -48,11 +49,13 @@ import com.googlecode.androidannotations.annotations.rest.RestService;
 import com.mobeta.android.dslv.DragSortListView;
 
 @EActivity(R.layout.main)
-public class RoutesListActivity extends SActivity implements TickSubscriber {
+public class RoutesListActivity extends Activity implements TickSubscriber {
 	private static final String NO_DELAYS_REPORTED = "No delays reported";
 
 	private static final TimeZone PACIFIC_TIME = TimeZone
 			.getTimeZone("America/Los_Angeles");
+
+	private static final String TAG = "RoutesListActivity";
 
 	@InstanceState
 	StationPair mCurrentlySelectedStationPair;
