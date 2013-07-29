@@ -172,7 +172,11 @@ public class Departure implements Parcelable, Comparable<Departure> {
 	}
 
 	public String getTrainLengthText() {
-		return trainLength + " car train";
+		return trainLength + " cars";
+	}
+
+	public String getTrainLengthAndPlatform() {
+		return trainLength + " cars, platform " + getPlatform();
 	}
 
 	public boolean getRequiresTransfer() {

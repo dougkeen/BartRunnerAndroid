@@ -471,7 +471,7 @@ public class ViewDeparturesActivity extends Activity implements
 		if (mActionMode == null)
 			mActionMode = startActionMode(new DepartureActionMode());
 		mActionMode.setTitle(mSelectedDeparture.getTrainDestinationName());
-		mActionMode.setSubtitle(mSelectedDeparture.getTrainLengthText());
+		mActionMode.setSubtitle(mSelectedDeparture.getTrainLengthAndPlatform());
 	}
 
 	private class DepartureActionMode implements ActionMode.Callback {

@@ -114,7 +114,7 @@ public class YourTrainLayout extends RelativeLayout implements Checkable {
 				.setText(boardedDeparture.getTrainDestination().toString());
 
 		((TextView) findViewById(R.id.yourTrainTrainLengthText))
-				.setText(boardedDeparture.getTrainLengthText());
+				.setText(boardedDeparture.getTrainLengthAndPlatform());
 
 		ImageView colorBar = (ImageView) findViewById(R.id.yourTrainDestinationColorBar);
 		((GradientDrawable) colorBar.getDrawable()).setColor(Color
