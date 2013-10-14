@@ -12,6 +12,11 @@
         android:icon="@drawable/ic_action_alarm"
         android:showAsAction="always|withText"
         android:title="@string/set_alarm"/>
+	<item
+	    android:id="@+id/share_arrival"
+	    android:icon="@drawable/ic_action_mail"
+	    android:showAsAction="always|withText"
+	    android:title="@string/share_arrival_time" />
     <item
         android:id="@+id/delete"
         android:icon="@drawable/ic_action_delete"

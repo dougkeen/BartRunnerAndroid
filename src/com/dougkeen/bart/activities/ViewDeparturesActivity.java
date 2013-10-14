@@ -619,9 +619,10 @@ public class ViewDeparturesActivity extends Activity implements
 		@Override
 		public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 			final int itemId = item.getItemId();
+			final Departure boardedDeparture = getBoardedDeparture();
 			if (itemId == R.id.set_alarm_button) {
 				// Don't prompt for alarm if train is about to leave
-				if (getBoardedDeparture().getMeanSecondsLeft() > 60) {
+				if (boardedDeparture.getMeanSecondsLeft() > 60) {
 					new TrainAlarmDialogFragment()
 							.show(getSupportFragmentManager()
 									.beginTransaction());
@@ -637,6 +638,22 @@ public class ViewDeparturesActivity extends Activity implements
 			} else if (itemId == R.id.delete) {
 				mSwipeHelper.dismissWithAnimation(true);
 				mode.finish();
+				return true;
+			} else if (itemId == R.id.share_arrival) {
+				Intent intent = new Intent(Intent.ACTION_SEND);
+				intent.setType("text/plain");
+				intent.putExtra(Intent.EXTRA_SUBJECT, "My BART train");
+				intent.putExtra(
+						Intent.EXTRA_TEXT,
+						getString(
+								R.string.arrival_message,
+								boardedDeparture.getStationPair()
+										.getDestination().name,
+								boardedDeparture
+										.getEstimatedArrivalTimeText(ViewDeparturesActivity.this)));
+
+				startActivity(Intent.createChooser(intent,
+						getString(R.string.share_arrival_time)));
 				return true;
 			}
 			return false;

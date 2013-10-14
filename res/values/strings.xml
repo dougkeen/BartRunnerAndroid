@@ -45,4 +45,7 @@
     <string name="leaving">Leaving</string>
     <string name="departed">Departed</string>
     <string name="arrives_at_destination">Arrive @ dest. ~</string>
-</resources>
+    <string name="arrival_message">I\'ll be arriving at %1$s around %2$s</string>
+    <string name="share_arrival_time">Share arrival time</string>
+
+</resources>
