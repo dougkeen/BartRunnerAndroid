@@ -58,6 +58,7 @@ public class AlertListConverter extends
 	public List<MediaType> getSupportedMediaTypes() {
 		final List<MediaType> supportedMediaTypes = new ArrayList<MediaType>();
 		supportedMediaTypes.add(MediaType.TEXT_HTML);
+		supportedMediaTypes.add(MediaType.TEXT_XML);
 		supportedMediaTypes.addAll(super.getSupportedMediaTypes());
 		return supportedMediaTypes;
 	}
