@@ -650,7 +650,7 @@ public class ViewDeparturesActivity extends Activity implements
 								boardedDeparture.getStationPair()
 										.getDestination().name,
 								boardedDeparture
-										.getEstimatedArrivalTimeText(ViewDeparturesActivity.this)));
+										.getEstimatedArrivalTimeText(ViewDeparturesActivity.this, false)));
 
 				startActivity(Intent.createChooser(intent,
 						getString(R.string.share_arrival_time)));

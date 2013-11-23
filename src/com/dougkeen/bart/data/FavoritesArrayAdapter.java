@@ -165,11 +165,18 @@ public class FavoritesArrayAdapter extends ArrayAdapter<StationPair> {
 			uncertaintyTextSwitcher.setTextProvider(new TextProvider() {
 				@Override
 				public String getText(long tickNumber) {
-					if (tickNumber % 6 <= 1) {
+					final String arrive = etdListener.getFirstDeparture()
+							.getEstimatedArrivalTimeText(getContext(), true);
+					int mod = StringUtils.isNotBlank(arrive) ? 8 : 6;
+					if (tickNumber % mod <= 1) {
 						return pair.getFare();
-					} else if (tickNumber % 6 <= 3) {
-						return etdListener.getFirstDeparture()
-								.getEstimatedDepartureTimeText(getContext());
+					} else if (tickNumber % mod <= 3) {
+						return "Dep "
+								+ etdListener.getFirstDeparture()
+										.getEstimatedDepartureTimeText(
+												getContext(), true);
+					} else if (mod == 8 && tickNumber % mod <= 5) {
+						return "Arr " + arrive;
 					} else {
 						return etdListener.getFirstDeparture()
 								.getUncertaintyText();

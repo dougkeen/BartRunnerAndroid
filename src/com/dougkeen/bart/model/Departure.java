@@ -1,5 +1,6 @@
 package com.dougkeen.bart.model;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -14,7 +15,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationCompat.Builder;
-import android.text.format.DateFormat;
 import android.util.Log;
 
 import com.dougkeen.bart.BartRunnerApplication;
@@ -26,6 +26,8 @@ import com.dougkeen.util.Observable;
 public class Departure implements Parcelable, Comparable<Departure> {
 	private static final int MINIMUM_MERGE_OVERLAP_MILLIS = 5000;
 	private static final int EXPIRE_MINUTES_AFTER_ARRIVAL = 1;
+
+	private static final DateFormat TIME_FORMAT = new SimpleDateFormat("h:mm");
 
 	public Departure() {
 		super();
@@ -300,30 +302,48 @@ public class Departure implements Parcelable, Comparable<Departure> {
 		if (minutesLeft < 0) {
 			return "Arrived at destination";
 		} else if (minutesLeft == 0) {
-			return "Arrives ~" + getEstimatedArrivalTimeText(context)
+			return "Arrives ~" + getEstimatedArrivalTimeText(context, false)
 					+ " (<1 min)";
 		} else if (minutesLeft == 1) {
-			return "Arrives ~" + getEstimatedArrivalTimeText(context)
+			return "Arrives ~" + getEstimatedArrivalTimeText(context, false)
 					+ " (1 min)";
 		} else {
-			return "Arrives ~" + getEstimatedArrivalTimeText(context) + " ("
-					+ minutesLeft + " mins)";
+			return "Arrives ~" + getEstimatedArrivalTimeText(context, false)
+					+ " (" + minutesLeft + " mins)";
 		}
 	}
 
 	public String getEstimatedArrivalTimeText(Context context) {
+		return getEstimatedArrivalTimeText(context, false);
+	}
+
+	public String getEstimatedArrivalTimeText(Context context, boolean compact) {
 		if (getEstimatedTripTime() > 0 || arrivalTimeOverride > 0) {
-			return DateFormat.getTimeFormat(context).format(
-					new Date(getEstimatedArrivalTime()));
+			final Date arrivalTime = new Date(getEstimatedArrivalTime());
+			if (compact) {
+				return TIME_FORMAT.format(arrivalTime);
+			} else {
+				return android.text.format.DateFormat.getTimeFormat(context)
+						.format(arrivalTime);
+			}
 		} else {
 			return "";
 		}
 	}
 
 	public String getEstimatedDepartureTimeText(Context context) {
+		return getEstimatedDepartureTimeText(context, false);
+	}
+
+	public String getEstimatedDepartureTimeText(Context context, boolean compact) {
 		if (getMeanEstimate() > 0) {
-			return DateFormat.getTimeFormat(context).format(
-					new Date(getMeanEstimate()));
+			final Date departureTime = new Date(getMeanEstimate());
+			if (compact) {
+				return TIME_FORMAT.format(departureTime);
+			} else {
+				return android.text.format.DateFormat.getTimeFormat(context)
+						.format(departureTime);
+			}
 		} else {
 			return "";
 		}

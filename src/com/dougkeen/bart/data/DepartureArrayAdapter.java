@@ -92,7 +92,7 @@ public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
 		final String arrivesAtDestinationPrefix = getContext().getString(
 				R.string.arrives_at_destination);
 		final String estimatedArrivalTimeText = departure
-				.getEstimatedArrivalTimeText(getContext());
+				.getEstimatedArrivalTimeText(getContext(), false);
 
 		TextView estimatedArrival = (TextView) view
 				.findViewById(R.id.estimatedArrival);
@@ -120,7 +120,7 @@ public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
 						return departure.getTrainLengthAndPlatform();
 					} else {
 						final String estimatedArrivalTimeText = departure
-								.getEstimatedArrivalTimeText(getContext());
+								.getEstimatedArrivalTimeText(getContext(), false);
 						if (StringUtils.isBlank(estimatedArrivalTimeText)) {
 							return "";
 						} else {
@@ -153,7 +153,7 @@ public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
 			((TextView) view.findViewById(R.id.uncertainty)).setText(departure
 					.getUncertaintyText());
 			departureTime.setText(departure
-					.getEstimatedDepartureTimeText(getContext()));
+					.getEstimatedDepartureTimeText(getContext(), false));
 		} else {
 			TimedTextSwitcher uncertaintySwitcher = (TimedTextSwitcher) view
 					.findViewById(R.id.uncertainty);
@@ -166,7 +166,7 @@ public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
 						return departure.getUncertaintyText();
 					} else {
 						return departure
-								.getEstimatedDepartureTimeText(getContext());
+								.getEstimatedDepartureTimeText(getContext(), false);
 					}
 				}
 			});
