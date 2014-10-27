@@ -292,8 +292,10 @@ public class RoutesListActivity extends Activity implements TickSubscriber {
 		} else if (itemId == R.id.elevator_button) {
 			elevatorMenuItem = item;
 			fetchElevatorInfo();
-			origElevatorActionView = elevatorMenuItem.getActionView();
-			elevatorMenuItem.setActionView(R.layout.progress_spinner);
+			if (android.os.Build.VERSION.SDK_INT >= 11) {
+				origElevatorActionView = elevatorMenuItem.getActionView();
+				elevatorMenuItem.setActionView(R.layout.progress_spinner);
+			}
 			return true;
 		} else {
 			return super.onOptionsItemSelected(item);
@@ -358,7 +360,9 @@ public class RoutesListActivity extends Activity implements TickSubscriber {
 	@UiThread
 	void resetElevatorMenuGraphic() {
 		ActivityCompat.invalidateOptionsMenu(this);
-		elevatorMenuItem.setActionView(origElevatorActionView);
+		if (android.os.Build.VERSION.SDK_INT >= 11) {
+			elevatorMenuItem.setActionView(origElevatorActionView);
+		}
 	}
 
 	@UiThread
