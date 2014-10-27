@@ -13,16 +13,16 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.view.ActionMode;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListAdapter;
 
-import com.actionbarsherlock.view.ActionMode;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
 import com.dougkeen.bart.BartRunnerApplication;
 import com.dougkeen.bart.R;
 import com.dougkeen.bart.controls.Ticker;
@@ -272,7 +272,7 @@ public class RoutesListActivity extends Activity implements TickSubscriber {
 	}
 
 	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getSupportMenuInflater();
+		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.routes_list_menu, menu);
 		return super.onCreateOptionsMenu(menu);
 	}
@@ -370,7 +370,7 @@ public class RoutesListActivity extends Activity implements TickSubscriber {
 	}
 
 	private void startContextualActionMode() {
-		mActionMode = startActionMode(new RouteActionMode());
+		mActionMode = startSupportActionMode(new RouteActionMode());
 		mActionMode.setTitle(mCurrentlySelectedStationPair.getOrigin().name);
 		mActionMode.setSubtitle("to "
 				+ mCurrentlySelectedStationPair.getDestination().name);
