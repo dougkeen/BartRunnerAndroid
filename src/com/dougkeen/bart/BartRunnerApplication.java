@@ -14,6 +14,7 @@ import org.holoeverywhere.widget.Toast;
 import android.app.AlarmManager;
 import android.content.Context;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.util.Log;
@@ -26,6 +27,7 @@ import com.dougkeen.bart.model.Station;
 import com.dougkeen.bart.model.StationPair;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
+import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.Wearable;
 import com.googlecode.androidannotations.annotations.Bean;
@@ -204,11 +206,6 @@ public class BartRunnerApplication extends Application {
 
 			this.mBoardedDeparture = boardedDeparture;
 
-			if (mGac != null && mGac.isConnected()) {
-				PutDataMapRequest pdmr = PutDataMapRequest.create("/bar");
-				pdmr.getDataMap().putInt("baz", mInt++);
-				Wearable.DataApi.putDataItem(mGac, pdmr.asPutDataRequest());
-			}
 
 			File cachedDepartureFile = new File(getCacheDir(), CACHE_FILE_NAME);
 			if (mBoardedDeparture == null) {
@@ -218,6 +215,9 @@ public class BartRunnerApplication extends Application {
 					Log.w(Constants.TAG,
 							"Couldn't delete lastBoardedDeparture file",
 							anotherException);
+				}
+				if (mGac != null && mGac.isConnected() && mUri != null) {
+					Wearable.DataApi.deleteDataItems(mGac, mUri);
 				}
 			} else {
 				FileOutputStream fileOutputStream = null;
@@ -233,11 +233,20 @@ public class BartRunnerApplication extends Application {
 				} finally {
 					IOUtils.closeQuietly(fileOutputStream);
 				}
+				if (mGac != null && mGac.isConnected()) {
+					PutDataMapRequest pdmr = PutDataMapRequest.create("/boarded_departure");
+					final DataMap dm = pdmr.getDataMap();
+					dm.putString("destination", boardedDeparture.getTrainDestinationAbbreviation());
+					dm.putLong("departure_time", boardedDeparture.getMeanEstimate());
+					mUri = pdmr.getUri();
+					Wearable.DataApi.putDataItem(mGac, pdmr.asPutDataRequest());
+				}
 			}
 		}
 	}
 
 	GoogleApiClient mGac;
+	private Uri mUri;
 	private int mInt = 5;
 
 	public boolean isAlarmSounding() {
