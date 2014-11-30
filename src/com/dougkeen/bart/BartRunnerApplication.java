@@ -9,10 +9,12 @@ import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.holoeverywhere.app.Application;
+import org.holoeverywhere.widget.Toast;
 
 import android.app.AlarmManager;
 import android.content.Context;
 import android.media.MediaPlayer;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.util.Log;
 
@@ -22,6 +24,10 @@ import com.dougkeen.bart.model.Constants;
 import com.dougkeen.bart.model.Departure;
 import com.dougkeen.bart.model.Station;
 import com.dougkeen.bart.model.StationPair;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
+import com.google.android.gms.wearable.PutDataMapRequest;
+import com.google.android.gms.wearable.Wearable;
 import com.googlecode.androidannotations.annotations.Bean;
 import com.googlecode.androidannotations.annotations.EApplication;
 
@@ -92,6 +98,24 @@ public class BartRunnerApplication extends Application {
 	public void onCreate() {
 		super.onCreate();
 		context = getApplicationContext();
+
+		mGac = new GoogleApiClient.Builder(this).addApi(Wearable.API)
+				.addConnectionCallbacks(new ConnectionCallbacks() {
+					@Override
+					public void onConnected(Bundle arg0) {
+						Toast.makeText(BartRunnerApplication.this,
+								"Wear API is connected!", Toast.LENGTH_LONG)
+								.show();
+					}
+
+					@Override
+					public void onConnectionSuspended(int arg0) {
+						Toast.makeText(BartRunnerApplication.this,
+								"Wear API failed to connect.",
+								Toast.LENGTH_LONG).show();
+					}
+				}).build();
+		mGac.connect();
 	}
 
 	public static Context getAppContext() {
@@ -180,6 +204,12 @@ public class BartRunnerApplication extends Application {
 
 			this.mBoardedDeparture = boardedDeparture;
 
+			if (mGac != null && mGac.isConnected()) {
+				PutDataMapRequest pdmr = PutDataMapRequest.create("/bar");
+				pdmr.getDataMap().putInt("baz", mInt++);
+				Wearable.DataApi.putDataItem(mGac, pdmr.asPutDataRequest());
+			}
+
 			File cachedDepartureFile = new File(getCacheDir(), CACHE_FILE_NAME);
 			if (mBoardedDeparture == null) {
 				try {
@@ -206,6 +236,9 @@ public class BartRunnerApplication extends Application {
 			}
 		}
 	}
+
+	GoogleApiClient mGac;
+	private int mInt = 5;
 
 	public boolean isAlarmSounding() {
 		return mAlarmSounding;
