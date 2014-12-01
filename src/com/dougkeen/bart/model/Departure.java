@@ -11,6 +11,7 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.v4.app.NotificationCompat;
@@ -22,6 +23,10 @@ import com.dougkeen.bart.R;
 import com.dougkeen.bart.activities.ViewDeparturesActivity;
 import com.dougkeen.bart.services.BoardedDepartureService;
 import com.dougkeen.util.Observable;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.wearable.DataMap;
+import com.google.android.gms.wearable.PutDataMapRequest;
+import com.google.android.gms.wearable.Wearable;
 
 public class Departure implements Parcelable, Comparable<Departure> {
 	private static final int MINIMUM_MERGE_OVERLAP_MILLIS = 5000;
@@ -80,6 +85,9 @@ public class Departure implements Parcelable, Comparable<Departure> {
 	private boolean listedInETDs = true;
 
 	private boolean selected;
+
+	private GoogleApiClient mGac;
+	private Uri mUri;
 
 	public Station getOrigin() {
 		return origin;
@@ -404,6 +412,10 @@ public class Departure implements Parcelable, Comparable<Departure> {
 			// We must never have 0 or negative uncertainty
 			setMinEstimate(newMin);
 			setMaxEstimate(newMax);
+		}
+
+		if (mGac != null) {
+			updateWear();
 		}
 	}
 
@@ -735,5 +747,43 @@ public class Departure implements Parcelable, Comparable<Departure> {
 
 	public void notifyAlarmHasBeenHandled() {
 		this.alarmPending.setValue(false);
+	}
+
+	public void setGac(GoogleApiClient gac) {
+		if (gac == null && mGac != null && mUri != null) {
+			Wearable.DataApi.deleteDataItems(mGac, mUri);
+		} else if (gac != null) {
+			/*
+			 * this is a hack in case mGac or mUri is null (i.e. we reloaded
+			 * from somewhere but we loaded a cached "boardedDeparture" and now
+			 * we're really just trying to swipe it away.
+			 * 
+			 * TODO: should really just do this above, but I don't know how to
+			 * synthesize the URI from the ether.
+			 */
+			mGac = gac;
+			updateWear();
+		}
+		mGac = gac;
+	}
+
+	private void updateWear() {
+		/*
+		 * TODO: This shit seems to sometimes run on the
+		 * BartRunnerNotificationService thread (i.e. from mergeDeparture), and
+		 * other times on the main thread (i.e. from choosing the departure from
+		 * the GUI).
+		 * 
+		 * The setGac() happens on the main thread always. It's possible
+		 * something HTTP is in flight while when we swipe it away, so MAYBE we
+		 * might actually re-update after submitting the deletion ... maybe if
+		 * the "mGac = null" isn't yet visible on this thread.
+		 */
+		PutDataMapRequest pdmr = PutDataMapRequest.create("/boarded_departure");
+		final DataMap dm = pdmr.getDataMap();
+		dm.putString("destination", getTrainDestinationAbbreviation());
+		dm.putLong("departure_time", getMeanEstimate());
+		mUri = pdmr.getUri();
+		Wearable.DataApi.putDataItem(mGac, pdmr.asPutDataRequest());
 	}
 }

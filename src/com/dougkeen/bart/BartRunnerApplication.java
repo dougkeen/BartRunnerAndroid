@@ -202,10 +202,11 @@ public class BartRunnerApplication extends Application {
 									this,
 									(AlarmManager) getSystemService(Context.ALARM_SERVICE));
 				}
+
+				mBoardedDeparture.setGac(null);
 			}
 
 			this.mBoardedDeparture = boardedDeparture;
-
 
 			File cachedDepartureFile = new File(getCacheDir(), CACHE_FILE_NAME);
 			if (mBoardedDeparture == null) {
@@ -215,9 +216,6 @@ public class BartRunnerApplication extends Application {
 					Log.w(Constants.TAG,
 							"Couldn't delete lastBoardedDeparture file",
 							anotherException);
-				}
-				if (mGac != null && mGac.isConnected() && mUri != null) {
-					Wearable.DataApi.deleteDataItems(mGac, mUri);
 				}
 			} else {
 				FileOutputStream fileOutputStream = null;
@@ -234,12 +232,7 @@ public class BartRunnerApplication extends Application {
 					IOUtils.closeQuietly(fileOutputStream);
 				}
 				if (mGac != null && mGac.isConnected()) {
-					PutDataMapRequest pdmr = PutDataMapRequest.create("/boarded_departure");
-					final DataMap dm = pdmr.getDataMap();
-					dm.putString("destination", boardedDeparture.getTrainDestinationAbbreviation());
-					dm.putLong("departure_time", boardedDeparture.getMeanEstimate());
-					mUri = pdmr.getUri();
-					Wearable.DataApi.putDataItem(mGac, pdmr.asPutDataRequest());
+					mBoardedDeparture.setGac(mGac);
 				}
 			}
 		}
