@@ -9,6 +9,7 @@ import android.content.Intent;
 import com.google.android.gms.wearable.DataMap;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -36,6 +37,7 @@ public class WearableDeparture {
                 .setSmallIcon(com.dougkeen.bart.R.drawable.ic_launcher)
                 .addAction(R.drawable.ic_launcher, "Cancel", pi)
                 .setOngoing(true)
+                .extend(new Notification.WearableExtender().setHintHideIcon(true))
         ;
 
     }
@@ -70,8 +72,7 @@ public class WearableDeparture {
     }
 
     public void updateNotification() {
-
-        long duration = departure_time.getTime() - new Date().getTime();
+        long duration = departure_time.getTime() - Calendar.getInstance().getTimeInMillis();
         long minutes = duration / 60000;
         long seconds = ((duration - minutes * 60000) % 60000) / 1000;
         String s = String.format("%dm%02ds", minutes, seconds);
