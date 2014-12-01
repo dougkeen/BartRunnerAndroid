@@ -1,5 +1,6 @@
 package com.dougkeen.bart;
 
+import android.content.Intent;
 import android.support.v4.app.NotificationManagerCompat;
 
 import com.google.android.gms.wearable.DataEvent;
@@ -37,5 +38,16 @@ public class DataListenerService extends WearableListenerService {
 
             departure.update(dataMap);
         }
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        super.onStartCommand(intent, flags, startId);
+
+        if (intent.getBooleanExtra("stop_notification", false)) {
+            departure.update(null);
+        }
+
+        return START_NOT_STICKY;
     }
 }
