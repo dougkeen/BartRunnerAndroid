@@ -23,6 +23,10 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcelable;
 import android.os.Vibrator;
+import android.support.v7.view.ActionMode;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.text.format.DateFormat;
 import android.text.util.Linkify;
 import android.util.Log;
@@ -31,10 +35,6 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Checkable;
 
-import com.actionbarsherlock.view.ActionMode;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
 import com.dougkeen.bart.BartRunnerApplication;
 import com.dougkeen.bart.R;
 import com.dougkeen.bart.controls.SwipeHelper;
@@ -399,7 +399,7 @@ public class ViewDeparturesActivity extends Activity implements
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getSupportMenuInflater();
+		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.route_menu, menu);
 		return true;
 	}
@@ -479,7 +479,7 @@ public class ViewDeparturesActivity extends Activity implements
 
 	private void startDepartureActionMode() {
 		if (mActionMode == null)
-			mActionMode = startActionMode(new DepartureActionMode());
+			mActionMode = startSupportActionMode(new DepartureActionMode());
 		mActionMode.setTitle(mSelectedDeparture.getTrainDestinationName());
 		mActionMode.setSubtitle(mSelectedDeparture.getTrainLengthAndPlatform());
 	}
@@ -519,7 +519,7 @@ public class ViewDeparturesActivity extends Activity implements
 
 	private void startYourTrainActionMode() {
 		if (mActionMode == null)
-			mActionMode = startActionMode(new YourTrainActionMode());
+			mActionMode = startSupportActionMode(new YourTrainActionMode());
 		mActionMode.setTitle(R.string.your_train);
 		Departure boardedDeparture = getBoardedDeparture();
 		if (boardedDeparture != null && boardedDeparture.isAlarmPending()) {
