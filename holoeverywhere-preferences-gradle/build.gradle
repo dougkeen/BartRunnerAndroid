@@ -1,0 +1,22 @@
+apply plugin: 'com.android.library'
+
+dependencies {
+  compile project(':holoeverywhere-gradle')
+}
+
+android {
+  compileSdkVersion 17
+  buildToolsVersion '22.0.1'
+
+  defaultConfig {
+    targetSdkVersion 17
+  }
+
+  sourceSets {
+    main {
+      manifest.srcFile '../holoeverywhere/addons/preferences/AndroidManifest.xml'
+      java.srcDirs = ['../holoeverywhere/addons/preferences/src']
+      res.srcDirs = ['../holoeverywhere/addons/preferences/res']
+    }
+  }
+}
