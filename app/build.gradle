@@ -2,15 +2,8 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.neenbedankt.android-apt'
 
 android {
-    compileSdkVersion 22
+    compileSdkVersion 17
     buildToolsVersion "22.0.1"
-
-    defaultConfig {
-        minSdkVersion 10
-        targetSdkVersion 22
-        versionCode 1
-        versionName "1.0"
-    }
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
