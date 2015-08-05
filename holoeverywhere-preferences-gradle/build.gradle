@@ -1,22 +1,25 @@
 apply plugin: 'com.android.library'
 
+// This file is here (rather than in the holoeverywhere project)
+// so we can control how it builds without having to submit pull requests.
+
 dependencies {
-  compile project(':holoeverywhere-gradle')
+    compile project(':holoeverywhere-gradle')
 }
 
 android {
-  compileSdkVersion 17
-  buildToolsVersion '22.0.1'
+    compileSdkVersion 17
+    buildToolsVersion '22.0.1'
 
-  defaultConfig {
-    targetSdkVersion 17
-  }
-
-  sourceSets {
-    main {
-      manifest.srcFile '../holoeverywhere/addons/preferences/AndroidManifest.xml'
-      java.srcDirs = ['../holoeverywhere/addons/preferences/src']
-      res.srcDirs = ['../holoeverywhere/addons/preferences/res']
+    defaultConfig {
+        targetSdkVersion 17
     }
-  }
+
+    sourceSets {
+        main {
+            manifest.srcFile '../holoeverywhere/addons/preferences/AndroidManifest.xml'
+            java.srcDirs = ['../holoeverywhere/addons/preferences/src']
+            res.srcDirs = ['../holoeverywhere/addons/preferences/res']
+        }
+    }
 }
