@@ -1,0 +1,4 @@
+include ':app'
+include ":holoeverywhere-gradle"
+include ":holoeverywhere-preferences-gradle"
+include ":drag-sort-listview-gradle"

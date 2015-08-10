@@ -1,0 +1,26 @@
+apply plugin: 'com.android.library'
+
+// This file is here (rather than in the drag-sort-listview project)
+// so we can control how it builds without having to submit pull requests.
+
+dependencies {
+    compile 'com.android.support:support-v4:19.1.0'
+}
+
+android {
+    compileSdkVersion 7
+    buildToolsVersion "22.0.1"
+
+    defaultConfig {
+        targetSdkVersion 7
+    }
+
+    sourceSets {
+        main {
+            manifest.srcFile '../drag-sort-listview/library/AndroidManifest.xml'
+            java.srcDirs = ['../drag-sort-listview/library/src']
+            res.srcDirs = ['../drag-sort-listview/library/res']
+        }
+    }
+}
+
