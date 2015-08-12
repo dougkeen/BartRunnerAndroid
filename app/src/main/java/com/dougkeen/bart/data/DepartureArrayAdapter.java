@@ -28,181 +28,181 @@ import com.dougkeen.bart.model.TextProvider;
 
 public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
 
-	private Drawable noBikeDrawable;
-	private Drawable bikeDrawable;
+    private Drawable noBikeDrawable;
+    private Drawable bikeDrawable;
 
-	public DepartureArrayAdapter(Context context, int textViewResourceId,
-			Departure[] objects) {
-		super(context, textViewResourceId, objects);
-		assignBikeDrawables();
-	}
+    public DepartureArrayAdapter(Context context, int textViewResourceId,
+                                 Departure[] objects) {
+        super(context, textViewResourceId, objects);
+        assignBikeDrawables();
+    }
 
-	private void assignBikeDrawables() {
-		noBikeDrawable = getContext().getResources().getDrawable(
-				R.drawable.nobike);
-		bikeDrawable = getContext().getResources().getDrawable(R.drawable.bike);
-	}
+    private void assignBikeDrawables() {
+        noBikeDrawable = getContext().getResources().getDrawable(
+                R.drawable.nobike);
+        bikeDrawable = getContext().getResources().getDrawable(R.drawable.bike);
+    }
 
-	public DepartureArrayAdapter(Context context, int resource,
-			int textViewResourceId, Departure[] objects) {
-		super(context, resource, textViewResourceId, objects);
-		assignBikeDrawables();
-	}
+    public DepartureArrayAdapter(Context context, int resource,
+                                 int textViewResourceId, Departure[] objects) {
+        super(context, resource, textViewResourceId, objects);
+        assignBikeDrawables();
+    }
 
-	public DepartureArrayAdapter(Context context, int resource,
-			int textViewResourceId, List<Departure> objects) {
-		super(context, resource, textViewResourceId, objects);
-		assignBikeDrawables();
-	}
+    public DepartureArrayAdapter(Context context, int resource,
+                                 int textViewResourceId, List<Departure> objects) {
+        super(context, resource, textViewResourceId, objects);
+        assignBikeDrawables();
+    }
 
-	public DepartureArrayAdapter(Context context, int resource,
-			int textViewResourceId) {
-		super(context, resource, textViewResourceId);
-		assignBikeDrawables();
-	}
+    public DepartureArrayAdapter(Context context, int resource,
+                                 int textViewResourceId) {
+        super(context, resource, textViewResourceId);
+        assignBikeDrawables();
+    }
 
-	public DepartureArrayAdapter(Context context, int textViewResourceId,
-			List<Departure> objects) {
-		super(context, textViewResourceId, objects);
-		assignBikeDrawables();
-	}
+    public DepartureArrayAdapter(Context context, int textViewResourceId,
+                                 List<Departure> objects) {
+        super(context, textViewResourceId, objects);
+        assignBikeDrawables();
+    }
 
-	public DepartureArrayAdapter(Context context, int textViewResourceId) {
-		super(context, textViewResourceId);
-		assignBikeDrawables();
-	}
+    public DepartureArrayAdapter(Context context, int textViewResourceId) {
+        super(context, textViewResourceId);
+        assignBikeDrawables();
+    }
 
-	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
-		View view;
-		if (convertView != null
-				&& convertView instanceof DepartureListItemLayout) {
-			view = convertView;
-		} else {
-			view = new DepartureListItemLayout(getContext());
-		}
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        View view;
+        if (convertView != null
+                && convertView instanceof DepartureListItemLayout) {
+            view = convertView;
+        } else {
+            view = new DepartureListItemLayout(getContext());
+        }
 
-		final Departure departure = getItem(position);
+        final Departure departure = getItem(position);
 
-		((Checkable) view).setChecked(departure.isSelected());
+        ((Checkable) view).setChecked(departure.isSelected());
 
-		((TextView) view.findViewById(R.id.destinationText)).setText(departure
-				.getTrainDestination().toString());
+        ((TextView) view.findViewById(R.id.destinationText)).setText(departure
+                .getTrainDestination().toString());
 
-		final String arrivesAtDestinationPrefix = getContext().getString(
-				R.string.arrives_at_destination);
-		final String estimatedArrivalTimeText = departure
-				.getEstimatedArrivalTimeText(getContext(), false);
+        final String arrivesAtDestinationPrefix = getContext().getString(
+                R.string.arrives_at_destination);
+        final String estimatedArrivalTimeText = departure
+                .getEstimatedArrivalTimeText(getContext(), false);
 
-		TextView estimatedArrival = (TextView) view
-				.findViewById(R.id.estimatedArrival);
-		if (estimatedArrival != null) {
-			((TextView) view.findViewById(R.id.trainLengthText))
-					.setText(departure.getTrainLengthAndPlatform());
-			estimatedArrival.setText(arrivesAtDestinationPrefix
-					+ estimatedArrivalTimeText);
-		} else {
-			TimedTextSwitcher textSwitcher = (TimedTextSwitcher) view
-					.findViewById(R.id.trainLengthText);
-			initTextSwitcher(textSwitcher,
-					R.layout.train_length_arrival_textview);
+        TextView estimatedArrival = (TextView) view
+                .findViewById(R.id.estimatedArrival);
+        if (estimatedArrival != null) {
+            ((TextView) view.findViewById(R.id.trainLengthText))
+                    .setText(departure.getTrainLengthAndPlatform());
+            estimatedArrival.setText(arrivesAtDestinationPrefix
+                    + estimatedArrivalTimeText);
+        } else {
+            TimedTextSwitcher textSwitcher = (TimedTextSwitcher) view
+                    .findViewById(R.id.trainLengthText);
+            initTextSwitcher(textSwitcher,
+                    R.layout.train_length_arrival_textview);
 
-			if (!StringUtils.isBlank(estimatedArrivalTimeText)) {
-				textSwitcher.setCurrentText(arrivesAtDestinationPrefix
-						+ estimatedArrivalTimeText);
-			} else {
-				textSwitcher.setCurrentText(departure.getTrainLengthAndPlatform());
-			}
-			textSwitcher.setTextProvider(new TextProvider() {
-				@Override
-				public String getText(long tickNumber) {
-					if (tickNumber % 4 == 0) {
-						return departure.getTrainLengthAndPlatform();
-					} else {
-						final String estimatedArrivalTimeText = departure
-								.getEstimatedArrivalTimeText(getContext(), false);
-						if (StringUtils.isBlank(estimatedArrivalTimeText)) {
-							return "";
-						} else {
-							return arrivesAtDestinationPrefix
-									+ estimatedArrivalTimeText;
-						}
-					}
-				}
-			});
-		}
+            if (!StringUtils.isBlank(estimatedArrivalTimeText)) {
+                textSwitcher.setCurrentText(arrivesAtDestinationPrefix
+                        + estimatedArrivalTimeText);
+            } else {
+                textSwitcher.setCurrentText(departure.getTrainLengthAndPlatform());
+            }
+            textSwitcher.setTextProvider(new TextProvider() {
+                @Override
+                public String getText(long tickNumber) {
+                    if (tickNumber % 4 == 0) {
+                        return departure.getTrainLengthAndPlatform();
+                    } else {
+                        final String estimatedArrivalTimeText = departure
+                                .getEstimatedArrivalTimeText(getContext(), false);
+                        if (StringUtils.isBlank(estimatedArrivalTimeText)) {
+                            return "";
+                        } else {
+                            return arrivesAtDestinationPrefix
+                                    + estimatedArrivalTimeText;
+                        }
+                    }
+                }
+            });
+        }
 
-		ImageView colorBar = (ImageView) view
-				.findViewById(R.id.destinationColorBar);
-		((GradientDrawable) colorBar.getDrawable()).setColor(Color
-				.parseColor(departure.getTrainDestinationColor()));
-		CountdownTextView countdownTextView = (CountdownTextView) view
-				.findViewById(R.id.countdown);
-		countdownTextView.setText(departure.getCountdownText());
-		countdownTextView.setTextProvider(new TextProvider() {
-			@Override
-			public String getText(long tickNumber) {
-				return departure.getCountdownText();
-			}
-		});
+        ImageView colorBar = (ImageView) view
+                .findViewById(R.id.destinationColorBar);
+        ((GradientDrawable) colorBar.getDrawable()).setColor(Color
+                .parseColor(departure.getTrainDestinationColor()));
+        CountdownTextView countdownTextView = (CountdownTextView) view
+                .findViewById(R.id.countdown);
+        countdownTextView.setText(departure.getCountdownText());
+        countdownTextView.setTextProvider(new TextProvider() {
+            @Override
+            public String getText(long tickNumber) {
+                return departure.getCountdownText();
+            }
+        });
 
-		TextView departureTime = (TextView) view
-				.findViewById(R.id.departureTime);
+        TextView departureTime = (TextView) view
+                .findViewById(R.id.departureTime);
 
-		if (departureTime != null) {
-			((TextView) view.findViewById(R.id.uncertainty)).setText(departure
-					.getUncertaintyText());
-			departureTime.setText(departure
-					.getEstimatedDepartureTimeText(getContext(), false));
-		} else {
-			TimedTextSwitcher uncertaintySwitcher = (TimedTextSwitcher) view
-					.findViewById(R.id.uncertainty);
-			initTextSwitcher(uncertaintySwitcher, R.layout.uncertainty_textview);
+        if (departureTime != null) {
+            ((TextView) view.findViewById(R.id.uncertainty)).setText(departure
+                    .getUncertaintyText());
+            departureTime.setText(departure
+                    .getEstimatedDepartureTimeText(getContext(), false));
+        } else {
+            TimedTextSwitcher uncertaintySwitcher = (TimedTextSwitcher) view
+                    .findViewById(R.id.uncertainty);
+            initTextSwitcher(uncertaintySwitcher, R.layout.uncertainty_textview);
 
-			uncertaintySwitcher.setTextProvider(new TextProvider() {
-				@Override
-				public String getText(long tickNumber) {
-					if (tickNumber % 4 == 0) {
-						return departure.getUncertaintyText();
-					} else {
-						return departure
-								.getEstimatedDepartureTimeText(getContext(), false);
-					}
-				}
-			});
-		}
-		
-		ImageView bikeIcon = (ImageView) view.findViewById(R.id.bikeIcon);
-		if (departure.isBikeAllowed()) {
-			bikeIcon.setImageDrawable(bikeDrawable);
-		} else {
-			bikeIcon.setImageDrawable(noBikeDrawable);
-		}
-		if (departure.getRequiresTransfer()) {
-			((ImageView) view.findViewById(R.id.xferIcon))
-					.setVisibility(View.VISIBLE);
-		} else {
-			((ImageView) view.findViewById(R.id.xferIcon))
-					.setVisibility(View.INVISIBLE);
-		}
+            uncertaintySwitcher.setTextProvider(new TextProvider() {
+                @Override
+                public String getText(long tickNumber) {
+                    if (tickNumber % 4 == 0) {
+                        return departure.getUncertaintyText();
+                    } else {
+                        return departure
+                                .getEstimatedDepartureTimeText(getContext(), false);
+                    }
+                }
+            });
+        }
 
-		return view;
-	}
+        ImageView bikeIcon = (ImageView) view.findViewById(R.id.bikeIcon);
+        if (departure.isBikeAllowed()) {
+            bikeIcon.setImageDrawable(bikeDrawable);
+        } else {
+            bikeIcon.setImageDrawable(noBikeDrawable);
+        }
+        if (departure.getRequiresTransfer()) {
+            view.findViewById(R.id.xferIcon)
+                    .setVisibility(View.VISIBLE);
+        } else {
+            view.findViewById(R.id.xferIcon)
+                    .setVisibility(View.INVISIBLE);
+        }
 
-	private void initTextSwitcher(TextSwitcher textSwitcher,
-			final int layoutView) {
-		if (textSwitcher.getInAnimation() == null) {
-			textSwitcher.setFactory(new ViewFactory() {
-				public View makeView() {
-					return LayoutInflater.from(getContext()).inflate(
-							layoutView, null);
-				}
-			});
+        return view;
+    }
 
-			textSwitcher.setInAnimation(AnimationUtils.loadAnimation(
-					getContext(), android.R.anim.slide_in_left));
-			textSwitcher.setOutAnimation(AnimationUtils.loadAnimation(
-					getContext(), android.R.anim.slide_out_right));
-		}
-	}
+    private void initTextSwitcher(TextSwitcher textSwitcher,
+                                  final int layoutView) {
+        if (textSwitcher.getInAnimation() == null) {
+            textSwitcher.setFactory(new ViewFactory() {
+                public View makeView() {
+                    return LayoutInflater.from(getContext()).inflate(
+                            layoutView, null);
+                }
+            });
+
+            textSwitcher.setInAnimation(AnimationUtils.loadAnimation(
+                    getContext(), android.R.anim.slide_in_left));
+            textSwitcher.setOutAnimation(AnimationUtils.loadAnimation(
+                    getContext(), android.R.anim.slide_out_right));
+        }
+    }
 }

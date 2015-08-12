@@ -10,16 +10,16 @@ import com.dougkeen.bart.model.StationPair;
 
 public class QuickRouteDialogFragment extends AbstractRouteSelectionFragment {
 
-	public QuickRouteDialogFragment() {
-		super(BartRunnerApplication.getAppContext().getString(
-				R.string.quick_departure_lookup));
-	}
+    public QuickRouteDialogFragment() {
+        super(BartRunnerApplication.getAppContext().getString(
+                R.string.quick_departure_lookup));
+    }
 
-	@Override
-	protected void onOkButtonClick(Station origin, Station destination) {
-		Intent intent = new Intent(getActivity(), ViewDeparturesActivity.class);
-		intent.putExtra(Constants.STATION_PAIR_EXTRA, new StationPair(origin,
-				destination));
-		startActivity(intent);
-	}
+    @Override
+    protected void onOkButtonClick(Station origin, Station destination) {
+        Intent intent = new Intent(getActivity(), ViewDeparturesActivity.class);
+        intent.putExtra(Constants.STATION_PAIR_EXTRA, new StationPair(origin,
+                destination));
+        startActivity(intent);
+    }
 }

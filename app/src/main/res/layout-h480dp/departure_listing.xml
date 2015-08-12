@@ -2,7 +2,7 @@
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:bart="http://schemas.android.com/apk/res/com.dougkeen.bart"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    android:layout_height="fill_parent">
 
     <ImageView
         android:id="@+id/destinationColorBar"
@@ -17,7 +17,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_toRightOf="@id/destinationColorBar" >
+        android:layout_toRightOf="@id/destinationColorBar">
 
         <TextView
             android:id="@+id/destinationText"

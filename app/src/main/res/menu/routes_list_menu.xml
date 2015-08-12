@@ -1,23 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
         android:id="@+id/add_favorite_menu_button"
         android:icon="@drawable/ic_action_new"
         android:showAsAction="ifRoom|withText"
-        android:title="@string/add_route">
-    </item>
+        android:title="@string/add_route"></item>
     <item
         android:id="@+id/view_system_map_button"
         android:icon="@drawable/ic_action_map"
         android:showAsAction="ifRoom|withText"
-        android:title="@string/view_system_map">
-    </item>
+        android:title="@string/view_system_map"></item>
     <item
         android:id="@+id/elevator_button"
         android:icon="@drawable/ic_action_elevator"
         android:showAsAction="ifRoom|withText"
-        android:title="Check elevator status">
-    </item>
+        android:title="Check elevator status"></item>
 
 </menu>

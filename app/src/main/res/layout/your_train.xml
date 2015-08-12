@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:bart="http://schemas.android.com/apk/res/com.dougkeen.bart" >
+    xmlns:bart="http://schemas.android.com/apk/res/com.dougkeen.bart">
 
     <TextView
         android:id="@+id/alarmText"
@@ -11,8 +11,7 @@
         android:drawableLeft="@drawable/ic_action_alarm"
         android:gravity="center_vertical"
         android:textSize="16dp"
-        android:visibility="gone" >
-    </TextView>
+        android:visibility="gone"></TextView>
 
     <TextView
         android:id="@+id/yourTrainHeader"

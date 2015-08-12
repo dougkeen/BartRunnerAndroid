@@ -3,8 +3,7 @@
 
     <!-- Base application theme is the default theme. -->
 
-    <style name="AppTheme" parent="@style/Holo.Theme">
-    </style>
+    <style name="AppTheme" parent="@style/Holo.Theme"></style>
 
     <style name="ButtonBar">
         <item name="android:layout_width">fill_parent</item>

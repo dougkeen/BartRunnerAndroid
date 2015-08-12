@@ -12,28 +12,28 @@ import com.dougkeen.util.WakeLocker;
 
 public class AlarmBroadcastReceiver extends BroadcastReceiver {
 
-	@Override
-	public void onReceive(Context context, Intent intent) {
-		BartRunnerApplication application = (BartRunnerApplication) context
-				.getApplicationContext();
-		final Departure boardedDeparture = application.getBoardedDeparture(true);
-		if (boardedDeparture == null) {
-			// Nothing to notify about
-			return;
-		}
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        BartRunnerApplication application = (BartRunnerApplication) context
+                .getApplicationContext();
+        final Departure boardedDeparture = application.getBoardedDeparture(true);
+        if (boardedDeparture == null) {
+            // Nothing to notify about
+            return;
+        }
 
-		WakeLocker.acquire(context);
+        WakeLocker.acquire(context);
 
-		application.setPlayAlarmRingtone(true);
+        application.setPlayAlarmRingtone(true);
 
-		Intent targetIntent = new Intent(context, ViewDeparturesActivity.class);
-		targetIntent.putExtra(Constants.STATION_PAIR_EXTRA,
-				boardedDeparture.getStationPair());
-		targetIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        Intent targetIntent = new Intent(context, ViewDeparturesActivity.class);
+        targetIntent.putExtra(Constants.STATION_PAIR_EXTRA,
+                boardedDeparture.getStationPair());
+        targetIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-		context.startActivity(targetIntent);
+        context.startActivity(targetIntent);
 
-		boardedDeparture.notifyAlarmHasBeenHandled();
-	}
+        boardedDeparture.notifyAlarmHasBeenHandled();
+    }
 
 }

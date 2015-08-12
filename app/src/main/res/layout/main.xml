@@ -4,7 +4,7 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:gravity="center"
-    android:orientation="vertical" >
+    android:orientation="vertical">
 
     <com.mobeta.android.dslv.DragSortListView
         android:id="@android:id/list"
@@ -43,7 +43,7 @@
         style="ButtonBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom" >
+        android:layout_gravity="bottom">
 
         <Button
             android:id="@+id/quickLookupButton"

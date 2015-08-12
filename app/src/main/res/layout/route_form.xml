@@ -3,7 +3,7 @@
     xmlns:holo="http://schemas.android.com/apk/res-auto"
     android:layout_width="300dp"
     android:layout_height="wrap_content"
-    android:gravity="center_vertical" >
+    android:gravity="center_vertical">
 
     <View
         android:id="@+id/titleDivider"
@@ -36,8 +36,7 @@
         android:paddingRight="5dp"
         android:paddingTop="15dip"
         android:text="@string/origin"
-        android:textSize="15sp" >
-    </TextView>
+        android:textSize="15sp"></TextView>
 
     <Spinner
         android:id="@+id/destination_spinner"
@@ -63,8 +62,7 @@
         android:paddingRight="5dp"
         android:paddingTop="15dip"
         android:text="@string/destination"
-        android:textSize="15sp" >
-    </TextView>
+        android:textSize="15sp"></TextView>
 
     <CheckBox
         android:id="@+id/return_checkbox"

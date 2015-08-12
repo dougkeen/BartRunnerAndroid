@@ -9,29 +9,29 @@ import com.dougkeen.bart.model.Station;
 import com.dougkeen.bart.model.StationPair;
 
 public class AddRouteDialogFragment extends AbstractRouteSelectionFragment {
-	public AddRouteDialogFragment() {
-		super(BartRunnerApplication.getAppContext().getString(
-				R.string.add_route));
-	}
+    public AddRouteDialogFragment() {
+        super(BartRunnerApplication.getAppContext().getString(
+                R.string.add_route));
+    }
 
-	@Override
-	public void onStart() {
-		super.onStart();
-		final View checkbox = getDialog().findViewById(R.id.return_checkbox);
-		checkbox.setVisibility(View.VISIBLE);
-	}
+    @Override
+    public void onStart() {
+        super.onStart();
+        final View checkbox = getDialog().findViewById(R.id.return_checkbox);
+        checkbox.setVisibility(View.VISIBLE);
+    }
 
-	@Override
-	protected void onOkButtonClick(Station origin, Station destination) {
-		RoutesListActivity activity = (RoutesListActivity) getActivity();
-		activity.addFavorite(new StationPair(origin, destination));
+    @Override
+    protected void onOkButtonClick(Station origin, Station destination) {
+        RoutesListActivity activity = (RoutesListActivity) getActivity();
+        activity.addFavorite(new StationPair(origin, destination));
 
-		if (((CheckBox) getDialog().findViewById(R.id.return_checkbox))
-				.isChecked()) {
-			activity.addFavorite(new StationPair(destination, origin));
-		}
+        if (((CheckBox) getDialog().findViewById(R.id.return_checkbox))
+                .isChecked()) {
+            activity.addFavorite(new StationPair(destination, origin));
+        }
 
-		dismiss();
-	}
+        dismiss();
+    }
 
 }

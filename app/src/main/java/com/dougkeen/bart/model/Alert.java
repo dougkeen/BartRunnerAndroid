@@ -4,86 +4,86 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Alert {
-	private String id;
-	private String type;
-	private String description;
-	private String postedTime;
-	private String expiresTime;
+    private String id;
+    private String type;
+    private String description;
+    private String postedTime;
+    private String expiresTime;
 
-	public Alert(String id) {
-		super();
-		this.id = id;
-	}
+    public Alert(String id) {
+        super();
+        this.id = id;
+    }
 
-	public String getId() {
-		return id;
-	}
+    public String getId() {
+        return id;
+    }
 
-	public void setId(String id) {
-		this.id = id;
-	}
+    public void setId(String id) {
+        this.id = id;
+    }
 
-	public String getType() {
-		return type;
-	}
+    public String getType() {
+        return type;
+    }
 
-	public void setType(String type) {
-		this.type = type;
-	}
+    public void setType(String type) {
+        this.type = type;
+    }
 
-	public String getDescription() {
-		return description;
-	}
+    public String getDescription() {
+        return description;
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-	public String getPostedTime() {
-		return postedTime;
-	}
+    public String getPostedTime() {
+        return postedTime;
+    }
 
-	public void setPostedTime(String postedTime) {
-		this.postedTime = postedTime;
-	}
+    public void setPostedTime(String postedTime) {
+        this.postedTime = postedTime;
+    }
 
-	public String getExpiresTime() {
-		return expiresTime;
-	}
+    public String getExpiresTime() {
+        return expiresTime;
+    }
 
-	public void setExpiresTime(String expiresTime) {
-		this.expiresTime = expiresTime;
-	}
+    public void setExpiresTime(String expiresTime) {
+        this.expiresTime = expiresTime;
+    }
 
-	public static class AlertList {
-		private List<Alert> alerts;
-		private boolean noDelaysReported;
+    public static class AlertList {
+        private List<Alert> alerts;
+        private boolean noDelaysReported;
 
-		public List<Alert> getAlerts() {
-			if (alerts == null) {
-				alerts = new ArrayList<Alert>();
-			}
-			return alerts;
-		}
+        public List<Alert> getAlerts() {
+            if (alerts == null) {
+                alerts = new ArrayList<Alert>();
+            }
+            return alerts;
+        }
 
-		public void addAlert(Alert alert) {
-			getAlerts().add(alert);
-		}
+        public void addAlert(Alert alert) {
+            getAlerts().add(alert);
+        }
 
-		public void clear() {
-			getAlerts().clear();
-		}
+        public void clear() {
+            getAlerts().clear();
+        }
 
-		public boolean hasAlerts() {
-			return !getAlerts().isEmpty();
-		}
+        public boolean hasAlerts() {
+            return !getAlerts().isEmpty();
+        }
 
-		public boolean areNoDelaysReported() {
-			return noDelaysReported;
-		}
+        public boolean areNoDelaysReported() {
+            return noDelaysReported;
+        }
 
-		public void setNoDelaysReported(boolean noDelaysReported) {
-			this.noDelaysReported = noDelaysReported;
-		}
-	}
+        public void setNoDelaysReported(boolean noDelaysReported) {
+            this.noDelaysReported = noDelaysReported;
+        }
+    }
 }
