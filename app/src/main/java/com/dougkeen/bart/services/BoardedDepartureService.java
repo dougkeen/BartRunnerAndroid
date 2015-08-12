@@ -4,7 +4,6 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 
 import android.app.AlarmManager;
-import android.app.NotificationManager;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
@@ -15,6 +14,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.support.v4.app.NotificationManagerCompat;
 
 import com.dougkeen.bart.BartRunnerApplication;
 import com.dougkeen.bart.model.Departure;
@@ -34,7 +34,7 @@ public class BoardedDepartureService extends Service implements
     private boolean mBound = false;
     private EtdService mEtdService;
     private StationPair mStationPair;
-    private NotificationManager mNotificationManager;
+    private NotificationManagerCompat mNotificationManager;
     private AlarmManager mAlarmManager;
     private Handler mHandler;
     private boolean mHasShutDown = false;
@@ -91,7 +91,7 @@ public class BoardedDepartureService extends Service implements
 
         bindService(EtdService_.intent(this).get(), mConnection,
                 Context.BIND_AUTO_CREATE);
-        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        mNotificationManager = NotificationManagerCompat.from(this);
         mAlarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         mHandler = new Handler();
         super.onCreate();
@@ -302,8 +302,7 @@ public class BoardedDepartureService extends Service implements
                 .getBoardedDeparture();
         if (boardedDeparture != null) {
             mNotificationManager.notify(DEPARTURE_NOTIFICATION_ID,
-                    boardedDeparture
-                            .createNotification(getApplicationContext()));
+                    boardedDeparture.createNotification(getApplicationContext()));
         }
     }
 

@@ -17,6 +17,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcelable;
 import android.os.Vibrator;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.text.format.DateFormat;
@@ -48,6 +49,7 @@ import com.dougkeen.bart.services.EtdService;
 import com.dougkeen.bart.services.EtdService.EtdServiceBinder;
 import com.dougkeen.bart.services.EtdService.EtdServiceListener;
 import com.dougkeen.bart.services.EtdService_;
+import com.dougkeen.util.Assert;
 import com.dougkeen.util.Observer;
 import com.dougkeen.util.WakeLocker;
 
@@ -86,8 +88,7 @@ public class ViewDeparturesActivity extends AppCompatActivity implements
 
         mProgress = (ProgressBar) findViewById(android.R.id.progress);
 
-        mDeparturesAdapter = new DepartureArrayAdapter(this,
-                R.layout.departure_listing);
+        mDeparturesAdapter = new DepartureArrayAdapter(this);
 
         setListAdapter(mDeparturesAdapter);
         final ListView listView = getListView();
@@ -127,9 +128,9 @@ public class ViewDeparturesActivity extends AppCompatActivity implements
         }
 
         if (savedInstanceState != null) {
-            if (savedInstanceState.containsKey("departures")) {
-                for (Parcelable departure : savedInstanceState
-                        .getParcelableArray("departures")) {
+            Parcelable[] departuresArray = savedInstanceState.getParcelableArray("departures");
+            if (departuresArray != null) {
+                for (Parcelable departure : departuresArray) {
                     mDeparturesAdapter.add((Departure) departure);
                 }
                 mDeparturesAdapter.notifyDataSetChanged();
@@ -151,8 +152,9 @@ public class ViewDeparturesActivity extends AppCompatActivity implements
         }
         refreshBoardedDeparture(false);
 
-        getSupportActionBar().setHomeButtonEnabled(true);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        ActionBar supportActionBar = Assert.notNull(getSupportActionBar());
+        supportActionBar.setHomeButtonEnabled(true);
+        supportActionBar.setDisplayHomeAsUpEnabled(true);
 
         if (bartRunnerApplication.shouldPlayAlarmRingtone()) {
             soundTheAlarm();
@@ -440,7 +442,7 @@ public class ViewDeparturesActivity extends AppCompatActivity implements
             return;
         }
 
-        mYourTrainSection.updateFromBoardedDeparture();
+        mYourTrainSection.updateFromBoardedDeparture(boardedDeparture);
 
         if (currentVisibility != View.VISIBLE) {
             showYourTrainSection(animate);

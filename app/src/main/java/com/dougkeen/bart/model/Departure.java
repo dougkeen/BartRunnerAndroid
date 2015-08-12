@@ -1,18 +1,14 @@
 package com.dougkeen.bart.model;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import org.apache.commons.lang3.time.DateFormatUtils;
-
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.ColorInt;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationCompat.Builder;
 import android.util.Log;
@@ -22,6 +18,12 @@ import com.dougkeen.bart.R;
 import com.dougkeen.bart.activities.ViewDeparturesActivity;
 import com.dougkeen.bart.services.BoardedDepartureService;
 import com.dougkeen.util.Observable;
+
+import org.apache.commons.lang3.time.DateFormatUtils;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class Departure implements Parcelable, Comparable<Departure> {
     private static final int MINIMUM_MERGE_OVERLAP_MILLIS = 5000;
@@ -133,8 +135,9 @@ public class Departure implements Parcelable, Comparable<Departure> {
         this.line = line;
     }
 
-    public String getTrainDestinationColor() {
-        return destinationColor;
+    @ColorInt
+    public int getTrainDestinationColor() {
+        return Color.parseColor(destinationColor);
     }
 
     public void setTrainDestinationColor(String destinationColor) {
@@ -627,33 +630,36 @@ public class Departure implements Parcelable, Comparable<Departure> {
         final Intent cancelAlarmIntent = new Intent(context,
                 BoardedDepartureService.class);
         cancelAlarmIntent.putExtra("cancelNotifications", true);
+        String title = getOrigin().shortName + " to " + getPassengerDestination().shortName;
+
         Builder notificationBuilder = new NotificationCompat.Builder(context)
                 .setOngoing(true)
                 .setSmallIcon(R.drawable.ic_stat_notification)
-                .setContentTitle(
-                        getOrigin().shortName + " to "
-                                + getPassengerDestination().shortName)
+                .setContentTitle(title)
                 .setContentIntent(getNotificationIntent(context)).setWhen(0);
+
         if (android.os.Build.VERSION.SDK_INT >= 16) {
-            notificationBuilder.setPriority(NotificationCompat.PRIORITY_HIGH)
+            notificationBuilder
+                    .setPriority(NotificationCompat.PRIORITY_HIGH)
                     .setContentText(minutesText + " until departure");
+
             if (isAlarmPending()) {
-                notificationBuilder.addAction(
-                        R.drawable.ic_action_cancel_alarm,
-                        "Cancel alarm",
-                        PendingIntent.getService(context, 0, cancelAlarmIntent,
-                                PendingIntent.FLAG_UPDATE_CURRENT)).setSubText(
-                        "Alarm " + getAlarmLeadTimeMinutes()
-                                + " minutes before departure");
+                PendingIntent pendingIntent = PendingIntent.getService(
+                        context, 0, cancelAlarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                String subText = "Alarm " + getAlarmLeadTimeMinutes() + " minutes before departure";
+
+                notificationBuilder
+                        .addAction(R.drawable.ic_action_cancel_alarm, "Cancel alarm", pendingIntent)
+                        .setSubText(subText);
             }
         } else if (isAlarmPending()) {
-            notificationBuilder.setContentText(minutesText
+            String text = minutesText
                     + " to departure (alarm at " + getAlarmLeadTimeMinutes()
                     + " min" + ((getAlarmLeadTimeMinutes() == 1) ? "" : "s")
-                    + ")");
+                    + ")";
+            notificationBuilder.setContentText(text);
         } else {
-            notificationBuilder
-                    .setContentText(minutesText + " until departure");
+            notificationBuilder.setContentText(minutesText + " until departure");
         }
 
         return notificationBuilder.build();

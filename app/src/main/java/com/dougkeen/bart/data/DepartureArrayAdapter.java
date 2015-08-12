@@ -1,13 +1,8 @@
 package com.dougkeen.bart.data;
 
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
-
 import android.content.Context;
-import android.graphics.Color;
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,65 +16,36 @@ import android.widget.ViewSwitcher.ViewFactory;
 
 import com.dougkeen.bart.R;
 import com.dougkeen.bart.controls.CountdownTextView;
-import com.dougkeen.bart.controls.DepartureListItemLayout;
+import com.dougkeen.bart.controls.CheckableLinearLayout;
 import com.dougkeen.bart.controls.TimedTextSwitcher;
 import com.dougkeen.bart.model.Departure;
 import com.dougkeen.bart.model.TextProvider;
+
+import org.apache.commons.lang3.StringUtils;
 
 public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
 
     private Drawable noBikeDrawable;
     private Drawable bikeDrawable;
 
-    public DepartureArrayAdapter(Context context, int textViewResourceId,
-                                 Departure[] objects) {
-        super(context, textViewResourceId, objects);
-        assignBikeDrawables();
-    }
-
-    private void assignBikeDrawables() {
-        noBikeDrawable = getContext().getResources().getDrawable(
-                R.drawable.nobike);
-        bikeDrawable = getContext().getResources().getDrawable(R.drawable.bike);
-    }
-
-    public DepartureArrayAdapter(Context context, int resource,
-                                 int textViewResourceId, Departure[] objects) {
-        super(context, resource, textViewResourceId, objects);
-        assignBikeDrawables();
-    }
-
-    public DepartureArrayAdapter(Context context, int resource,
-                                 int textViewResourceId, List<Departure> objects) {
-        super(context, resource, textViewResourceId, objects);
-        assignBikeDrawables();
-    }
-
-    public DepartureArrayAdapter(Context context, int resource,
-                                 int textViewResourceId) {
-        super(context, resource, textViewResourceId);
-        assignBikeDrawables();
-    }
-
-    public DepartureArrayAdapter(Context context, int textViewResourceId,
-                                 List<Departure> objects) {
-        super(context, textViewResourceId, objects);
-        assignBikeDrawables();
-    }
-
-    public DepartureArrayAdapter(Context context, int textViewResourceId) {
-        super(context, textViewResourceId);
-        assignBikeDrawables();
+    @SuppressWarnings("deprecation")
+    public DepartureArrayAdapter(Context context) {
+        super(context, 0 /* resource, unused since we override getView */);
+        Resources resources = context.getResources();
+        // We need to use the deprecated getDrawable since the newer version that
+        // replaces it was only made available in API 21.
+        noBikeDrawable = resources.getDrawable(R.drawable.nobike);
+        bikeDrawable = resources.getDrawable(R.drawable.bike);
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View view;
-        if (convertView != null
-                && convertView instanceof DepartureListItemLayout) {
+        if (convertView != null && convertView instanceof CheckableLinearLayout) {
             view = convertView;
         } else {
-            view = new DepartureListItemLayout(getContext());
+            view = LayoutInflater.from(getContext()).inflate(
+                    R.layout.departure_listing, parent, false /* attachToRoot */);
         }
 
         final Departure departure = getItem(position);
@@ -132,10 +98,8 @@ public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
             });
         }
 
-        ImageView colorBar = (ImageView) view
-                .findViewById(R.id.destinationColorBar);
-        ((GradientDrawable) colorBar.getDrawable()).setColor(Color
-                .parseColor(departure.getTrainDestinationColor()));
+        view.findViewById(R.id.destinationColorBar)
+                .setBackgroundColor(departure.getTrainDestinationColor());
         CountdownTextView countdownTextView = (CountdownTextView) view
                 .findViewById(R.id.countdown);
         countdownTextView.setText(departure.getCountdownText());
@@ -171,7 +135,7 @@ public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
                 }
             });
         }
-
+        
         ImageView bikeIcon = (ImageView) view.findViewById(R.id.bikeIcon);
         if (departure.isBikeAllowed()) {
             bikeIcon.setImageDrawable(bikeDrawable);
@@ -179,11 +143,9 @@ public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
             bikeIcon.setImageDrawable(noBikeDrawable);
         }
         if (departure.getRequiresTransfer()) {
-            view.findViewById(R.id.xferIcon)
-                    .setVisibility(View.VISIBLE);
+            view.findViewById(R.id.xferIcon).setVisibility(View.VISIBLE);
         } else {
-            view.findViewById(R.id.xferIcon)
-                    .setVisibility(View.INVISIBLE);
+            view.findViewById(R.id.xferIcon).setVisibility(View.INVISIBLE);
         }
 
         return view;
