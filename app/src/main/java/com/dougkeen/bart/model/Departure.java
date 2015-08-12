@@ -363,9 +363,9 @@ public class Departure implements Parcelable, Comparable<Departure> {
         if (departure.hasDeparted() && origin.longStationLinger
                 && getMinEstimate() > 0 && !beganAsDeparted) {
             /*
-			 * This is probably not a true departure, but an indication that the
-			 * train is in the station. Don't update the estimates.
-			 */
+             * This is probably not a true departure, but an indication that the
+             * train is in the station. Don't update the estimates.
+             */
             return;
         }
 
@@ -380,19 +380,19 @@ public class Departure implements Parcelable, Comparable<Departure> {
 
         if ((getMaxEstimate() - departure.getMinEstimate()) < MINIMUM_MERGE_OVERLAP_MILLIS
                 || departure.getMaxEstimate() - getMinEstimate() < MINIMUM_MERGE_OVERLAP_MILLIS) {
-			/*
-			 * The estimate must have changed... just use the latest incoming
-			 * values
-			 */
+            /*
+             * The estimate must have changed... just use the latest incoming
+             * values
+             */
             newMin = departure.getMinEstimate();
             newMax = departure.getMaxEstimate();
         }
 
-		/*
-		 * If the new departure would mark this as departed, and we have < 60
-		 * seconds left on a fairly accurate local estimate, ignore the incoming
-		 * departure
-		 */
+        /*
+         * If the new departure would mark this as departed, and we have < 60
+         * seconds left on a fairly accurate local estimate, ignore the incoming
+         * departure
+         */
         if (!wasDeparted && getMeanSecondsLeft(newMin, newMax) <= 0
                 && getMeanSecondsLeft() < 60 && getUncertaintySeconds() < 30) {
             Log.d(Constants.TAG,

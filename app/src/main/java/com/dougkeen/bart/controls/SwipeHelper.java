@@ -56,11 +56,11 @@ import com.nineoldandroids.animation.ValueAnimator;
  * <p>
  * <pre>
  * view.setOnTouchListener(new SwipeDismisser(view, null, // Optional
- * 														// token/cookie
- * 														// object
- * 		new SwipeDismisser.OnDismissCallback() {
- * 			public void onDismiss(View view, Object token) {
- * 				parent.removeView(view);
+ *                                                         // token/cookie
+ *                                                         // object
+ *         new SwipeDismisser.OnDismissCallback() {
+ *             public void onDismiss(View view, Object token) {
+ *                 parent.removeView(view);
  *            }
  *        }));
  * </pre>
@@ -244,10 +244,10 @@ public class SwipeHelper implements View.OnTouchListener {
                 mCallback.onDismiss(mView, mToken);
                 // Reset view presentation
 
-				/*
+                /*
                  * Alpha stays at 0, otherwise Android 2.x leaves weird
-				 * artifacts
-				 */
+                 * artifacts
+                 */
                 // setAlpha(mView, 1f);
 
                 setTranslationX(mView, 0);
@@ -269,14 +269,14 @@ public class SwipeHelper implements View.OnTouchListener {
 
     public void showWithAnimation() {
         final int measureSpec = MeasureSpec.makeMeasureSpec(
-                ViewGroup.LayoutParams.WRAP_CONTENT, MeasureSpec.EXACTLY);
+                ViewGroup.LayoutParams.WRAP_CONTENT, MeasureSpec.UNSPECIFIED);
         mView.measure(measureSpec, measureSpec);
         mViewWidth = mView.getMeasuredWidth();
         final int viewHeight = mView.getMeasuredHeight();
         setAlpha(mView, 0f);
 
         final ViewGroup.LayoutParams lp = mView.getLayoutParams();
-        lp.width = mViewWidth;
+        final int originalHeight = lp.height;
 
         setTranslationX(mView, mViewWidth);
 
@@ -288,11 +288,13 @@ public class SwipeHelper implements View.OnTouchListener {
             @Override
             public void onAnimationEnd(Animator animation) {
                 // Reset view presentation
-                // mView.requestLayout();
+                lp.height = originalHeight;
+                mView.setLayoutParams(lp);
 
                 // Swipe view into space that opened up
                 animate(mView).translationX(0).alpha(1)
                         .setDuration(mAnimationTime)
+                        // Dummy listener so the default doesn't run
                         .setListener(new AnimatorListenerAdapter() {
                         });
             }

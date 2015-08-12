@@ -1,20 +1,21 @@
 package com.dougkeen.bart.activities;
 
-import org.holoeverywhere.LayoutInflater;
-import org.holoeverywhere.app.AlertDialog;
-import org.holoeverywhere.app.Dialog;
-import org.holoeverywhere.app.DialogFragment;
-import org.holoeverywhere.widget.ArrayAdapter;
-import org.holoeverywhere.widget.Spinner;
-import org.holoeverywhere.widget.Toast;
-
+import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AlertDialog;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.dougkeen.bart.R;
 import com.dougkeen.bart.model.Station;
@@ -57,22 +58,23 @@ public abstract class AbstractRouteSelectionFragment extends DialogFragment {
 
         final Dialog dialog = getDialog();
         final FragmentActivity activity = getActivity();
-        ArrayAdapter<Station> originSpinnerAdapter = new ArrayAdapter<Station>(
-                activity, R.layout.simple_spinner_item,
+
+        ArrayAdapter<Station> originSpinnerAdapter = new ArrayAdapter<>(
+                activity, R.layout.support_simple_spinner_dropdown_item,
                 Station.getStationList());
         originSpinnerAdapter
-                .setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
+                .setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
 
         final Spinner originSpinner = (Spinner) dialog
                 .findViewById(R.id.origin_spinner);
         originSpinner.setAdapter(originSpinnerAdapter);
         originSpinner.setSelection(lastSelectedOriginPosition);
 
-        ArrayAdapter<Station> destinationSpinnerAdapter = new ArrayAdapter<Station>(
-                activity, R.layout.simple_spinner_item,
+        ArrayAdapter<Station> destinationSpinnerAdapter = new ArrayAdapter<>(
+                activity, R.layout.support_simple_spinner_dropdown_item,
                 Station.getStationList());
         destinationSpinnerAdapter
-                .setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
+                .setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
 
         final Spinner destinationSpinner = (Spinner) dialog
                 .findViewById(R.id.destination_spinner);
@@ -80,12 +82,14 @@ public abstract class AbstractRouteSelectionFragment extends DialogFragment {
         destinationSpinner.setSelection(lastSelectedDestinationPosition);
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         final FragmentActivity activity = getActivity();
 
-        final View dialogView = LayoutInflater.inflate(activity,
-                R.layout.route_form);
+        @SuppressLint("InflateParams")
+        final View dialogView = LayoutInflater.from(activity)
+                .inflate(R.layout.route_form, null /* root */);
 
         return new AlertDialog.Builder(activity)
                 .setTitle(mTitle)
@@ -117,6 +121,7 @@ public abstract class AbstractRouteSelectionFragment extends DialogFragment {
 
         Station origin = (Station) originSpinner.getSelectedItem();
         Station destination = (Station) destinationSpinner.getSelectedItem();
+        // TODO(fuegofro) - convert these toasts to error messages on the dialog.
         if (origin == null) {
             Toast.makeText(dialog.getContext(),
                     com.dougkeen.bart.R.string.error_null_origin,

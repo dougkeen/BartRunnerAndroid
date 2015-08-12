@@ -1,15 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
 
     <item
         android:id="@+id/view_on_bart_site_button"
         android:icon="@drawable/ic_action_web"
-        android:showAsAction="never"
-        android:title="@string/view_on_bart_site"></item>
+        android:title="@string/view_on_bart_site"
+        app:showAsAction="never"
+        />
     <item
         android:id="@+id/view_system_map_button"
         android:icon="@drawable/ic_action_map"
-        android:showAsAction="ifRoom|withText"
-        android:title="@string/view_system_map"></item>
+        android:title="@string/view_system_map"
+        app:showAsAction="ifRoom|withText"
+        />
 
 </menu>

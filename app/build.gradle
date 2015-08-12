@@ -2,17 +2,21 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.neenbedankt.android-apt'
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile project(":holoeverywhere-gradle")
-    compile project(":holoeverywhere-preferences-gradle")
-    compile project(":drag-sort-listview-gradle")
+    compile project(':drag-sort-listview-gradle')
+    compile 'commons-io:commons-io:2.4'
+    compile 'org.apache.commons:commons-lang3:3.4'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.6.1'
+    compile 'org.springframework.android:spring-android-rest-template:1.0.1.RELEASE'
+    compile 'com.code-troopers.betterpickers:library:2.0.0'
+
+    compile 'com.android.support:appcompat-v7:22.2.1'
 
     apt 'com.googlecode.androidannotations:androidannotations:2.7'
     compile "com.googlecode.androidannotations:androidannotations-api:2.7"
 }
 
 android {
-    compileSdkVersion 17
+    compileSdkVersion 22
     buildToolsVersion "22.0.1"
 
     compileOptions {
@@ -20,8 +24,13 @@ android {
         targetCompatibility JavaVersion.VERSION_1_7
     }
 
-    sourceSets {
-        main.java.srcDirs += ["../nineoldandroids/library/src"]
+    defaultConfig {
+        versionName "2.2.4"
+        versionCode 31
+
+        // TODO(fuegofro) - bring this back down to 8 if it's easy by using a different number picker library
+        minSdkVersion 9
+        targetSdkVersion 22
     }
 
     buildTypes {
@@ -31,8 +40,10 @@ android {
     }
 
     packagingOptions {
+        exclude 'META-INF/LICENSE'
         exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/license.txt'
+        exclude 'META-INF/NOTICE'
         exclude 'META-INF/NOTICE.txt'
         exclude 'META-INF/notice.txt'
     }

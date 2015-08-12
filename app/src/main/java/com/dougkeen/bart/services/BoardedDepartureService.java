@@ -247,14 +247,14 @@ public class BoardedDepartureService extends Service implements
 
         if (mEtdService != null) {
             /*
-			 * Make sure we're still listening for ETD changes (in case weak ref
-			 * was garbage collected). Not a huge fan of this approach, but I
-			 * think I'd rather keep the weak references to avoid memory leaks
-			 * than move to soft references or some other form of stronger
-			 * reference. Besides, registerListener() should only result in a
-			 * few constant-time map operations, so there shouldn't be a big
-			 * performance hit.
-			 */
+             * Make sure we're still listening for ETD changes (in case weak ref
+             * was garbage collected). Not a huge fan of this approach, but I
+             * think I'd rather keep the weak references to avoid memory leaks
+             * than move to soft references or some other form of stronger
+             * reference. Besides, registerListener() should only result in a
+             * few constant-time map operations, so there shouldn't be a big
+             * performance hit.
+             */
             mEtdService.registerListener(this, false);
         }
 
