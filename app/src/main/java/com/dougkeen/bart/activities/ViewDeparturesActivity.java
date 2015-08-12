@@ -2,12 +2,6 @@ package com.dougkeen.bart.activities;
 
 import java.util.List;
 
-import org.holoeverywhere.app.Activity;
-import org.holoeverywhere.widget.ListView;
-import org.holoeverywhere.widget.ProgressBar;
-import org.holoeverywhere.widget.TextView;
-import org.holoeverywhere.widget.Toast;
-
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.ComponentName;
@@ -23,18 +17,23 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcelable;
 import android.os.Vibrator;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ActionMode;
 import android.text.format.DateFormat;
 import android.text.util.Linkify;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Checkable;
+import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.Toast;
 
-import com.actionbarsherlock.view.ActionMode;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
 import com.dougkeen.bart.BartRunnerApplication;
 import com.dougkeen.bart.R;
 import com.dougkeen.bart.controls.SwipeHelper;
@@ -52,7 +51,7 @@ import com.dougkeen.bart.services.EtdService_;
 import com.dougkeen.util.Observer;
 import com.dougkeen.util.WakeLocker;
 
-public class ViewDeparturesActivity extends Activity implements
+public class ViewDeparturesActivity extends AppCompatActivity implements
         EtdServiceListener {
 
     private StationPair mStationPair;
@@ -286,15 +285,15 @@ public class ViewDeparturesActivity extends Activity implements
 
             if (mActionMode != null) {
                 /*
-				 * If action mode is displayed, cancel out of that
-				 */
+                 * If action mode is displayed, cancel out of that
+                 */
                 mActionMode.finish();
                 getListView().clearChoices();
             } else {
-				/*
-				 * Otherwise select the clicked departure as the one the user
-				 * wants to board
-				 */
+                /*
+                 * Otherwise select the clicked departure as the one the user
+                 * wants to board
+                 */
                 setBoardedDeparture(
                         getListAdapter().getItem(position), true);
             }
@@ -350,10 +349,10 @@ public class ViewDeparturesActivity extends Activity implements
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         if (mStationPair != null) {
-			/*
-			 * If origin or destination are null, this thing was never
-			 * initialized in the first place, so there's really nothing to save
-			 */
+            /*
+             * If origin or destination are null, this thing was never
+             * initialized in the first place, so there's really nothing to save
+             */
             Departure[] departures = new Departure[mDeparturesAdapter
                     .getCount()];
             for (int i = mDeparturesAdapter.getCount() - 1; i >= 0; i--) {
@@ -399,7 +398,7 @@ public class ViewDeparturesActivity extends Activity implements
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getSupportMenuInflater();
+        MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.route_menu, menu);
         return true;
     }
@@ -453,15 +452,10 @@ public class ViewDeparturesActivity extends Activity implements
                 && departure.getStationPair().equals(getStationPair());
     }
 
-    private void setBoardedDeparture(Departure selectedDeparture) {
-        setBoardedDeparture(selectedDeparture, false);
-    }
-
     private void setBoardedDeparture(Departure selectedDeparture,
                                      boolean startActionMode) {
         final BartRunnerApplication application = (BartRunnerApplication) getApplication();
-        selectedDeparture
-                .setPassengerDestination(mStationPair.getDestination());
+        selectedDeparture.setPassengerDestination(mStationPair.getDestination());
         application.setBoardedDeparture(selectedDeparture);
         refreshBoardedDeparture(true);
 
@@ -479,7 +473,7 @@ public class ViewDeparturesActivity extends Activity implements
 
     private void startDepartureActionMode() {
         if (mActionMode == null)
-            mActionMode = startActionMode(new DepartureActionMode());
+            mActionMode = startSupportActionMode(new DepartureActionMode());
         mActionMode.setTitle(mSelectedDeparture.getTrainDestinationName());
         mActionMode.setSubtitle(mSelectedDeparture.getTrainLengthAndPlatform());
     }
@@ -519,7 +513,7 @@ public class ViewDeparturesActivity extends Activity implements
 
     private void startYourTrainActionMode() {
         if (mActionMode == null)
-            mActionMode = startActionMode(new YourTrainActionMode());
+            mActionMode = startSupportActionMode(new YourTrainActionMode());
         mActionMode.setTitle(R.string.your_train);
         Departure boardedDeparture = getBoardedDeparture();
         if (boardedDeparture != null && boardedDeparture.isAlarmPending()) {
@@ -624,8 +618,7 @@ public class ViewDeparturesActivity extends Activity implements
                 // Don't prompt for alarm if train is about to leave
                 if (boardedDeparture.getMeanSecondsLeft() > 60) {
                     new TrainAlarmDialogFragment()
-                            .show(getSupportFragmentManager()
-                                    .beginTransaction());
+                            .show(getSupportFragmentManager(), TrainAlarmDialogFragment.TAG);
                 }
 
                 return true;
@@ -733,7 +726,6 @@ public class ViewDeparturesActivity extends Activity implements
                                 existingDeparture.mergeEstimate(departure);
                             } else {
                                 mDeparturesAdapter.add(departure);
-                                existingDeparture = departure;
                             }
                         }
                     } else {
@@ -762,6 +754,7 @@ public class ViewDeparturesActivity extends Activity implements
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                // TODO(fuegofro) - see if there's a way to not use toasts
                 Toast.makeText(ViewDeparturesActivity.this, errorMessage,
                         Toast.LENGTH_LONG).show();
             }

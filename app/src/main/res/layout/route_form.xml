@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:holo="http://schemas.android.com/apk/res-auto"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="300dp"
     android:layout_height="wrap_content"
     android:gravity="center_vertical">
@@ -22,7 +22,7 @@
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
         android:paddingTop="15dip"
-        holo:spinnerMode="dialog" />
+        />
 
     <TextView
         android:id="@+id/origin_label"
@@ -48,7 +48,7 @@
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
         android:paddingTop="15dip"
-        holo:spinnerMode="dialog" />
+        />
 
     <TextView
         android:id="@+id/destination_label"

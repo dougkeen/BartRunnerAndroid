@@ -1,9 +1,11 @@
 package com.dougkeen.bart.controls;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
+import com.dougkeen.bart.R;
 import com.dougkeen.bart.model.TextProvider;
 
 public class CountdownTextView extends TextView implements
@@ -27,9 +29,9 @@ public class CountdownTextView extends TextView implements
     }
 
     private void setInstanceVarsFromAttrs(AttributeSet attrs) {
-        int tickInterval = attrs.getAttributeIntValue(
-                "http://schemas.android.com/apk/res/com.dougkeen.bart",
-                "tickInterval", 0);
+        TypedArray typedArray = getContext().getTheme()
+                .obtainStyledAttributes(attrs, R.styleable.CountdownTextView, 0, 0);
+        int tickInterval = typedArray.getInteger(R.styleable.CountdownTextView_tickInterval, 0);
         if (tickInterval > 0) {
             setTickInterval(tickInterval);
         }

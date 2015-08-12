@@ -367,10 +367,10 @@ public class EtdService extends Service {
                 mStationPair.setAverageTripSampleCount(newAverageSampleCount);
             }
 
-			/*
+            /*
              * If we still have some departures without estimates, try again
-			 * later
-			 */
+             * later
+             */
             if (departuresWithoutEstimates > 0) {
                 scheduleScheduleInfoFetch(20000);
             }
@@ -386,12 +386,12 @@ public class EtdService extends Service {
             if (result.getDepartures().isEmpty()
                     && mStationPair.isBetweenStations(Station.MLBR,
                     Station.SFIA)) {
-				/*
-				 * Let's try again, ignoring direction (this sometimes comes up
-				 * when you travel between Millbrae and SFO... sometimes you
-				 * need to travel north and transfer, sometimes you can travel
-				 * south for a direct line)
-				 */
+                /*
+                 * Let's try again, ignoring direction (this sometimes comes up
+                 * when you travel between Millbrae and SFO... sometimes you
+                 * need to travel north and transfer, sometimes you can travel
+                 * south for a direct line)
+                 */
                 mIgnoreDepartureDirection = true;
                 scheduleDepartureFetch(50);
                 return;
@@ -402,10 +402,10 @@ public class EtdService extends Service {
             final Departure boardedDeparture = ((BartRunnerApplication) getApplication())
                     .getBoardedDeparture();
 
-			/*
-			 * Keep track of first departure, since we'll request another quick
-			 * refresh if it has departed.
-			 */
+            /*
+             * Keep track of first departure, since we'll request another quick
+             * refresh if it has departed.
+             */
             Departure firstDeparture = null;
 
             final List<Departure> departures = result.getDepartures();
@@ -424,16 +424,16 @@ public class EtdService extends Service {
                     }
                 }
 
-				/*
-				 * Since all the departures are new, we'll definitely need
-				 * better accuracy
-				 */
+                /*
+                 * Since all the departures are new, we'll definitely need
+                 * better accuracy
+                 */
                 needsBetterAccuracy = true;
             } else {
-				/*
-				 * Let's merge the latest departure list with the instance
-				 * departure list
-				 */
+                /*
+                 * Let's merge the latest departure list with the instance
+                 * departure list
+                 */
                 int instanceListIndex = -1;
                 for (Departure departure : departures) {
                     instanceListIndex++;
@@ -442,20 +442,20 @@ public class EtdService extends Service {
                         existingDeparture = mLatestDepartures
                                 .get(instanceListIndex);
                     }
-					/*
-					 * Looks for departures at the beginning of the adapter that
-					 * aren't in the latest list of departures
-					 */
+                    /*
+                     * Looks for departures at the beginning of the adapter that
+                     * aren't in the latest list of departures
+                     */
                     while (existingDeparture != null
                             && !departure.equals(existingDeparture)) {
                         // Remove old departure
                         mLatestDepartures.remove(existingDeparture);
                         if (instanceListIndex < mLatestDepartures.size()) {
-							/*
-							 * Try again with next departure (keep in mind the
-							 * next departure is now at the current index, since
-							 * we removed a member)
-							 */
+                            /*
+                             * Try again with next departure (keep in mind the
+                             * next departure is now at the current index, since
+                             * we removed a member)
+                             */
                             existingDeparture = mLatestDepartures
                                     .get(instanceListIndex);
                         } else {
@@ -463,10 +463,10 @@ public class EtdService extends Service {
                             existingDeparture = null;
                         }
                     }
-					/*
-					 * Merge the estimate if we found a matching departure,
-					 * otherwise add a new one to the adapter
-					 */
+                    /*
+                     * Merge the estimate if we found a matching departure,
+                     * otherwise add a new one to the adapter
+                     */
                     if (existingDeparture != null) {
                         existingDeparture.mergeEstimate(departure);
                     } else {
@@ -502,10 +502,10 @@ public class EtdService extends Service {
                     // Get more data in 20s
                     scheduleDepartureFetch(20000);
                 } else {
-					/*
-					 * Get more 90 seconds before next train arrives, right when
-					 * next train arrives, or 3 minutes, whichever is sooner
-					 */
+                    /*
+                     * Get more 90 seconds before next train arrives, right when
+                     * next train arrives, or 3 minutes, whichever is sooner
+                     */
                     final int intervalUntilNextDeparture = firstDeparture
                             .getMinSecondsLeft() * 1000;
                     final int alternativeInterval = 3 * 60 * 1000;
@@ -539,10 +539,10 @@ public class EtdService extends Service {
                 return;
             }
 
-			/*
-			 * Otherwise, check if the latest departure doesn't have schedule
-			 * info... if not, fetch
-			 */
+            /*
+             * Otherwise, check if the latest departure doesn't have schedule
+             * info... if not, fetch
+             */
             Departure lastDeparture = mLatestDepartures.get(mLatestDepartures
                     .size() - 1);
             if (mLatestScheduleInfo.getLatestDepartureTime() < lastDeparture

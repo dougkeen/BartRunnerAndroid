@@ -3,9 +3,11 @@ package com.dougkeen.bart.controls;
 import org.apache.commons.lang3.StringUtils;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.widget.TextSwitcher;
 
+import com.dougkeen.bart.R;
 import com.dougkeen.bart.model.TextProvider;
 
 public class TimedTextSwitcher extends TextSwitcher implements
@@ -21,9 +23,9 @@ public class TimedTextSwitcher extends TextSwitcher implements
     }
 
     private void setInstanceVarsFromAttrs(AttributeSet attrs) {
-        int tickInterval = attrs.getAttributeIntValue(
-                "http://schemas.android.com/apk/res/com.dougkeen.bart",
-                "tickInterval", 0);
+        TypedArray typedArray = getContext().getTheme()
+                .obtainStyledAttributes(attrs, R.styleable.TimedTextSwitcher, 0, 0);
+        int tickInterval = typedArray.getInteger(R.styleable.TimedTextSwitcher_tickInterval, 0);
         if (tickInterval > 0) {
             setTickInterval(tickInterval);
         }

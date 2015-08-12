@@ -8,9 +8,9 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ObjectUtils;
-import org.holoeverywhere.app.Application;
 
 import android.app.AlarmManager;
+import android.app.Application;
 import android.content.Context;
 import android.media.MediaPlayer;
 import android.os.Parcel;
@@ -126,10 +126,10 @@ public class BartRunnerApplication extends Application {
                             .createFromParcel(parcel);
                     parcel.recycle();
 
-					/*
+                    /*
                      * Ooptionally check if the cached one is relatively recent.
-					 * If so, restore that to the application context
-					 */
+                     * If so, restore that to the application context
+                     */
                     long now = System.currentTimeMillis();
                     if (useOldCache
                             || lastBoardedDeparture.getEstimatedArrivalTime() >= now

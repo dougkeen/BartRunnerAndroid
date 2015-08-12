@@ -9,6 +9,8 @@ import com.dougkeen.bart.model.Station;
 import com.dougkeen.bart.model.StationPair;
 
 public class AddRouteDialogFragment extends AbstractRouteSelectionFragment {
+    public static final String TAG = "ADD_ROUTE_DIALOG_FRAGMENT_TAG";
+
     public AddRouteDialogFragment() {
         super(BartRunnerApplication.getAppContext().getString(
                 R.string.add_route));

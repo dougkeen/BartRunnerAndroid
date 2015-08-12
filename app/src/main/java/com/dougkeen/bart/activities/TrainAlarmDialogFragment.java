@@ -1,25 +1,27 @@
 package com.dougkeen.bart.activities;
 
-import org.holoeverywhere.LayoutInflater;
-import org.holoeverywhere.app.AlertDialog;
-import org.holoeverywhere.app.Dialog;
-import org.holoeverywhere.app.DialogFragment;
-import org.holoeverywhere.widget.NumberPicker;
-
+import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AlertDialog;
+import android.view.LayoutInflater;
 import android.view.View;
 
+import com.codetroopers.betterpickers.numberpicker.NumberPicker;
 import com.dougkeen.bart.BartRunnerApplication;
 import com.dougkeen.bart.R;
 import com.dougkeen.bart.model.Departure;
 
 public class TrainAlarmDialogFragment extends DialogFragment {
 
+    public static final String TAG = "TRAIN_ALARM_DIALOG_FRAGMENT_TAG";
     private static final String KEY_LAST_ALARM_LEAD_TIME = "lastAlarmLeadTime";
 
     public TrainAlarmDialogFragment() {
@@ -52,33 +54,35 @@ public class TrainAlarmDialogFragment extends DialogFragment {
         final Departure boardedDeparture = application.getBoardedDeparture();
         final int maxValue = boardedDeparture.getMeanSecondsLeft() / 60;
 
-        String[] displayedValues = new String[maxValue];
-        for (int i = 1; i <= maxValue; i++) {
-            displayedValues[i - 1] = String.valueOf(i);
-        }
-        numberPicker.setMinValue(1);
-        numberPicker.setMaxValue(maxValue);
-        numberPicker.setDisplayedValues(displayedValues);
+        numberPicker.setMin(1);
+        numberPicker.setMax(maxValue);
 
         if (boardedDeparture.isAlarmPending()) {
-            numberPicker.setValue(boardedDeparture.getAlarmLeadTimeMinutes());
+            setNumber(numberPicker, boardedDeparture.getAlarmLeadTimeMinutes());
         } else if (maxValue >= lastAlarmLeadTime) {
-            numberPicker.setValue(lastAlarmLeadTime);
+            setNumber(numberPicker, lastAlarmLeadTime);
         } else if (maxValue >= 5) {
-            numberPicker.setValue(5);
+            setNumber(numberPicker, 5);
         } else if (maxValue >= 3) {
-            numberPicker.setValue(3);
+            setNumber(numberPicker, 3);
         } else {
-            numberPicker.setValue(1);
+            setNumber(numberPicker, 1);
         }
     }
 
+    private void setNumber(NumberPicker numberPicker, int value) {
+        // Passing in null for the decimalPart and sign doesn't change them.
+        numberPicker.setNumber(value, null /* decimalPart */, null /* sign */);
+    }
+
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         final FragmentActivity activity = getActivity();
 
-        final View dialogView = LayoutInflater.inflate(activity,
-                R.layout.train_alarm_dialog);
+        @SuppressLint("InflateParams")
+        final View dialogView = LayoutInflater.from(activity)
+                .inflate(R.layout.train_alarm_dialog, null /* root */);
 
         return new AlertDialog.Builder(activity)
                 .setTitle(R.string.set_up_departure_alarm)
@@ -88,11 +92,10 @@ public class TrainAlarmDialogFragment extends DialogFragment {
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog,
-                                                int which) {
+                                    int which) {
                                 NumberPicker numberPicker = (NumberPicker) getDialog()
                                         .findViewById(R.id.numberPicker);
-                                final int alarmLeadTime = numberPicker
-                                        .getValue();
+                                final int alarmLeadTime = numberPicker.getNumber();
 
                                 // Save most recent selection
                                 Editor editor = getActivity().getPreferences(

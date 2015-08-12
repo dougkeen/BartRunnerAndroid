@@ -3,26 +3,25 @@ package com.dougkeen.bart.activities;
 import java.util.Calendar;
 import java.util.TimeZone;
 
-import org.holoeverywhere.app.Activity;
-import org.holoeverywhere.app.AlertDialog;
-import org.holoeverywhere.app.AlertDialog.Builder;
-import org.holoeverywhere.app.DialogFragment;
-import org.holoeverywhere.widget.TextView;
-
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ActionMode;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListAdapter;
+import android.widget.TextView;
 
-import com.actionbarsherlock.view.ActionMode;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
 import com.dougkeen.bart.BartRunnerApplication;
 import com.dougkeen.bart.R;
 import com.dougkeen.bart.controls.Ticker;
@@ -49,7 +48,7 @@ import com.googlecode.androidannotations.annotations.rest.RestService;
 import com.mobeta.android.dslv.DragSortListView;
 
 @EActivity(R.layout.main)
-public class RoutesListActivity extends Activity implements TickSubscriber {
+public class RoutesListActivity extends AppCompatActivity implements TickSubscriber {
     private static final String NO_DELAYS_REPORTED = "No delays reported";
 
     private static final TimeZone PACIFIC_TIME = TimeZone
@@ -88,7 +87,7 @@ public class RoutesListActivity extends Activity implements TickSubscriber {
     @Click(R.id.quickLookupButton)
     void quickLookupButtonClick() {
         DialogFragment dialog = new QuickRouteDialogFragment();
-        dialog.show(getSupportFragmentManager().beginTransaction());
+        dialog.show(getSupportFragmentManager(), QuickRouteDialogFragment.TAG);
     }
 
     @ItemClick(android.R.id.list)
@@ -273,8 +272,9 @@ public class RoutesListActivity extends Activity implements TickSubscriber {
         }
     }
 
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getSupportMenuInflater();
+        MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.routes_list_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
@@ -282,11 +282,12 @@ public class RoutesListActivity extends Activity implements TickSubscriber {
     private MenuItem elevatorMenuItem;
     private View origElevatorActionView;
 
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemId = item.getItemId();
         if (itemId == R.id.add_favorite_menu_button) {
-            new AddRouteDialogFragment().show(getSupportFragmentManager()
-                    .beginTransaction());
+            new AddRouteDialogFragment().show(getSupportFragmentManager(),
+                    AddRouteDialogFragment.TAG);
             return true;
         } else if (itemId == R.id.view_system_map_button) {
             startActivity(new Intent(this, ViewMapActivity.class));
@@ -294,8 +295,8 @@ public class RoutesListActivity extends Activity implements TickSubscriber {
         } else if (itemId == R.id.elevator_button) {
             elevatorMenuItem = item;
             fetchElevatorInfo();
-            origElevatorActionView = elevatorMenuItem.getActionView();
-            elevatorMenuItem.setActionView(R.layout.progress_spinner);
+            origElevatorActionView = MenuItemCompat.getActionView(elevatorMenuItem);
+            MenuItemCompat.setActionView(elevatorMenuItem, R.layout.progress_spinner);
             return true;
         } else {
             return super.onOptionsItemSelected(item);
@@ -336,7 +337,7 @@ public class RoutesListActivity extends Activity implements TickSubscriber {
         if (messageText == null) {
             hideAlertMessage();
             return;
-        } else if (messageText == NO_DELAYS_REPORTED) {
+        } else if (messageText.equals(NO_DELAYS_REPORTED)) {
             alertMessages.setCompoundDrawablesWithIntrinsicBounds(
                     R.drawable.ic_allgood, 0, 0, 0);
         } else {
@@ -360,19 +361,19 @@ public class RoutesListActivity extends Activity implements TickSubscriber {
     @UiThread
     void resetElevatorMenuGraphic() {
         ActivityCompat.invalidateOptionsMenu(this);
-        elevatorMenuItem.setActionView(origElevatorActionView);
+        MenuItemCompat.setActionView(elevatorMenuItem, origElevatorActionView);
     }
 
     @UiThread
     void showElevatorMessage(String message) {
-        Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(message);
         builder.setTitle("Elevator status");
         builder.show();
     }
 
     private void startContextualActionMode() {
-        mActionMode = startActionMode(new RouteActionMode());
+        mActionMode = startSupportActionMode(new RouteActionMode());
         mActionMode.setTitle(mCurrentlySelectedStationPair.getOrigin().name);
         mActionMode.setSubtitle("to "
                 + mCurrentlySelectedStationPair.getDestination().name);
