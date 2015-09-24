@@ -673,7 +673,7 @@ public class ViewDeparturesActivity extends AppCompatActivity implements
     private void dismissYourTrainSelection() {
         Intent intent = new Intent(ViewDeparturesActivity.this,
                 BoardedDepartureService.class);
-        intent.putExtra("clearBoardedDeparture", true);
+        intent.putExtra(Constants.CLEAR_DEPARTURE, true);
         startService(intent);
         hideYourTrainSection();
     }

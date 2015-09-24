@@ -9,6 +9,7 @@ dependencies {
     compile 'org.springframework.android:spring-android-rest-template:1.0.1.RELEASE'
     compile 'com.code-troopers.betterpickers:library:2.0.0'
 
+    compile "com.android.support:support-v4:20.0.+"
     compile 'com.android.support:appcompat-v7:22.2.1'
 
     apt 'com.googlecode.androidannotations:androidannotations:2.7'
