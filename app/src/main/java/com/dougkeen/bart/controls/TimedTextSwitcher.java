@@ -10,8 +10,7 @@ import android.widget.TextSwitcher;
 import com.dougkeen.bart.R;
 import com.dougkeen.bart.model.TextProvider;
 
-public class TimedTextSwitcher extends TextSwitcher implements
-        Ticker.TickSubscriber {
+public class TimedTextSwitcher extends TextSwitcher implements Ticker.TickSubscriber {
 
     public TimedTextSwitcher(Context context, AttributeSet attrs) {
         super(context, attrs);

@@ -2,41 +2,51 @@ package com.dougkeen.bart.controls;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Checkable;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.dougkeen.bart.BartRunnerApplication;
 import com.dougkeen.bart.R;
 import com.dougkeen.bart.model.Departure;
 import com.dougkeen.bart.model.TextProvider;
 import com.dougkeen.util.Observer;
 
-public class YourTrainLayout extends RelativeLayout implements Checkable {
+public class YourTrainLayout extends FrameLayout implements Checkable {
+
+    private final TextView destinationText;
+    private final TextView trainLength;
+    private final View colorBar;
+    private final ImageView bikeIcon;
+    private final View xferIcon;
+    private final CountdownTextView departureCountdown;
+    private final CountdownTextView arrivalCountdown;
+    private final TextView alarmText;
 
     public YourTrainLayout(Context context) {
-        super(context);
-        assignLayout(context);
+        this(context, null);
+    }
+
+    public YourTrainLayout(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
     }
 
     public YourTrainLayout(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        assignLayout(context);
-    }
 
-    public YourTrainLayout(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        assignLayout(context);
-    }
-
-    public void assignLayout(Context context) {
         LayoutInflater.from(context).inflate(R.layout.your_train, this, true);
+
+        destinationText = (TextView) findViewById(R.id.yourTrainDestinationText);
+        trainLength = (TextView) findViewById(R.id.yourTrainTrainLengthText);
+        colorBar = findViewById(R.id.yourTrainDestinationColorBar);
+        bikeIcon = (ImageView) findViewById(R.id.yourTrainBikeIcon);
+        xferIcon = findViewById(R.id.yourTrainXferIcon);
+        departureCountdown = (CountdownTextView) findViewById(R.id.yourTrainDepartureCountdown);
+        arrivalCountdown = (CountdownTextView) findViewById(R.id.yourTrainArrivalCountdown);
+        alarmText = (TextView) findViewById(R.id.alarmText);
     }
 
     private boolean mChecked;
@@ -75,13 +85,8 @@ public class YourTrainLayout extends RelativeLayout implements Checkable {
     }
 
     private void setBackground() {
-        if (isChecked()) {
-            setBackgroundDrawable(getContext().getResources().getDrawable(
-                    R.color.blue_selection));
-        } else {
-            setBackgroundDrawable(getContext().getResources().getDrawable(
-                    R.color.gray));
-        }
+        int colorRes = isChecked() ? R.color.blue_selection : R.color.gray;
+        setBackgroundResource(colorRes);
     }
 
     @Override
@@ -89,11 +94,10 @@ public class YourTrainLayout extends RelativeLayout implements Checkable {
         setChecked(!isChecked());
     }
 
-    public void updateFromBoardedDeparture() {
-        final Departure boardedDeparture = ((BartRunnerApplication) ((Activity) getContext())
-                .getApplication()).getBoardedDeparture();
-        if (boardedDeparture == null)
+    public void updateFromBoardedDeparture(final Departure boardedDeparture) {
+        if (boardedDeparture == null) {
             return;
+        }
 
         if (!boardedDeparture.equals(mDeparture)) {
             if (mDeparture != null) {
@@ -110,35 +114,22 @@ public class YourTrainLayout extends RelativeLayout implements Checkable {
 
         mDeparture = boardedDeparture;
 
-        ((TextView) findViewById(R.id.yourTrainDestinationText))
-                .setText(boardedDeparture.getTrainDestination().toString());
+        destinationText.setText(boardedDeparture.getTrainDestination().toString());
+        trainLength.setText(boardedDeparture.getTrainLengthAndPlatform());
 
-        ((TextView) findViewById(R.id.yourTrainTrainLengthText))
-                .setText(boardedDeparture.getTrainLengthAndPlatform());
-
-        ImageView colorBar = (ImageView) findViewById(R.id.yourTrainDestinationColorBar);
-        ((GradientDrawable) colorBar.getDrawable()).setColor(Color
-                .parseColor(boardedDeparture.getTrainDestinationColor()));
-        ImageView bikeIcon = (ImageView) findViewById(R.id.yourTrainBikeIcon);
+        colorBar.setBackgroundColor(boardedDeparture.getTrainDestinationColor());
         if (boardedDeparture.isBikeAllowed()) {
-            bikeIcon.setImageDrawable(getResources().getDrawable(
-                    R.drawable.bike));
+            bikeIcon.setImageResource(R.drawable.bike);
         } else {
-            bikeIcon.setImageDrawable(getResources().getDrawable(
-                    R.drawable.nobike));
+            bikeIcon.setImageResource(R.drawable.nobike);
         }
         if (boardedDeparture.getRequiresTransfer()) {
-            findViewById(R.id.yourTrainXferIcon)
-                    .setVisibility(View.VISIBLE);
+            xferIcon.setVisibility(View.VISIBLE);
         } else {
-            findViewById(R.id.yourTrainXferIcon)
-                    .setVisibility(View.INVISIBLE);
+            xferIcon.setVisibility(View.INVISIBLE);
         }
 
         updateAlarmIndicator();
-
-        CountdownTextView departureCountdown = (CountdownTextView) findViewById(R.id.yourTrainDepartureCountdown);
-        CountdownTextView arrivalCountdown = (CountdownTextView) findViewById(R.id.yourTrainArrivalCountdown);
 
         final TextProvider textProvider = new TextProvider() {
             @Override
@@ -169,11 +160,10 @@ public class YourTrainLayout extends RelativeLayout implements Checkable {
 
     private void updateAlarmIndicator() {
         if (!mDeparture.isAlarmPending()) {
-            findViewById(R.id.alarmText).setVisibility(GONE);
+            alarmText.setVisibility(GONE);
         } else {
-            findViewById(R.id.alarmText).setVisibility(VISIBLE);
-            ((TextView) findViewById(R.id.alarmText)).setText(String
-                    .valueOf(mDeparture.getAlarmLeadTimeMinutes()));
+            alarmText.setVisibility(VISIBLE);
+            alarmText.setText(String.valueOf(mDeparture.getAlarmLeadTimeMinutes()));
         }
     }
 

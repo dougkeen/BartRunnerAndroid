@@ -1,77 +1,111 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge
+<com.dougkeen.bart.controls.CheckableLinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:bart="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_height="fill_parent"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    >
 
-    <ImageView
+    <!-- This layout is used when the height is >= 480 dp, eg usually in portrait mode. -->
+
+    <View
         android:id="@+id/destinationColorBar"
-        android:layout_width="wrap_content"
+        android:layout_width="15dp"
         android:layout_height="64dp"
-        android:layout_alignParentLeft="true"
-        android:layout_centerVertical="true"
-        android:src="@drawable/basic_rectangle" />
+        tools:background="#F00"
+        />
 
+    <!-- Holds the destination, the train info, and the arrival time -->
     <LinearLayout
-        android:id="@+id/topRow"
-        android:layout_width="fill_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_toRightOf="@id/destinationColorBar">
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        >
 
         <TextView
             android:id="@+id/destinationText"
             style="@style/DepartureDestinationText"
-            android:layout_weight="1"
             android:ellipsize="marquee"
-            android:singleLine="true" />
+            android:singleLine="true"
+            tools:text="Richmond"
+            />
+
+        <TextView
+            android:id="@+id/trainLengthText"
+            style="@style/DepartureUncertaintyText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="9 cars, platform 2"
+            />
+
+        <TextView
+            android:id="@+id/estimatedArrival"
+            style="@style/DepartureUncertaintyText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="Arrives ~11:12 AM (20 mins)"
+            />
+
+    </LinearLayout>
+
+    <!-- Holds the bike and xfer icons -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        >
 
         <ImageView
             android:id="@+id/bikeIcon"
-            style="@style/BikeIcon" />
+            style="@style/TrainInfoIcon"
+            tools:src="@drawable/bike"
+            />
+
+        <ImageView
+            android:id="@+id/xferIcon"
+            style="@style/TrainInfoIcon"
+            android:src="@drawable/xfer"
+            />
+
+    </LinearLayout>
+
+    <!-- Holds the departure countdown, uncertainty, and departure time -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:gravity="right"
+        android:orientation="vertical"
+        >
 
         <com.dougkeen.bart.controls.CountdownTextView
             android:id="@+id/countdown"
             style="@style/DepartureCountdownText"
-            android:gravity="right"
             android:width="90dp"
-            bart:tickInterval="1" />
+            android:gravity="right"
+            bart:tickInterval="1"
+            tools:text="9m, 57s"
+            />
+
+        <TextView
+            android:id="@+id/uncertainty"
+            style="@style/DepartureUncertaintyText"
+            tools:text="(+8s)"
+            />
+
+        <TextView
+            android:id="@+id/departureTime"
+            style="@style/DepartureUncertaintyText"
+            tools:text="11:20 AM"
+            />
+
     </LinearLayout>
 
-    <ImageView
-        android:id="@+id/xferIcon"
-        style="@style/XferIcon"
-        android:layout_alignParentRight="true"
-        android:layout_below="@id/topRow"
-        android:src="@drawable/xfer" />
-
-    <TextView
-        android:id="@+id/trainLengthText"
-        style="@style/DepartureUncertaintyText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/topRow"
-        android:layout_toRightOf="@id/destinationColorBar" />
-
-    <TextView
-        android:id="@+id/uncertainty"
-        style="@style/DepartureUncertaintyText"
-        android:layout_alignParentRight="true"
-        android:layout_below="@id/topRow" />
-
-    <TextView
-        android:id="@+id/estimatedArrival"
-        style="@style/DepartureUncertaintyText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/trainLengthText"
-        android:layout_toRightOf="@id/destinationColorBar" />
-
-    <TextView
-        android:id="@+id/departureTime"
-        style="@style/DepartureUncertaintyText"
-        android:layout_alignParentRight="true"
-        android:layout_below="@id/uncertainty" />
-
-</merge>
+</com.dougkeen.bart.controls.CheckableLinearLayout>
