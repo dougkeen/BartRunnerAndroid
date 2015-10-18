@@ -42,13 +42,5 @@
         android:layout_height="wrap_content"
         android:indeterminate="true"
         android:visibility="gone" />
-
-    <TextView
-        android:id="@+id/missingDepartureText"
-        style="@style/MissingDepartureText"
-        android:autoLink="email"
-        android:singleLine="false"
-        android:text="@string/missing_departure"
-        android:visibility="gone" />
-
+F
 </LinearLayout>

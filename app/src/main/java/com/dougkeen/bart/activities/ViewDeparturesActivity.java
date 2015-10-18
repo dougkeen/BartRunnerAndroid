@@ -96,9 +96,6 @@ public class ViewDeparturesActivity extends AppCompatActivity implements
         listView.setOnItemClickListener(mListItemClickListener);
         listView.setOnItemLongClickListener(mListItemLongClickListener);
 
-        mMissingDepartureText = findViewById(R.id.missingDepartureText);
-        mMissingDepartureText.setVisibility(View.VISIBLE);
-
         mYourTrainSection = (YourTrainLayout) findViewById(R.id.yourTrainSection);
         mYourTrainSection.setOnClickListener(mYourTrainSectionClickListener);
         mSwipeHelper = new SwipeHelper(mYourTrainSection, null,
@@ -320,8 +317,6 @@ public class ViewDeparturesActivity extends AppCompatActivity implements
             startYourTrainActionMode();
         }
     };
-
-    private View mMissingDepartureText;
 
     private YourTrainLayout mYourTrainSection;
 
@@ -769,7 +764,6 @@ public class ViewDeparturesActivity extends AppCompatActivity implements
             @Override
             public void run() {
                 mProgress.setVisibility(View.VISIBLE);
-                mMissingDepartureText.setVisibility(View.GONE);
             }
         });
     }
@@ -780,7 +774,6 @@ public class ViewDeparturesActivity extends AppCompatActivity implements
             @Override
             public void run() {
                 mProgress.setVisibility(View.GONE);
-                mMissingDepartureText.setVisibility(View.VISIBLE);
             }
         });
     }
