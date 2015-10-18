@@ -57,6 +57,7 @@ public class Departure implements Parcelable, Comparable<Departure> {
     private Station passengerDestination;
     private Line line;
     private String destinationColor;
+    private @ColorInt int destinationColorInt;
     private String platform;
     private String direction;
     private boolean bikeAllowed;
@@ -137,7 +138,10 @@ public class Departure implements Parcelable, Comparable<Departure> {
 
     @ColorInt
     public int getTrainDestinationColor() {
-        return Color.parseColor(destinationColor);
+        if (destinationColorInt == 0) {
+            destinationColorInt = Color.parseColor(destinationColor);
+        }
+        return destinationColorInt;
     }
 
     public void setTrainDestinationColor(String destinationColor) {
