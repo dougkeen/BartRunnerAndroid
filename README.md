@@ -2,18 +2,16 @@
 This is my "fun project", where I get a chance to work my Android development muscles and hopefully create something free and useful for the SF Bay Area community.
 
 ## Reporting bugs/requesting features
-Please email all reports/requests to bartrunner@dougkeen.com
+Please file bugs and suggestions as GitHub issues
 
 ## Developed by
 Doug Keen - doug@dougkeen.com
 
 # Special thanks to
 
-* Christophe Versieux's [HoloEverywhere](https://github.com/ChristopheVersieux/HoloEverywhere) project
-* SimonVT's [android-numberpicker](https://github.com/SimonVT/android-numberpicker) project
-* Jake Wharton's [NineOldAndroids](https://github.com/JakeWharton/NineOldAndroids), and [ActionBarSherlock](https://github.com/JakeWharton/ActionBarSherlock) projects
+* Victor Stuber for some amazing work on the feature graphic and the app icon
+* All pull request contributors, who are keeping this project alive!
 
-Without the hard work of the above individuals and all the contributors to their projects, BART Runner would look like crap on Android 2.x devices.
 
 ## License
 
