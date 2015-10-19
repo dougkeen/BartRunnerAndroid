@@ -1,4 +1,7 @@
 # ![Logo](https://raw.github.com/dougkeen/BartRunnerAndroid/master/featuredGraphic.png)
+
+[![Build Status](https://travis-ci.org/dougkeen/BartRunnerAndroid.svg?branch=master)](https://travis-ci.org/dougkeen/BartRunnerAndroid)
+
 This is my "fun project", where I get a chance to work my Android development muscles and hopefully create something free and useful for the SF Bay Area community.
 
 ## Reporting bugs/requesting features
