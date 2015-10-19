@@ -22,5 +22,9 @@ android {
             res.srcDirs = ['../drag-sort-listview/library/res']
         }
     }
+
+    lintOptions {
+        abortOnError false
+    }
 }
 
