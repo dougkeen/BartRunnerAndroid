@@ -13,8 +13,8 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.NumberPicker;
 
-import com.codetroopers.betterpickers.numberpicker.NumberPicker;
 import com.dougkeen.bart.BartRunnerApplication;
 import com.dougkeen.bart.R;
 import com.dougkeen.bart.model.Departure;
@@ -54,8 +54,8 @@ public class TrainAlarmDialogFragment extends DialogFragment {
         final Departure boardedDeparture = application.getBoardedDeparture();
         final int maxValue = boardedDeparture.getMeanSecondsLeft() / 60;
 
-        numberPicker.setMin(1);
-        numberPicker.setMax(maxValue);
+        numberPicker.setMinValue(1);
+        numberPicker.setMaxValue(maxValue);
 
         if (boardedDeparture.isAlarmPending()) {
             setNumber(numberPicker, boardedDeparture.getAlarmLeadTimeMinutes());
@@ -71,8 +71,7 @@ public class TrainAlarmDialogFragment extends DialogFragment {
     }
 
     private void setNumber(NumberPicker numberPicker, int value) {
-        // Passing in null for the decimalPart and sign doesn't change them.
-        numberPicker.setNumber(value, null /* decimalPart */, null /* sign */);
+        numberPicker.setValue(value);
     }
 
     @NonNull
@@ -95,7 +94,7 @@ public class TrainAlarmDialogFragment extends DialogFragment {
                                     int which) {
                                 NumberPicker numberPicker = (NumberPicker) getDialog()
                                         .findViewById(R.id.numberPicker);
-                                final int alarmLeadTime = numberPicker.getNumber();
+                                final int alarmLeadTime = numberPicker.getValue();
 
                                 // Save most recent selection
                                 Editor editor = getActivity().getPreferences(

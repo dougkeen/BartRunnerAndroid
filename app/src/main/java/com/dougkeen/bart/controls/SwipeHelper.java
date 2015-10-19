@@ -19,10 +19,9 @@
 
 package com.dougkeen.bart.controls;
 
-import static com.nineoldandroids.view.ViewHelper.setAlpha;
-import static com.nineoldandroids.view.ViewHelper.setTranslationX;
-import static com.nineoldandroids.view.ViewPropertyAnimator.animate;
-
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -32,9 +31,6 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 
 import com.dougkeen.bart.model.Constants;
-import com.nineoldandroids.animation.Animator;
-import com.nineoldandroids.animation.AnimatorListenerAdapter;
-import com.nineoldandroids.animation.ValueAnimator;
 
 /**
  * A utility class for animating the dismissal of a view (with 'onDismiss'
@@ -167,7 +163,7 @@ public class SwipeHelper implements View.OnTouchListener {
                     dismissWithAnimation(dismissRight);
                 } else {
                     // cancel
-                    animate(mView).translationX(0).alpha(1)
+                    mView.animate().translationX(0).alpha(1)
                             .setDuration(mAnimationTime).setListener(null);
                 }
                 mVelocityTracker = null;
@@ -198,10 +194,9 @@ public class SwipeHelper implements View.OnTouchListener {
 
                 if (mSwiping) {
                     mTranslationX = deltaX;
-                    setTranslationX(mView, deltaX);
+                    mView.setTranslationX(deltaX);
                     // TODO: use an ease-out interpolator or such
-                    setAlpha(
-                            mView,
+                    mView.setAlpha(
                             Math.max(
                                     0f,
                                     Math.min(1f, 1f - 2f * Math.abs(deltaX)
@@ -215,7 +210,7 @@ public class SwipeHelper implements View.OnTouchListener {
     }
 
     public void dismissWithAnimation(boolean dismissRight) {
-        animate(mView).translationX(dismissRight ? mViewWidth : -mViewWidth)
+        mView.animate().translationX(dismissRight ? mViewWidth : -mViewWidth)
                 .alpha(0).setDuration(mAnimationTime)
                 .setListener(new AnimatorListenerAdapter() {
                     @Override
@@ -250,7 +245,7 @@ public class SwipeHelper implements View.OnTouchListener {
                  */
                 // setAlpha(mView, 1f);
 
-                setTranslationX(mView, 0);
+                mView.setTranslationX(0);
                 lp.height = originalHeight;
                 mView.setLayoutParams(lp);
             }
@@ -273,12 +268,12 @@ public class SwipeHelper implements View.OnTouchListener {
         mView.measure(measureSpec, measureSpec);
         mViewWidth = mView.getMeasuredWidth();
         final int viewHeight = mView.getMeasuredHeight();
-        setAlpha(mView, 0f);
+        mView.setAlpha(0f);
 
         final ViewGroup.LayoutParams lp = mView.getLayoutParams();
         final int originalHeight = lp.height;
 
-        setTranslationX(mView, mViewWidth);
+        mView.setTranslationX(mViewWidth);
 
         // Grow space
         ValueAnimator animator = ValueAnimator.ofInt(1, viewHeight)
@@ -292,7 +287,7 @@ public class SwipeHelper implements View.OnTouchListener {
                 mView.setLayoutParams(lp);
 
                 // Swipe view into space that opened up
-                animate(mView).translationX(0).alpha(1)
+                mView.animate().translationX(0).alpha(1)
                         .setDuration(mAnimationTime)
                         // Dummy listener so the default doesn't run
                         .setListener(new AnimatorListenerAdapter() {

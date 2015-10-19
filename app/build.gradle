@@ -7,7 +7,7 @@ dependencies {
     compile 'org.apache.commons:commons-lang3:3.4'
     compile 'com.fasterxml.jackson.core:jackson-databind:2.6.1'
     compile 'org.springframework.android:spring-android-rest-template:1.0.1.RELEASE'
-    compile 'com.code-troopers.betterpickers:library:2.0.0'
+    compile 'com.squareup.okhttp:okhttp:2.5.0'
 
     compile 'com.android.support:appcompat-v7:22.2.1'
 
@@ -16,7 +16,7 @@ dependencies {
 }
 
 android {
-    compileSdkVersion 22
+    compileSdkVersion 23
     buildToolsVersion "22.0.1"
 
     compileOptions {
@@ -25,12 +25,11 @@ android {
     }
 
     defaultConfig {
-        versionName "2.2.4"
-        versionCode 31
+        versionName "2.2.5"
+        versionCode 32
 
-        // TODO(fuegofro) - bring this back down to 8 if it's easy by using a different number picker library
-        minSdkVersion 9
-        targetSdkVersion 22
+        minSdkVersion 14
+        targetSdkVersion 23
     }
 
     buildTypes {

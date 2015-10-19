@@ -1,16 +1,9 @@
 package com.dougkeen.bart.networktasks;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.util.List;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpUriRequest;
 
 import android.os.AsyncTask;
 import android.util.Log;
@@ -20,6 +13,9 @@ import com.dougkeen.bart.model.Constants;
 import com.dougkeen.bart.model.RealTimeDepartures;
 import com.dougkeen.bart.model.Route;
 import com.dougkeen.bart.model.StationPair;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 
 public abstract class GetRealTimeDeparturesTask extends
         AsyncTask<StationPair, Integer, RealTimeDepartures> {
@@ -29,6 +25,8 @@ public abstract class GetRealTimeDeparturesTask extends
     private final static String ETD_URL_NO_DIRECTION = "http://api.bart.gov/api/etd.aspx?cmd=etd&key="
             + Constants.API_KEY + "&orig=%1$s";
     private final static int MAX_ATTEMPTS = 5;
+
+    private final OkHttpClient mClient = NetworkUtils.makeHttpClient();
 
     private Exception mException;
 
@@ -83,7 +81,9 @@ public abstract class GetRealTimeDeparturesTask extends
                         mRoutes.get(0).getDirection());
             }
 
-            HttpUriRequest request = new HttpGet(url);
+
+            Request request = new Request.Builder()
+                    .url(url).build();
 
             EtdContentHandler handler = new EtdContentHandler(
                     params.getOrigin(), params.getDestination(), mRoutes);
@@ -91,17 +91,13 @@ public abstract class GetRealTimeDeparturesTask extends
                 return null;
             }
 
-            HttpResponse response = NetworkUtils.executeWithRecovery(request);
+            Response response = mClient.newCall(request).execute();
 
-            if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-                throw new IOException("Server returned "
-                        + response.getStatusLine().toString());
+            if (!response.isSuccessful()) {
+                throw new IOException("Server returned " + response.code());
             }
 
-            StringWriter writer = new StringWriter();
-            IOUtils.copy(response.getEntity().getContent(), writer, "UTF-8");
-
-            xml = writer.toString();
+            xml = response.body().string();
             if (xml.length() == 0) {
                 throw new IOException("Server returned blank xml document");
             }

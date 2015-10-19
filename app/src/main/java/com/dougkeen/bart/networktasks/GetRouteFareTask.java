@@ -1,23 +1,20 @@
 package com.dougkeen.bart.networktasks;
 
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.xml.sax.SAXException;
-
 import android.os.AsyncTask;
 import android.util.Log;
 import android.util.Xml;
 
 import com.dougkeen.bart.model.Constants;
 import com.dougkeen.bart.model.Station;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
+
+import org.xml.sax.SAXException;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 
 public abstract class GetRouteFareTask extends
         AsyncTask<GetRouteFareTask.Params, Integer, String> {
@@ -25,6 +22,8 @@ public abstract class GetRouteFareTask extends
     private final static int MAX_ATTEMPTS = 5;
     private final static String FARE_URL = "http://api.bart.gov/api/sched.aspx?cmd=fare&date=today&key="
             + Constants.API_KEY + "&orig=%1$s&dest=%2$s";
+
+    private final static OkHttpClient client = NetworkUtils.makeHttpClient();
 
     private Exception mException;
 
@@ -45,26 +44,21 @@ public abstract class GetRouteFareTask extends
         String xml = null;
 
         try {
-            HttpUriRequest request = new HttpGet(
-                    String.format(FARE_URL, params.origin.abbreviation,
-                            params.destination.abbreviation));
+            Request request = new Request.Builder()
+                    .url(String.format(FARE_URL, params.origin.abbreviation, params.destination.abbreviation)).build();
 
             FareContentHandler handler = new FareContentHandler();
             if (isCancelled()) {
                 return null;
             }
 
-            HttpResponse response = NetworkUtils.executeWithRecovery(request);
+            Response response = client.newCall(request).execute();
 
-            if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-                throw new IOException("Server returned "
-                        + response.getStatusLine().toString());
+            if (!response.isSuccessful()) {
+                throw new IOException("Server returned " + response.code());
             }
 
-            StringWriter writer = new StringWriter();
-            IOUtils.copy(response.getEntity().getContent(), writer, "UTF-8");
-
-            xml = writer.toString();
+            xml = response.body().string();
             if (xml.length() == 0) {
                 throw new IOException("Server returned blank xml document");
             }

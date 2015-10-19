@@ -37,7 +37,7 @@
     <string name="getting_on_this_train">I will board this train</string>
     <string name="departure_options">Departure options</string>
     <string name="your_train">Your train</string>
-    <string name="set_up_departure_alarm">Set up departure alarm</string>
+    <string name="set_up_departure_alarm">Set alarm</string>
     <string name="train_alarm_text">Your train is leaving soon!</string>
     <string name="silence_alarm">Silence alarm</string>
     <string name="cancel_alarm">Cancel alarm</string>
@@ -47,5 +47,6 @@
     <string name="arrives_at_destination">Arrive @ dest. ~</string>
     <string name="arrival_message">I\'ll be arriving at %1$s around %2$s</string>
     <string name="share_arrival_time">Share arrival time</string>
+    <string name="minutes_before_departure">minutes before departure</string>
 
 </resources>

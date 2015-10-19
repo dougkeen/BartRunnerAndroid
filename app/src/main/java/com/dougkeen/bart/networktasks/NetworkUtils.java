@@ -1,40 +1,47 @@
 package com.dougkeen.bart.networktasks;
 
-import java.io.IOException;
+import android.util.Log;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.conn.params.ConnManagerParams;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
+import com.squareup.okhttp.Interceptor;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
+
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 public class NetworkUtils {
 
-    public static HttpClient getHttpClient() {
-        HttpClient client = new DefaultHttpClient();
-        final HttpParams params = client.getParams();
-        HttpConnectionParams.setConnectionTimeout(params,
-                NetworkUtils.CONNECTION_TIMEOUT_MILLIS);
-        HttpConnectionParams.setSoTimeout(params,
-                NetworkUtils.CONNECTION_TIMEOUT_MILLIS);
-        ConnManagerParams.setTimeout(params,
-                NetworkUtils.CONNECTION_TIMEOUT_MILLIS);
-        return client;
-    }
+    private static class RetryInterceptor implements Interceptor {
+        private static final String TAG = "RetryInterceptor";
 
-    public static HttpResponse executeWithRecovery(final HttpUriRequest request)
-            throws IOException {
-        try {
-            return getHttpClient().execute(request);
-        } catch (IllegalStateException e) {
-            // try again... this is a rare error
-            return getHttpClient().execute(request);
+        @Override
+        public Response intercept(Chain chain) throws IOException {
+            Request request = chain.request();
+
+            // try the request
+            Response response;
+            int attempt = 0;
+            do {
+                attempt++;
+                try {
+                    response = chain.proceed(request);
+                } catch (IOException e) {
+                    Log.w(TAG, "Request failed: ", e);
+                    response = null;
+                }
+            } while ((response == null || !response.isSuccessful()) && attempt < 2);
+
+            return response;
         }
     }
 
-    static final int CONNECTION_TIMEOUT_MILLIS = 10000;
+    public static OkHttpClient makeHttpClient() {
+        OkHttpClient client = new OkHttpClient();
+        client.setConnectTimeout(CONNECTION_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+        client.interceptors().add(new RetryInterceptor());
+        return client;
+    }
 
+    static final int CONNECTION_TIMEOUT_MILLIS = 10000;
 }
