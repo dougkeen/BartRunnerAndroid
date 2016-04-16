@@ -130,6 +130,23 @@ public enum Station {
         }
     }
 
+    public static Station getByApproximateName(String name) {
+        if (name == null) return null;
+
+        final String lowercaseName = name.toLowerCase();
+        for (Station station : Station.values()) {
+            if (lowercaseName.startsWith(station.name.toLowerCase())) {
+                return station;
+            }
+        }
+        for (Station station : Station.values()) {
+            if (lowercaseName.endsWith(station.name.toLowerCase())) {
+                return station;
+            }
+        }
+        return Station.SPCL;
+    }
+
     public Station getInboundTransferStation() {
         return getByAbbreviation(inboundTransferStation);
     }

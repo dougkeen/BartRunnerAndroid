@@ -27,7 +27,7 @@ public class EtdContentHandler extends DefaultHandler {
 
     private final static List<String> TAGS = Arrays.asList("date", "time",
             "abbreviation", "minutes", "platform", "direction", "length",
-            "color", "hexcolor", "bikeflag");
+            "color", "hexcolor", "bikeflag", "destination");
 
     private RealTimeDepartures realTimeDepartures;
 
@@ -36,7 +36,8 @@ public class EtdContentHandler extends DefaultHandler {
     }
 
     private String date;
-    private String currentDestination;
+    private String currentDestinationAbbreviation;
+    private String currentDestinationName;
     private String currentValue;
     private Departure currentDeparture;
     private boolean isParsingTag;
@@ -57,8 +58,11 @@ public class EtdContentHandler extends DefaultHandler {
         }
         if (localName.equals("estimate")) {
             currentDeparture = new Departure();
-            currentDeparture.setTrainDestination(Station
-                    .getByAbbreviation(currentDestination));
+            Station destination = Station.getByAbbreviation(currentDestinationAbbreviation);
+            if (destination == null) {
+                destination = Station.getByApproximateName(currentDestinationName);
+            }
+            currentDeparture.setTrainDestination(destination);
             currentDeparture.setOrigin(realTimeDepartures.getOrigin());
         }
     }
@@ -71,7 +75,9 @@ public class EtdContentHandler extends DefaultHandler {
         } else if (localName.equals("time")) {
             realTimeDepartures.setTime(Date.parse(date + " " + currentValue));
         } else if (localName.equals("abbreviation")) {
-            currentDestination = currentValue;
+            currentDestinationAbbreviation = currentValue;
+        } else if (localName.equals("destination")) {
+            currentDestinationName = currentValue;
         } else if (localName.equals("minutes")) {
             if (StringUtils.isNumeric(currentValue)) {
                 currentDeparture.setMinutes(Integer.parseInt(currentValue));
@@ -109,10 +115,14 @@ public class EtdContentHandler extends DefaultHandler {
         } else if (localName.equals("bikeflag")) {
             currentDeparture.setBikeAllowed(currentValue.equalsIgnoreCase("1"));
         } else if (localName.equals("estimate")) {
-            realTimeDepartures.addDeparture(currentDeparture);
+            // If we can't infer a real destination because of weird API data,
+            // just skip it ¯\_(ツ)_/¯
+            if (realTimeDepartures.getDestination() != null) {
+                realTimeDepartures.addDeparture(currentDeparture);
+            }
             currentDeparture = null;
         } else if (localName.equals("etd")) {
-            currentDestination = null;
+            currentDestinationAbbreviation = null;
         } else if (localName.equals("station")) {
             realTimeDepartures.finalizeDeparturesList();
         }
