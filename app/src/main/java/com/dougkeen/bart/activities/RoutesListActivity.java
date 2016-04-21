@@ -66,6 +66,30 @@ public class RoutesListActivity extends AppCompatActivity implements TickSubscri
 
     private FavoritesArrayAdapter mRoutesAdapter;
 
+    private DragSortListView.DropListener onDrop = new DragSortListView.DropListener() {
+        @Override
+        public void drop(int from, int to) {
+            if (from == to)
+                return;
+
+            StationPair item = mRoutesAdapter.getItem(from);
+
+            mRoutesAdapter.move(item, to);
+            mRoutesAdapter.notifyDataSetChanged();
+        }
+    };
+
+    private DragSortListView.RemoveListener onRemove = new DragSortListView.RemoveListener() {
+        @Override
+        public void remove(int which) {
+            mRoutesAdapter.remove(mRoutesAdapter.getItem(which));
+            mRoutesAdapter.notifyDataSetChanged();
+        }
+    };
+
+    private MenuItem elevatorMenuItem;
+    private View origElevatorActionView;
+
     @App
     BartRunnerApplication app;
 
@@ -108,27 +132,6 @@ public class RoutesListActivity extends AppCompatActivity implements TickSubscri
 
         startContextualActionMode();
     }
-
-    private DragSortListView.DropListener onDrop = new DragSortListView.DropListener() {
-        @Override
-        public void drop(int from, int to) {
-            if (from == to)
-                return;
-
-            StationPair item = mRoutesAdapter.getItem(from);
-
-            mRoutesAdapter.move(item, to);
-            mRoutesAdapter.notifyDataSetChanged();
-        }
-    };
-
-    private DragSortListView.RemoveListener onRemove = new DragSortListView.RemoveListener() {
-        @Override
-        public void remove(int which) {
-            mRoutesAdapter.remove(mRoutesAdapter.getItem(which));
-            mRoutesAdapter.notifyDataSetChanged();
-        }
-    };
 
     @AfterViews
     void afterViews() {
@@ -278,9 +281,6 @@ public class RoutesListActivity extends AppCompatActivity implements TickSubscri
         inflater.inflate(R.menu.routes_list_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
-
-    private MenuItem elevatorMenuItem;
-    private View origElevatorActionView;
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

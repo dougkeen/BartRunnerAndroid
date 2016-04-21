@@ -5,13 +5,13 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 public class FareContentHandler extends DefaultHandler {
-    public FareContentHandler() {
-        super();
-    }
-
     private String currentValue;
     private boolean isParsingTag;
     private String fare;
+
+    public FareContentHandler() {
+        super();
+    }
 
     public String getFare() {
         return fare;

@@ -19,21 +19,11 @@ import com.dougkeen.bart.model.Route;
 import com.dougkeen.bart.model.Station;
 
 public class EtdContentHandler extends DefaultHandler {
-    public EtdContentHandler(Station origin, Station destination,
-                             List<Route> routes) {
-        super();
-        realTimeDepartures = new RealTimeDepartures(origin, destination, routes);
-    }
-
-    private final static List<String> TAGS = Arrays.asList("date", "time",
+    private static final List<String> TAGS = Arrays.asList("date", "time",
             "abbreviation", "minutes", "platform", "direction", "length",
             "color", "hexcolor", "bikeflag", "destination");
 
     private RealTimeDepartures realTimeDepartures;
-
-    public RealTimeDepartures getRealTimeDepartures() {
-        return realTimeDepartures;
-    }
 
     private String date;
     private String currentDestinationAbbreviation;
@@ -41,6 +31,16 @@ public class EtdContentHandler extends DefaultHandler {
     private String currentValue;
     private Departure currentDeparture;
     private boolean isParsingTag;
+
+    public EtdContentHandler(Station origin, Station destination,
+                             List<Route> routes) {
+        super();
+        realTimeDepartures = new RealTimeDepartures(origin, destination, routes);
+    }
+
+    public RealTimeDepartures getRealTimeDepartures() {
+        return realTimeDepartures;
+    }
 
     @Override
     public void characters(char[] ch, int start, int length)

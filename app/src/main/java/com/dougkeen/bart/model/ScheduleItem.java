@@ -6,16 +6,6 @@ import java.util.Date;
 
 public class ScheduleItem {
 
-    public ScheduleItem() {
-        super();
-    }
-
-    public ScheduleItem(Station origin, Station destination) {
-        super();
-        this.origin = origin;
-        this.destination = destination;
-    }
-
     public static final int SCHEDULE_ITEM_DEPARTURE_EQUALS_TOLERANCE = 120000;
 
     private Station origin;
@@ -25,6 +15,16 @@ public class ScheduleItem {
     private long arrivalTime;
     private boolean bikesAllowed;
     private String trainHeadStation;
+
+    public ScheduleItem() {
+        super();
+    }
+
+    public ScheduleItem(Station origin, Station destination) {
+        super();
+        this.origin = origin;
+        this.destination = destination;
+    }
 
     public Station getOrigin() {
         return origin;

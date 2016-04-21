@@ -36,6 +36,8 @@ public class EtdService extends Service {
 
     private Map<StationPair, EtdServiceEngine> mServiceEngineMap;
 
+    private long mNextFetchClockTime = 0;
+
     public EtdService() {
         super();
         mBinder = new EtdServiceBinder();
@@ -553,8 +555,6 @@ public class EtdService extends Service {
                 applyScheduleInformation(mLatestScheduleInfo);
             }
         }
-
-        private long mNextFetchClockTime = 0;
 
         private void scheduleDepartureFetch(int millisUntilExecute) {
             mPendingEtdRequest = true;

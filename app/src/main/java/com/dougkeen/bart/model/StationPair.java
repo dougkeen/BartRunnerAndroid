@@ -12,6 +12,24 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class StationPair implements Parcelable {
+    public static final Parcelable.Creator<StationPair> CREATOR = new Parcelable.Creator<StationPair>() {
+        public StationPair createFromParcel(Parcel in) {
+            return new StationPair(in);
+        }
+
+        public StationPair[] newArray(int size) {
+            return new StationPair[size];
+        }
+    };
+
+    private Station origin;
+    private Station destination;
+    private String fare;
+
+    private long fareLastUpdated;
+    private int averageTripLength;
+    private int averageTripSampleCount;
+
     @JsonCreator
     public StationPair(@JsonProperty("origin") Station origin,
                        @JsonProperty("destination") Station destination) {
@@ -39,14 +57,6 @@ public class StationPair implements Parcelable {
                 RoutesColumns.AVERAGE_TRIP_SAMPLE_COUNT);
         return pair;
     }
-
-    private Station origin;
-    private Station destination;
-    private String fare;
-
-    private long fareLastUpdated;
-    private int averageTripLength;
-    private int averageTripSampleCount;
 
     public Station getOrigin() {
         return origin;
@@ -145,14 +155,4 @@ public class StationPair implements Parcelable {
         origin = Station.getByAbbreviation(in.readString());
         destination = Station.getByAbbreviation(in.readString());
     }
-
-    public static final Parcelable.Creator<StationPair> CREATOR = new Parcelable.Creator<StationPair>() {
-        public StationPair createFromParcel(Parcel in) {
-            return new StationPair(in);
-        }
-
-        public StationPair[] newArray(int size) {
-            return new StationPair[size];
-        }
-    };
 }

@@ -31,26 +31,15 @@ public class Departure implements Parcelable, Comparable<Departure> {
 
     private static final DateFormat TIME_FORMAT = new SimpleDateFormat("h:mm");
 
-    public Departure() {
-        super();
-    }
+    public static final Parcelable.Creator<Departure> CREATOR = new Parcelable.Creator<Departure>() {
+        public Departure createFromParcel(Parcel in) {
+            return new Departure(in);
+        }
 
-    public Departure(String destinationAbbr, String destinationColor,
-                     String platform, String direction, boolean bikeAllowed,
-                     String trainLength, int minutes) {
-        super();
-        this.trainDestination = Station.getByAbbreviation(destinationAbbr);
-        this.destinationColor = destinationColor;
-        this.platform = platform;
-        this.direction = direction;
-        this.bikeAllowed = bikeAllowed;
-        this.trainLength = trainLength;
-        this.minutes = minutes;
-    }
-
-    public Departure(Parcel in) {
-        readFromParcel(in);
-    }
+        public Departure[] newArray(int size) {
+            return new Departure[size];
+        }
+    };
 
     private Station origin;
     private Station trainDestination;
@@ -83,6 +72,29 @@ public class Departure implements Parcelable, Comparable<Departure> {
     private boolean listedInETDs = true;
 
     private boolean selected;
+
+    private PendingIntent notificationIntent;
+
+    public Departure() {
+        super();
+    }
+
+    public Departure(String destinationAbbr, String destinationColor,
+                     String platform, String direction, boolean bikeAllowed,
+                     String trainLength, int minutes) {
+        super();
+        this.trainDestination = Station.getByAbbreviation(destinationAbbr);
+        this.destinationColor = destinationColor;
+        this.platform = platform;
+        this.direction = direction;
+        this.bikeAllowed = bikeAllowed;
+        this.trainLength = trainLength;
+        this.minutes = minutes;
+    }
+
+    public Departure(Parcel in) {
+        readFromParcel(in);
+    }
 
     public Station getOrigin() {
         return origin;
@@ -609,8 +621,6 @@ public class Departure implements Parcelable, Comparable<Departure> {
         this.alarmPending.setValue(false);
     }
 
-    private PendingIntent notificationIntent;
-
     private PendingIntent getNotificationIntent(Context context) {
         if (notificationIntent == null) {
             Intent targetIntent = new Intent(context,
@@ -732,16 +742,6 @@ public class Departure implements Parcelable, Comparable<Departure> {
         requiresTransfer = in.readByte() == (byte) 1;
         transferScheduled = in.readByte() == (byte) 1;
     }
-
-    public static final Parcelable.Creator<Departure> CREATOR = new Parcelable.Creator<Departure>() {
-        public Departure createFromParcel(Parcel in) {
-            return new Departure(in);
-        }
-
-        public Departure[] newArray(int size) {
-            return new Departure[size];
-        }
-    };
 
     public void notifyAlarmHasBeenHandled() {
         this.alarmPending.setValue(false);

@@ -12,6 +12,10 @@ import com.dougkeen.bart.model.TextProvider;
 
 public class TimedTextSwitcher extends TextSwitcher implements Ticker.TickSubscriber {
 
+    private int mTickInterval;
+    private TextProvider mTextProvider;
+    private CharSequence mLastText;
+
     public TimedTextSwitcher(Context context, AttributeSet attrs) {
         super(context, attrs);
         setInstanceVarsFromAttrs(attrs);
@@ -30,9 +34,6 @@ public class TimedTextSwitcher extends TextSwitcher implements Ticker.TickSubscr
         }
     }
 
-    private int mTickInterval;
-    private TextProvider mTextProvider;
-
     @Override
     public int getTickInterval() {
         return mTickInterval;
@@ -46,8 +47,6 @@ public class TimedTextSwitcher extends TextSwitcher implements Ticker.TickSubscr
         mTextProvider = textProvider;
         Ticker.getInstance().addSubscriber(this, getContext());
     }
-
-    private CharSequence mLastText;
 
     @Override
     public void setCurrentText(CharSequence text) {

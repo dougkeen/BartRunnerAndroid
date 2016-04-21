@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 public class NetworkUtils {
+    static final int CONNECTION_TIMEOUT_MILLIS = 10000;
 
     private static class RetryInterceptor implements Interceptor {
         private static final String TAG = "RetryInterceptor";
@@ -42,6 +43,4 @@ public class NetworkUtils {
         client.interceptors().add(new RetryInterceptor());
         return client;
     }
-
-    static final int CONNECTION_TIMEOUT_MILLIS = 10000;
 }

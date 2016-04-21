@@ -21,6 +21,12 @@ public class Ticker {
 
     private TickerEngine mEngine;
 
+    private Ticker() {
+        mSubscribers = new WeakHashMap<TickSubscriber, Object>();
+        mTickerHosts = new WeakHashMap<Context, Object>();
+        mEngine = new TickerEngine(this);
+    }
+
     private static class TickerEngine implements Runnable {
 
         private static final int TICK_INTERVAL_MILLIS = 1000;
@@ -92,12 +98,6 @@ public class Ticker {
             mSubscribers.put(subscriber, null);
             startTicking(host);
         }
-    }
-
-    private Ticker() {
-        mSubscribers = new WeakHashMap<TickSubscriber, Object>();
-        mTickerHosts = new WeakHashMap<Context, Object>();
-        mEngine = new TickerEngine(this);
     }
 
     public void startTicking(Context host) {

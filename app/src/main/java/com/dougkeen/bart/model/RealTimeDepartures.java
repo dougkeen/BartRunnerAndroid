@@ -6,14 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 
 public class RealTimeDepartures {
-    public RealTimeDepartures(Station origin, Station destination,
-                              List<Route> routes) {
-        this.origin = origin;
-        this.destination = destination;
-        this.routes = routes;
-        this.unfilteredDepartures = new ArrayList<Departure>();
-    }
-
     private Station origin;
     private Station destination;
     private long time;
@@ -23,6 +15,13 @@ public class RealTimeDepartures {
     final private List<Departure> unfilteredDepartures;
 
     private List<Route> routes;
+
+    public RealTimeDepartures(Station origin, Station destination, List<Route> routes) {
+        this.origin = origin;
+        this.destination = destination;
+        this.routes = routes;
+        this.unfilteredDepartures = new ArrayList<Departure>();
+    }
 
     public Station getOrigin() {
         return origin;
