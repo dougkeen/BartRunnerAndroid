@@ -5,16 +5,18 @@ import java.util.List;
 
 public class ScheduleInformation {
 
+    private Station origin;
+    private Station destination;
+    private long date;
+    private List<ScheduleItem> trips;
+    private int aveTripLength = -1;
+    private int tripCount = 0;
+
     public ScheduleInformation(Station origin, Station destination) {
         super();
         this.origin = origin;
         this.destination = destination;
     }
-
-    private Station origin;
-    private Station destination;
-    private long date;
-    private List<ScheduleItem> trips;
 
     public Station getOrigin() {
         return origin;
@@ -61,9 +63,6 @@ public class ScheduleInformation {
         else
             return getTrips().get(getTrips().size() - 1).getDepartureTime();
     }
-
-    private int aveTripLength = -1;
-    private int tripCount = 0;
 
     public int getAverageTripLength() {
         if (aveTripLength < 0) {

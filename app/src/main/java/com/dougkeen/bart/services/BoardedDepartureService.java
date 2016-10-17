@@ -28,6 +28,24 @@ public class BoardedDepartureService extends Service implements
 
     private static final int DEPARTURE_NOTIFICATION_ID = 123;
 
+    private final ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mEtdService = null;
+            mBound = false;
+        }
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mEtdService = ((EtdServiceBinder) service).getService();
+            if (getStationPair() != null) {
+                mEtdService.registerListener(BoardedDepartureService.this,
+                        false);
+            }
+            mBound = true;
+        }
+    };
+
     private volatile Looper mServiceLooper;
     private volatile ServiceHandler mServiceHandler;
 
@@ -38,6 +56,7 @@ public class BoardedDepartureService extends Service implements
     private AlarmManager mAlarmManager;
     private Handler mHandler;
     private boolean mHasShutDown = false;
+    private long mNextScheduledCheckClockTime = 0;
 
     public BoardedDepartureService() {
         super();
@@ -61,24 +80,6 @@ public class BoardedDepartureService extends Service implements
             }
         }
     }
-
-    private final ServiceConnection mConnection = new ServiceConnection() {
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            mEtdService = null;
-            mBound = false;
-        }
-
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            mEtdService = ((EtdServiceBinder) service).getService();
-            if (getStationPair() != null) {
-                mEtdService.registerListener(BoardedDepartureService.this,
-                        false);
-            }
-            mBound = true;
-        }
-    };
 
     @Override
     public void onCreate() {
@@ -233,8 +234,6 @@ public class BoardedDepartureService extends Service implements
     public StationPair getStationPair() {
         return mStationPair;
     }
-
-    private long mNextScheduledCheckClockTime = 0;
 
     private void pollDepartureStatus() {
         final Departure boardedDeparture = ((BartRunnerApplication) getApplication())

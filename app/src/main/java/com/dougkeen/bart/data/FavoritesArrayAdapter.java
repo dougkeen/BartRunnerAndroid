@@ -59,6 +59,14 @@ public class FavoritesArrayAdapter extends ArrayAdapter<StationPair> {
         }
     };
 
+    public FavoritesArrayAdapter(Context context, int textViewResourceId,
+                                 List<StationPair> objects) {
+        super(context, textViewResourceId, objects);
+        mHostActivity = (Activity) context;
+        mHostActivity.bindService(EtdService_.intent(mHostActivity).get(),
+                mConnection, Context.BIND_AUTO_CREATE);
+    }
+
     public void setUpEtdListeners() {
         if (mBound && mEtdService != null) {
             for (int i = getCount() - 1; i >= 0; i--) {
@@ -79,14 +87,6 @@ public class FavoritesArrayAdapter extends ArrayAdapter<StationPair> {
 
     public boolean areEtdListenersActive() {
         return !mEtdListeners.isEmpty();
-    }
-
-    public FavoritesArrayAdapter(Context context, int textViewResourceId,
-                                 List<StationPair> objects) {
-        super(context, textViewResourceId, objects);
-        mHostActivity = (Activity) context;
-        mHostActivity.bindService(EtdService_.intent(mHostActivity).get(),
-                mConnection, Context.BIND_AUTO_CREATE);
     }
 
     public void close() {

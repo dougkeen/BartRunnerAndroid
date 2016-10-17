@@ -19,19 +19,24 @@ import com.dougkeen.bart.model.ScheduleItem;
 import com.dougkeen.bart.model.Station;
 
 public class ScheduleContentHandler extends DefaultHandler {
-    public ScheduleContentHandler(Station origin, Station destination) {
-        super();
-        schedule = new ScheduleInformation(origin, destination);
-    }
-
-    private final static List<String> TAGS = Arrays.asList("date", "time",
+    private static final List<String> TAGS = Arrays.asList("date", "time",
             "trip", "leg");
 
-    private final static DateFormat TRIP_DATE_FORMAT;
-    private final static DateFormat REQUEST_DATE_FORMAT;
+    private static final DateFormat TRIP_DATE_FORMAT;
+    private static final DateFormat REQUEST_DATE_FORMAT;
 
-    private final static TimeZone PACIFIC_TIME = TimeZone
+    private static final TimeZone PACIFIC_TIME = TimeZone
             .getTimeZone("America/Los_Angeles");
+
+    private ScheduleInformation schedule;
+
+    private String currentValue;
+    private boolean isParsingTag;
+
+    private String requestDate;
+    private String requestTime;
+
+    private ScheduleItem currentTrip;
 
     static {
         TRIP_DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy h:mm a");
@@ -41,19 +46,14 @@ public class ScheduleContentHandler extends DefaultHandler {
         REQUEST_DATE_FORMAT.setTimeZone(PACIFIC_TIME);
     }
 
-    private ScheduleInformation schedule;
+    public ScheduleContentHandler(Station origin, Station destination) {
+        super();
+        schedule = new ScheduleInformation(origin, destination);
+    }
 
     public ScheduleInformation getSchedule() {
         return schedule;
     }
-
-    private String currentValue;
-    private boolean isParsingTag;
-
-    private String requestDate;
-    private String requestTime;
-
-    private ScheduleItem currentTrip;
 
     @Override
     public void characters(char[] ch, int start, int length)

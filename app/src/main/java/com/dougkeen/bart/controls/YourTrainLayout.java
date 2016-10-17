@@ -25,6 +25,35 @@ public class YourTrainLayout extends FrameLayout implements Checkable {
     private final CountdownTextView departureCountdown;
     private final CountdownTextView arrivalCountdown;
     private final TextView alarmText;
+    private boolean mChecked;
+    private Departure mDeparture;
+
+    private final Observer<Integer> mAlarmLeadObserver = new Observer<Integer>() {
+        @Override
+        public void onUpdate(Integer newValue) {
+            final Activity context = (Activity) getContext();
+            if (context != null) {
+                context.runOnUiThread(mUpdateAlarmIndicatorRunnable);
+            }
+        }
+    };
+
+    private final Observer<Boolean> mAlarmPendingObserver = new Observer<Boolean>() {
+        @Override
+        public void onUpdate(Boolean newValue) {
+            final Activity context = (Activity) getContext();
+            if (context != null) {
+                context.runOnUiThread(mUpdateAlarmIndicatorRunnable);
+            }
+        }
+    };
+
+    private final Runnable mUpdateAlarmIndicatorRunnable = new Runnable() {
+        @Override
+        public void run() {
+            updateAlarmIndicator();
+        }
+    };
 
     public YourTrainLayout(Context context) {
         this(context, null);
@@ -48,30 +77,6 @@ public class YourTrainLayout extends FrameLayout implements Checkable {
         arrivalCountdown = (CountdownTextView) findViewById(R.id.yourTrainArrivalCountdown);
         alarmText = (TextView) findViewById(R.id.alarmText);
     }
-
-    private boolean mChecked;
-
-    private Departure mDeparture;
-
-    private final Observer<Integer> mAlarmLeadObserver = new Observer<Integer>() {
-        @Override
-        public void onUpdate(Integer newValue) {
-            final Activity context = (Activity) getContext();
-            if (context != null) {
-                context.runOnUiThread(mUpdateAlarmIndicatorRunnable);
-            }
-        }
-    };
-
-    private final Observer<Boolean> mAlarmPendingObserver = new Observer<Boolean>() {
-        @Override
-        public void onUpdate(Boolean newValue) {
-            final Activity context = (Activity) getContext();
-            if (context != null) {
-                context.runOnUiThread(mUpdateAlarmIndicatorRunnable);
-            }
-        }
-    };
 
     @Override
     public boolean isChecked() {
@@ -166,11 +171,4 @@ public class YourTrainLayout extends FrameLayout implements Checkable {
             alarmText.setText(String.valueOf(mDeparture.getAlarmLeadTimeMinutes()));
         }
     }
-
-    private final Runnable mUpdateAlarmIndicatorRunnable = new Runnable() {
-        @Override
-        public void run() {
-            updateAlarmIndicator();
-        }
-    };
 }

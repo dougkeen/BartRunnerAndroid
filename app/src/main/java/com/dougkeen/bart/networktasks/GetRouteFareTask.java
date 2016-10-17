@@ -19,11 +19,11 @@ import java.net.MalformedURLException;
 public abstract class GetRouteFareTask extends
         AsyncTask<GetRouteFareTask.Params, Integer, String> {
 
-    private final static int MAX_ATTEMPTS = 5;
-    private final static String FARE_URL = "http://api.bart.gov/api/sched.aspx?cmd=fare&date=today&key="
+    private static final int MAX_ATTEMPTS = 5;
+    private static final String FARE_URL = "http://api.bart.gov/api/sched.aspx?cmd=fare&date=today&key="
             + Constants.API_KEY + "&orig=%1$s&dest=%2$s";
 
-    private final static OkHttpClient client = NetworkUtils.makeHttpClient();
+    private static final OkHttpClient client = NetworkUtils.makeHttpClient();
 
     private Exception mException;
 
@@ -93,14 +93,14 @@ public abstract class GetRouteFareTask extends
     }
 
     public static class Params {
+        public final Station origin;
+        public final Station destination;
+
         public Params(Station origin, Station destination) {
             super();
             this.origin = origin;
             this.destination = destination;
         }
-
-        public final Station origin;
-        public final Station destination;
     }
 
     @Override

@@ -73,6 +73,75 @@ public class ViewDeparturesActivity extends AppCompatActivity implements
 
     private boolean mBound = false;
 
+    private boolean mWasLongClick = false;
+
+    private YourTrainLayout mYourTrainSection;
+
+    private SwipeHelper mSwipeHelper;
+
+    private final ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mEtdService = null;
+            mBound = false;
+        }
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mEtdService = ((EtdServiceBinder) service).getService();
+            mBound = true;
+            if (getStationPair() != null) {
+                mEtdService
+                        .registerListener(ViewDeparturesActivity.this, false);
+            }
+        }
+    };
+
+    private final AdapterView.OnItemClickListener mListItemClickListener = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> adapterView, View view,
+                                int position, long id) {
+            if (mWasLongClick) {
+                mWasLongClick = false;
+                return;
+            }
+
+            if (mActionMode != null) {
+                /*
+                 * If action mode is displayed, cancel out of that
+                 */
+                mActionMode.finish();
+                getListView().clearChoices();
+            } else {
+                /*
+                 * Otherwise select the clicked departure as the one the user
+                 * wants to board
+                 */
+                setBoardedDeparture(
+                        getListAdapter().getItem(position), true);
+            }
+        }
+    };
+
+    private final AdapterView.OnItemLongClickListener mListItemLongClickListener = new AdapterView.OnItemLongClickListener() {
+        @Override
+        public boolean onItemLongClick(AdapterView<?> adapterView, View view,
+                                       int position, long id) {
+            mWasLongClick = true;
+            setSelectedDeparture(getListAdapter().getItem(position));
+            startDepartureActionMode();
+            return false;
+        }
+    };
+
+    private final View.OnClickListener mYourTrainSectionClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            ((Checkable) v).setChecked(true);
+            startYourTrainActionMode();
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -252,75 +321,6 @@ public class ViewDeparturesActivity extends AppCompatActivity implements
     private ListView getListView() {
         return (ListView) findViewById(android.R.id.list);
     }
-
-    private final ServiceConnection mConnection = new ServiceConnection() {
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            mEtdService = null;
-            mBound = false;
-        }
-
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            mEtdService = ((EtdServiceBinder) service).getService();
-            mBound = true;
-            if (getStationPair() != null) {
-                mEtdService
-                        .registerListener(ViewDeparturesActivity.this, false);
-            }
-        }
-    };
-
-    private boolean mWasLongClick = false;
-
-    private final AdapterView.OnItemClickListener mListItemClickListener = new AdapterView.OnItemClickListener() {
-        @Override
-        public void onItemClick(AdapterView<?> adapterView, View view,
-                                int position, long id) {
-            if (mWasLongClick) {
-                mWasLongClick = false;
-                return;
-            }
-
-            if (mActionMode != null) {
-                /*
-                 * If action mode is displayed, cancel out of that
-                 */
-                mActionMode.finish();
-                getListView().clearChoices();
-            } else {
-                /*
-                 * Otherwise select the clicked departure as the one the user
-                 * wants to board
-                 */
-                setBoardedDeparture(
-                        getListAdapter().getItem(position), true);
-            }
-        }
-    };
-
-    private final AdapterView.OnItemLongClickListener mListItemLongClickListener = new AdapterView.OnItemLongClickListener() {
-        @Override
-        public boolean onItemLongClick(AdapterView<?> adapterView, View view,
-                                       int position, long id) {
-            mWasLongClick = true;
-            setSelectedDeparture(getListAdapter().getItem(position));
-            startDepartureActionMode();
-            return false;
-        }
-    };
-
-    private final View.OnClickListener mYourTrainSectionClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            ((Checkable) v).setChecked(true);
-            startYourTrainActionMode();
-        }
-    };
-
-    private YourTrainLayout mYourTrainSection;
-
-    private SwipeHelper mSwipeHelper;
 
     protected DepartureArrayAdapter getListAdapter() {
         return mDeparturesAdapter;

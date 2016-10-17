@@ -7,16 +7,16 @@ public enum RoutesColumns {
             "AVE_TRIP_SAMPLE_COUNT", "INTEGER", true), AVERAGE_TRIP_LENGTH(
             "AVE_TRIP_LENGTH", "INTEGER", true);
 
+    public final String string;
+    public final String sqliteType;
+    public final Boolean nullable;
+
     // This class cannot be instantiated
     RoutesColumns(String string, String type, Boolean nullable) {
         this.string = string;
         this.sqliteType = type;
         this.nullable = nullable;
     }
-
-    public final String string;
-    public final String sqliteType;
-    public final Boolean nullable;
 
     protected String getColumnDef() {
         return string + " " + sqliteType + (nullable ? "" : " NOT NULL");
