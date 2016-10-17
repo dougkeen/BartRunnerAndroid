@@ -4,15 +4,15 @@ apply plugin: 'com.android.library'
 // so we can control how it builds without having to submit pull requests.
 
 dependencies {
-    compile 'com.android.support:support-v4:23.1.0'
+    compile 'com.android.support:support-v4:24.2.1'
 }
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.1"
+    compileSdkVersion 24
+    buildToolsVersion "24.0.3"
 
     defaultConfig {
-        targetSdkVersion 23
+        targetSdkVersion 24
     }
 
     sourceSets {
