@@ -36,7 +36,7 @@ public class FareContentHandler extends DefaultHandler {
     @Override
     public void endElement(String uri, String localName, String qName)
             throws SAXException {
-        if (localName.equals("fare")) {
+        if (localName.equals("fare") && currentValue != null) {
             fare = "$" + currentValue;
         }
         isParsingTag = false;
