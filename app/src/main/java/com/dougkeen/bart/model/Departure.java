@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.ColorInt;
@@ -595,7 +596,13 @@ public class Departure implements Parcelable, Comparable<Departure> {
 
             long alarmTime = getAlarmClockTime();
 
-            alarmManager.set(AlarmManager.RTC_WAKEUP, alarmTime, alarmIntent);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, alarmTime, alarmIntent);
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, alarmTime, alarmIntent);
+            } else {
+                alarmManager.set(AlarmManager.RTC_WAKEUP, alarmTime, alarmIntent);
+            }
 
             if (Log.isLoggable(Constants.TAG, Log.VERBOSE))
                 Log.v(Constants.TAG,
