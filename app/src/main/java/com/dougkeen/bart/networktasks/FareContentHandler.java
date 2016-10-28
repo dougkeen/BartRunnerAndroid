@@ -4,13 +4,14 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class FareContentHandler extends DefaultHandler {
     public FareContentHandler() {
         super();
     }
 
-    private String currentValue;
-    private boolean isParsingTag;
     private String fare;
 
     public String getFare() {
@@ -18,29 +19,16 @@ public class FareContentHandler extends DefaultHandler {
     }
 
     @Override
-    public void characters(char[] ch, int start, int length)
-            throws SAXException {
-        if (isParsingTag) {
-            currentValue = new String(ch, start, length);
-        }
-    }
-
-    @Override
     public void startElement(String uri, String localName, String qName,
                              Attributes attributes) throws SAXException {
         if (localName.equals("fare")) {
-            isParsingTag = true;
+            Map<String, String> attributeMap = new HashMap<>();
+            for (int i = attributes.getLength() - 1; i >= 0; i--) {
+                attributeMap.put(attributes.getLocalName(i), attributes.getValue(i));
+            }
+            if (attributeMap.containsKey("class") && attributeMap.get("class").equals("cash")) {
+                fare = "$" + attributeMap.get("amount");
+            }
         }
     }
-
-    @Override
-    public void endElement(String uri, String localName, String qName)
-            throws SAXException {
-        if (localName.equals("fare") && currentValue != null) {
-            fare = "$" + currentValue;
-        }
-        isParsingTag = false;
-        currentValue = null;
-    }
-
 }
