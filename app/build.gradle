@@ -9,15 +9,15 @@ dependencies {
     compile 'org.springframework.android:spring-android-rest-template:1.0.1.RELEASE'
     compile 'com.squareup.okhttp:okhttp:2.5.0'
 
-    compile 'com.android.support:appcompat-v7:24.2.1'
+    compile 'com.android.support:appcompat-v7:25.0.0'
 
     apt 'com.googlecode.androidannotations:androidannotations:2.7'
     compile "com.googlecode.androidannotations:androidannotations-api:2.7"
 }
 
 android {
-    compileSdkVersion 24
-    buildToolsVersion "24.0.3"
+    compileSdkVersion 25
+    buildToolsVersion "25.0.0"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
@@ -25,11 +25,11 @@ android {
     }
 
     defaultConfig {
-        versionName "2.2.7"
-        versionCode 34
+        versionName "2.2.8"
+        versionCode 35
 
         minSdkVersion 14
-        targetSdkVersion 24
+        targetSdkVersion 25
     }
 
     buildTypes {
