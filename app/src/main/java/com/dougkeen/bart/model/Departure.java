@@ -17,6 +17,7 @@ import android.util.Log;
 import com.dougkeen.bart.BartRunnerApplication;
 import com.dougkeen.bart.R;
 import com.dougkeen.bart.activities.ViewDeparturesActivity;
+import com.dougkeen.bart.receivers.AlarmBroadcastReceiver;
 import com.dougkeen.bart.services.BoardedDepartureService;
 import com.dougkeen.util.Observable;
 
@@ -58,7 +59,9 @@ public class Departure implements Parcelable, Comparable<Departure> {
     private Station passengerDestination;
     private Line line;
     private String destinationColor;
-    private @ColorInt int destinationColorInt;
+    private
+    @ColorInt
+    int destinationColorInt;
     private String platform;
     private String direction;
     private boolean bikeAllowed;
@@ -566,11 +569,9 @@ public class Departure implements Parcelable, Comparable<Departure> {
     }
 
     private PendingIntent getAlarmIntent(Context context) {
-        Intent intent = new Intent(context, ViewDeparturesActivity.class);
-        intent.putExtra(Constants.STATION_PAIR_EXTRA, getStationPair());
+        Intent intent = new Intent(context, AlarmBroadcastReceiver.class);
         intent.setAction(Constants.ACTION_ALARM);
-        return PendingIntent.getBroadcast(context, 0, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
+        return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     private long getAlarmClockTime() {
@@ -581,39 +582,44 @@ public class Departure implements Parcelable, Comparable<Departure> {
         return getMeanSecondsLeft() - getAlarmLeadTimeMinutes() * 60;
     }
 
-    public void setUpAlarm(int leadTimeMinutes) {
+    public void setUpAlarm(int leadTimeMinutes, Context context, AlarmManager alarmManager) {
         this.alarmLeadTimeMinutes.setValue(leadTimeMinutes);
         this.alarmPending.setValue(true);
+        scheduleAlarm(alarmManager, getAlarmIntent(context));
     }
 
     public void updateAlarm(Context context, AlarmManager alarmManager) {
-        if (alarmManager == null)
+        if (alarmManager == null) {
+            Log.w(Constants.TAG, "No alarm manager available, so alarm will not be updated");
             return;
+        }
 
         if (isAlarmPending() && getAlarmLeadTimeMinutes() > 0) {
-            final PendingIntent alarmIntent = getAlarmIntent(context);
-            alarmManager.cancel(alarmIntent);
-
-            long alarmTime = getAlarmClockTime();
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, alarmTime, alarmIntent);
-            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                alarmManager.setExact(AlarmManager.RTC_WAKEUP, alarmTime, alarmIntent);
-            } else {
-                alarmManager.set(AlarmManager.RTC_WAKEUP, alarmTime, alarmIntent);
-            }
-
-            if (Log.isLoggable(Constants.TAG, Log.VERBOSE))
-                Log.v(Constants.TAG,
-                        "Scheduling alarm for "
-                                + DateFormatUtils.format(alarmTime, "h:mm:ss"));
+            scheduleAlarm(alarmManager, getAlarmIntent(context));
         }
+    }
+
+    private void scheduleAlarm(AlarmManager alarmManager, PendingIntent alarmIntent) {
+        long alarmTime = getAlarmClockTime();
+
+        if (alarmTime < System.currentTimeMillis()
+                || Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            alarmManager.set(AlarmManager.RTC_WAKEUP, alarmTime, alarmIntent);
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, alarmTime, alarmIntent);
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, alarmTime, alarmIntent);
+        } else {
+            Log.e(Constants.TAG, "Could not find a suitable method for scheduling an alarm");
+        }
+
+        Log.v(Constants.TAG, "Scheduling alarm for " + DateFormatUtils.format(alarmTime, "h:mm:ss"));
     }
 
     public void cancelAlarm(Context context, AlarmManager alarmManager) {
         alarmManager.cancel(getAlarmIntent(context));
         this.alarmPending.setValue(false);
+        Log.d(Constants.TAG, "Alarm cancelled");
     }
 
     private PendingIntent notificationIntent;

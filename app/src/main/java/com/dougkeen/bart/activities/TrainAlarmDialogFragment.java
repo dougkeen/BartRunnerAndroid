@@ -1,6 +1,7 @@
 package com.dougkeen.bart.activities;
 
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -91,7 +92,7 @@ public class TrainAlarmDialogFragment extends DialogFragment {
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog,
-                                    int which) {
+                                                int which) {
                                 NumberPicker numberPicker = (NumberPicker) getDialog()
                                         .findViewById(R.id.numberPicker);
                                 final int alarmLeadTime = numberPicker.getValue();
@@ -101,12 +102,16 @@ public class TrainAlarmDialogFragment extends DialogFragment {
                                         Context.MODE_PRIVATE).edit();
                                 editor.putInt(KEY_LAST_ALARM_LEAD_TIME,
                                         alarmLeadTime);
-                                editor.commit();
+                                editor.apply();
 
-                                ((BartRunnerApplication) getActivity()
-                                        .getApplication())
-                                        .getBoardedDeparture().setUpAlarm(
-                                        alarmLeadTime);
+                                BartRunnerApplication application =
+                                        (BartRunnerApplication) getActivity().getApplication();
+                                application.getBoardedDeparture().setUpAlarm(
+                                        alarmLeadTime,
+                                        application,
+                                        (AlarmManager) getActivity()
+                                                .getSystemService(Context.ALARM_SERVICE)
+                                );
                             }
                         })
                 .setNegativeButton(R.string.cancel,
