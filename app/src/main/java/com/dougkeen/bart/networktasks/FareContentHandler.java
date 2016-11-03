@@ -26,7 +26,9 @@ public class FareContentHandler extends DefaultHandler {
             for (int i = attributes.getLength() - 1; i >= 0; i--) {
                 attributeMap.put(attributes.getLocalName(i), attributes.getValue(i));
             }
-            if (attributeMap.containsKey("class") && attributeMap.get("class").equals("cash")) {
+            if (attributeMap.containsKey("class")
+                    && attributeMap.get("class").equals("cash")
+                    && attributeMap.get("amount") != null) {
                 fare = "$" + attributeMap.get("amount");
             }
         }

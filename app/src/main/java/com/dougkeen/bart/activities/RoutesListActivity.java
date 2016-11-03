@@ -197,15 +197,13 @@ public class RoutesListActivity extends AppCompatActivity implements TickSubscri
             lastUpdate.setTimeZone(PACIFIC_TIME);
 
             // Update every day
-            if (now.get(Calendar.DAY_OF_YEAR) != lastUpdate
-                    .get(Calendar.DAY_OF_YEAR)
+            if (now.get(Calendar.DAY_OF_YEAR) != lastUpdate.get(Calendar.DAY_OF_YEAR)
                     || now.get(Calendar.YEAR) != lastUpdate.get(Calendar.YEAR)) {
                 GetRouteFareTask fareTask = new GetRouteFareTask() {
                     @Override
                     public void onResult(String fare) {
                         stationPair.setFare(fare);
-                        stationPair.setFareLastUpdated(System
-                                .currentTimeMillis());
+                        stationPair.setFareLastUpdated(System.currentTimeMillis());
                         getListAdapter().notifyDataSetChanged();
                     }
 
