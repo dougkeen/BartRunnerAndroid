@@ -751,9 +751,7 @@ public class ViewDeparturesActivity extends AppCompatActivity implements
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                // TODO(fuegofro) - see if there's a way to not use toasts
-                Toast.makeText(ViewDeparturesActivity.this, errorMessage,
-                        Toast.LENGTH_LONG).show();
+                mEmptyView.setText(errorMessage);
             }
         });
     }
