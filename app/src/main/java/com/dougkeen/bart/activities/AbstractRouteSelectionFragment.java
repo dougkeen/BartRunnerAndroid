@@ -14,6 +14,8 @@ import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -80,6 +82,16 @@ public abstract class AbstractRouteSelectionFragment extends DialogFragment {
                 .findViewById(R.id.destination_spinner);
         destinationSpinner.setAdapter(destinationSpinnerAdapter);
         destinationSpinner.setSelection(lastSelectedDestinationPosition);
+
+        final ImageButton swapButton = (ImageButton) dialog.findViewById(R.id.swap_button);
+        swapButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int destinationSelection = destinationSpinner.getSelectedItemPosition();
+                destinationSpinner.setSelection(originSpinner.getSelectedItemPosition());
+                originSpinner.setSelection(destinationSelection);
+            }
+        });
     }
 
     @NonNull
