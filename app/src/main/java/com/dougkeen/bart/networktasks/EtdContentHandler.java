@@ -27,7 +27,7 @@ public class EtdContentHandler extends DefaultHandler {
 
     private final static List<String> TAGS = Arrays.asList("date", "time",
             "abbreviation", "minutes", "platform", "direction", "length",
-            "color", "hexcolor", "bikeflag", "destination");
+            "color", "hexcolor", "bikeflag", "destination", "error");
 
     private RealTimeDepartures realTimeDepartures;
 
@@ -41,6 +41,7 @@ public class EtdContentHandler extends DefaultHandler {
     private String currentValue;
     private Departure currentDeparture;
     private boolean isParsingTag;
+    private String error;
 
     @Override
     public void characters(char[] ch, int start, int length)
@@ -125,8 +126,14 @@ public class EtdContentHandler extends DefaultHandler {
             currentDestinationAbbreviation = null;
         } else if (localName.equals("station")) {
             realTimeDepartures.finalizeDeparturesList();
+        } else if (localName.equals("error")) {
+            error = currentValue;
         }
         isParsingTag = false;
         currentValue = null;
+    }
+
+    public String getError() {
+        return error;
     }
 }

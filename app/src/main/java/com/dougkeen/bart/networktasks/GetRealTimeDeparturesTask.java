@@ -111,6 +111,12 @@ public abstract class GetRealTimeDeparturesTask extends
             }
             final RealTimeDepartures realTimeDepartures = handler
                     .getRealTimeDepartures();
+
+            if (handler.getError() != null) {
+                mException = new BartApiException("BART's systems are reporting a problem:\n\"" + handler.getError() + "\"");
+                return null;
+            }
+
             return realTimeDepartures;
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);

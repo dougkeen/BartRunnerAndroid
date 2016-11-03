@@ -25,6 +25,7 @@ import com.dougkeen.bart.model.ScheduleInformation;
 import com.dougkeen.bart.model.ScheduleItem;
 import com.dougkeen.bart.model.Station;
 import com.dougkeen.bart.model.StationPair;
+import com.dougkeen.bart.networktasks.BartApiException;
 import com.dougkeen.bart.networktasks.GetRealTimeDeparturesTask;
 import com.dougkeen.bart.networktasks.GetScheduleInformationTask;
 import com.googlecode.androidannotations.annotations.EService;
@@ -115,6 +116,8 @@ public class EtdService extends Service {
         private List<Departure> mLatestDepartures;
         private ScheduleInformation mLatestScheduleInfo;
 
+        private String mLatestDepartureError;
+
         private AsyncTask<StationPair, Integer, RealTimeDepartures> mGetDeparturesTask;
         private AsyncTask<StationPair, Integer, ScheduleInformation> mGetScheduleInformationTask;
 
@@ -138,6 +141,12 @@ public class EtdService extends Service {
             if (!mPendingEtdRequest) {
                 mStarted = true;
                 fetchLatestDepartures();
+            }
+            // Replay ETD or error event
+            if (!mLatestDepartures.isEmpty()) {
+                listener.onETDChanged(mLatestDepartures);
+            } else if (mLatestDepartureError != null) {
+                listener.onError(mLatestDepartureError);
             }
         }
 
@@ -195,6 +204,7 @@ public class EtdService extends Service {
                     mIgnoreDepartureDirection) {
                 @Override
                 public void onResult(RealTimeDepartures result) {
+                    mLatestDepartureError = null;
                     Log.v(Constants.TAG, "Processing data from server");
                     processLatestDepartures(result);
                     Log.v(Constants.TAG, "Done processing data from server");
@@ -205,7 +215,14 @@ public class EtdService extends Service {
                 @Override
                 public void onError(Exception e) {
                     Log.w(Constants.TAG, e.getMessage(), e);
-                    notifyListenersOfError(getString(R.string.could_not_connect));
+
+                    if (e instanceof BartApiException) {
+                        mLatestDepartureError = e.getMessage();
+                    } else {
+                        mLatestDepartureError = getString(R.string.could_not_connect);
+                    }
+                    notifyListenersOfError(mLatestDepartureError);
+
                     // Try again in 60s
                     scheduleDepartureFetch(60000);
                     notifyListenersOfRequestEnd();
