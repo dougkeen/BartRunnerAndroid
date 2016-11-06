@@ -1,19 +1,15 @@
 package com.dougkeen.bart.activities;
 
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.graphics.drawable.VectorDrawableCompat;
-import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.ImageView;
 
+import com.davemorrissey.labs.subscaleview.ImageSource;
+import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
 import com.dougkeen.bart.R;
 
-import uk.co.senab.photoview.PhotoView;
-import uk.co.senab.photoview.PhotoViewAttacher;
 
 public class ViewMapActivity extends AppCompatActivity {
 
@@ -21,18 +17,14 @@ public class ViewMapActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        PhotoView photoView = new PhotoView(this);
+        SubsamplingScaleImageView photoView = new SubsamplingScaleImageView(this);
 
         setContentView(photoView);
 
-        Drawable map = ResourcesCompat.getDrawable(getResources(), R.drawable.map, null);
-        photoView.setImageDrawable(map);
-
-        PhotoViewAttacher attacher = new PhotoViewAttacher(photoView);
-        attacher.setScaleType(ImageView.ScaleType.FIT_CENTER);
-
-        getSupportActionBar().setHomeButtonEnabled(true);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        photoView.setImage(ImageSource.resource(R.drawable.map).dimensions(2279, 2075),
+                ImageSource.resource(R.drawable.map_preview));
+        photoView.setMinimumDpi(320);
+        photoView.setDoubleTapZoomDpi(480);
     }
 
     @Override
