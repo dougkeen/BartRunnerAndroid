@@ -53,7 +53,7 @@ import com.dougkeen.util.Assert;
 import com.dougkeen.util.Observer;
 import com.dougkeen.util.WakeLocker;
 
-public class ViewDeparturesActivity extends AppCompatActivity implements
+public class ViewDeparturesActivity extends AbstractViewActivity implements
         EtdServiceListener {
 
     private StationPair mStationPair;
