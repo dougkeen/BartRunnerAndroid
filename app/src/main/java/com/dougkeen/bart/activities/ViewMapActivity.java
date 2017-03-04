@@ -13,7 +13,7 @@ import com.dougkeen.bart.R;
 import com.dougkeen.util.Assert;
 
 
-public class ViewMapActivity extends AppCompatActivity {
+public class ViewMapActivity extends AbstractViewActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -9,10 +9,13 @@ import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ObjectUtils;
 
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.Application;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.media.MediaPlayer;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.util.Log;
 
@@ -26,10 +29,14 @@ import com.googlecode.androidannotations.annotations.Bean;
 import com.googlecode.androidannotations.annotations.EApplication;
 
 @EApplication
-public class BartRunnerApplication extends Application {
+public class BartRunnerApplication extends Application implements
+        Application.ActivityLifecycleCallbacks {
+
     private static final int FIVE_MINUTES = 5 * 60 * 1000;
 
     private static final String CACHE_FILE_NAME = "lastBoardedDeparture";
+    private static final String PREFS_NAME = "prefs_bart_runner";
+    private static final String PREFS_ACTIVITY_TIMESTAMP = "prefs_activity_timestamp";
 
     private Departure mBoardedDeparture;
 
@@ -38,6 +45,8 @@ public class BartRunnerApplication extends Application {
     private boolean mAlarmSounding;
 
     private MediaPlayer mAlarmMediaPlayer;
+
+    private SharedPreferences mApplicationPreferences;
 
     private static Context context;
 
@@ -92,6 +101,8 @@ public class BartRunnerApplication extends Application {
     public void onCreate() {
         super.onCreate();
         context = getApplicationContext();
+        mApplicationPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        registerActivityLifecycleCallbacks(this);
     }
 
     public static Context getAppContext() {
@@ -221,5 +232,47 @@ public class BartRunnerApplication extends Application {
 
     public void setAlarmMediaPlayer(MediaPlayer alarmMediaPlayer) {
         this.mAlarmMediaPlayer = alarmMediaPlayer;
+    }
+
+    public void setActivityTimestamp(long timestamp) {
+        mApplicationPreferences.edit().putLong(PREFS_ACTIVITY_TIMESTAMP, timestamp).apply();
+    }
+
+    public long getActivityTimestamp() {
+        return mApplicationPreferences.getLong(PREFS_ACTIVITY_TIMESTAMP, 0L);
+    }
+
+
+    @Override
+    public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+    }
+
+    @Override
+    public void onActivityStarted(Activity activity) {
+
+    }
+
+    @Override
+    public void onActivityResumed(Activity activity) {
+        setActivityTimestamp(System.currentTimeMillis());
+    }
+
+    @Override
+    public void onActivityPaused(Activity activity) {
+
+    }
+
+    @Override
+    public void onActivityStopped(Activity activity) {
+    }
+
+    @Override
+    public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
+
+    }
+
+    @Override
+    public void onActivityDestroyed(Activity activity) {
+
     }
 }
