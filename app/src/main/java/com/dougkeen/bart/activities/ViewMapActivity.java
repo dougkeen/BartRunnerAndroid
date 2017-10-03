@@ -7,10 +7,9 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import com.davemorrissey.labs.subscaleview.ImageSource;
-import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
 import com.dougkeen.bart.R;
 import com.dougkeen.util.Assert;
+import com.github.chrisbanes.photoview.PhotoView;
 
 
 public class ViewMapActivity extends AbstractViewActivity {
@@ -22,14 +21,11 @@ public class ViewMapActivity extends AbstractViewActivity {
         supportActionBar.setHomeButtonEnabled(true);
         supportActionBar.setDisplayHomeAsUpEnabled(true);
 
-        SubsamplingScaleImageView photoView = new SubsamplingScaleImageView(this);
+        PhotoView photoView = new PhotoView(this);
 
         setContentView(photoView);
 
-        photoView.setImage(ImageSource.resource(R.drawable.map).dimensions(2279, 2075),
-                ImageSource.resource(R.drawable.map_preview));
-        photoView.setMinimumDpi(320);
-        photoView.setDoubleTapZoomDpi(480);
+        photoView.setImageResource(R.drawable.map);
     }
 
     @Override
