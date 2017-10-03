@@ -6,15 +6,16 @@ import android.util.Xml;
 
 import com.dougkeen.bart.model.Constants;
 import com.dougkeen.bart.model.Station;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public abstract class GetRouteFareTask extends
         AsyncTask<GetRouteFareTask.Params, Integer, String> {
@@ -66,9 +67,7 @@ public abstract class GetRouteFareTask extends
             Xml.parse(xml, handler);
             fare = handler.getFare();
             return fare;
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        } catch (UnsupportedEncodingException e) {
+        } catch (MalformedURLException | UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
             if (attemptNumber < MAX_ATTEMPTS - 1) {

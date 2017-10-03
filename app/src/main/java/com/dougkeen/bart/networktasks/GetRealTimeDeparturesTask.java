@@ -13,9 +13,10 @@ import com.dougkeen.bart.model.Constants;
 import com.dougkeen.bart.model.RealTimeDepartures;
 import com.dougkeen.bart.model.Route;
 import com.dougkeen.bart.model.StationPair;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public abstract class GetRealTimeDeparturesTask extends
         AsyncTask<StationPair, Integer, RealTimeDepartures> {
@@ -82,8 +83,7 @@ public abstract class GetRealTimeDeparturesTask extends
             }
 
 
-            Request request = new Request.Builder()
-                    .url(url).build();
+            Request request = new Request.Builder().url(url).build();
 
             EtdContentHandler handler = new EtdContentHandler(
                     params.getOrigin(), params.getDestination(), mRoutes);
@@ -118,9 +118,7 @@ public abstract class GetRealTimeDeparturesTask extends
             }
 
             return realTimeDepartures;
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        } catch (UnsupportedEncodingException e) {
+        } catch (MalformedURLException | UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
             if (attemptNumber < MAX_ATTEMPTS - 1) {

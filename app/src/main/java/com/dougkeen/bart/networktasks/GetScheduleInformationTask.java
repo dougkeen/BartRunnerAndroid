@@ -7,9 +7,10 @@ import android.util.Xml;
 import com.dougkeen.bart.model.Constants;
 import com.dougkeen.bart.model.ScheduleInformation;
 import com.dougkeen.bart.model.StationPair;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 import org.xml.sax.SAXException;
 
@@ -70,11 +71,8 @@ public abstract class GetScheduleInformationTask extends
             }
 
             Xml.parse(xml, handler);
-            final ScheduleInformation schedule = handler.getSchedule();
-            return schedule;
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        } catch (UnsupportedEncodingException e) {
+            return handler.getSchedule();
+        } catch (MalformedURLException | UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
             if (attemptNumber < MAX_ATTEMPTS - 1) {
