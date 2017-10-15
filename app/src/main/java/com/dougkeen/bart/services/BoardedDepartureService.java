@@ -17,6 +17,7 @@ import android.os.Message;
 import android.support.v4.app.NotificationManagerCompat;
 
 import com.dougkeen.bart.BartRunnerApplication;
+import com.dougkeen.bart.model.Constants;
 import com.dougkeen.bart.model.Departure;
 import com.dougkeen.bart.model.StationPair;
 import com.dougkeen.bart.services.EtdService.EtdServiceBinder;
@@ -140,11 +141,11 @@ public class BoardedDepartureService extends Service implements
             return;
         }
         if (intent.getBooleanExtra("cancelNotifications", false)
-                || intent.getBooleanExtra("clearBoardedDeparture", false)) {
+                || intent.getBooleanExtra(Constants.CLEAR_DEPARTURE, false)) {
             // We want to cancel the alarm
             boardedDeparture
                     .cancelAlarm(getApplicationContext(), mAlarmManager);
-            if (intent.getBooleanExtra("clearBoardedDeparture", false)) {
+            if (intent.getBooleanExtra(Constants.CLEAR_DEPARTURE, false)) {
                 application.setBoardedDeparture(null);
                 shutDown(false);
             } else {

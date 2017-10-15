@@ -637,12 +637,26 @@ public class Departure implements Parcelable, Comparable<Departure> {
         return notificationIntent;
     }
 
+    private PendingIntent deleteNotificationIntent;
+
+    private PendingIntent getDeleteNotificationIntent(Context context) {
+        if (deleteNotificationIntent == null) {
+            Intent targetIntent = new Intent(context,
+                    BoardedDepartureService.class);
+            targetIntent.putExtra(Constants.CLEAR_DEPARTURE, true);
+            deleteNotificationIntent = PendingIntent.getService(context, 0,
+                    targetIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        }
+        return deleteNotificationIntent;
+    }
+
     public Notification createNotification(Context context) {
         final int halfMinutes = (getMeanSecondsLeft() + 15) / 30;
         float minutes = halfMinutes / 2f;
         final String minutesText = (minutes < 1) ? "Less than one minute"
                 : (String.format("~%.1f minute", minutes) + ((minutes != 1.0) ? "s"
                 : ""));
+        final String directionText = getOrigin().shortName + " to " + getPassengerDestination().shortName;
 
         final Intent cancelAlarmIntent = new Intent(context,
                 BoardedDepartureService.class);
@@ -650,15 +664,16 @@ public class Departure implements Parcelable, Comparable<Departure> {
         String title = getOrigin().shortName + " to " + getPassengerDestination().shortName;
 
         Builder notificationBuilder = new NotificationCompat.Builder(context)
-                .setOngoing(true)
                 .setSmallIcon(R.drawable.ic_stat_notification)
-                .setContentTitle(title)
-                .setContentIntent(getNotificationIntent(context)).setWhen(0);
+                .setContentTitle(minutesText + " until departure")
+                .setContentIntent(getNotificationIntent(context))
+                .setDeleteIntent(getDeleteNotificationIntent(context))
+                .setWhen(0);
 
         if (android.os.Build.VERSION.SDK_INT >= 16) {
             notificationBuilder
                     .setPriority(NotificationCompat.PRIORITY_HIGH)
-                    .setContentText(minutesText + " until departure");
+                    .setContentText(directionText);
 
             if (isAlarmPending()) {
                 PendingIntent pendingIntent = PendingIntent.getService(
@@ -670,13 +685,12 @@ public class Departure implements Parcelable, Comparable<Departure> {
                         .setSubText(subText);
             }
         } else if (isAlarmPending()) {
-            String text = minutesText
-                    + " to departure (alarm at " + getAlarmLeadTimeMinutes()
+            notificationBuilder.setContentText(directionText
+                    + " (alarm at " + getAlarmLeadTimeMinutes()
                     + " min" + ((getAlarmLeadTimeMinutes() == 1) ? "" : "s")
-                    + ")";
-            notificationBuilder.setContentText(text);
+                    + ")");
         } else {
-            notificationBuilder.setContentText(minutesText + " until departure");
+            notificationBuilder.setContentText(directionText);
         }
 
         return notificationBuilder.build();
