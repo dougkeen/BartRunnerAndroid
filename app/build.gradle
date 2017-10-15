@@ -10,15 +10,16 @@ dependencies {
     compile 'com.squareup.okhttp3:okhttp:3.9.0'
     compile 'com.github.chrisbanes:PhotoView:2.0.0'
 
-    compile 'com.android.support:appcompat-v7:25.0.0'
+    compile 'com.android.support:support-v4:26.1.0'
+    compile 'com.android.support:appcompat-v7:26.1.0'
 
     apt 'com.googlecode.androidannotations:androidannotations:2.7'
     compile "com.googlecode.androidannotations:androidannotations-api:2.7"
 }
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion '25.0.2'
+    compileSdkVersion 26
+    buildToolsVersion '26.0.2'
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
