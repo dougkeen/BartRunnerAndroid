@@ -48,5 +48,7 @@
     <string name="arrival_message">I\'ll be arriving at %1$s around %2$s</string>
     <string name="share_arrival_time">Share arrival time</string>
     <string name="minutes_before_departure">minutes before departure</string>
+    <string name="notification_channel_id">BART_Runner_notifications</string>
+    <string name="notification_channel_name">BART Runner departure notifications</string>
 
 </resources>

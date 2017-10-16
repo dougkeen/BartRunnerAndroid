@@ -4,11 +4,14 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 
 import android.app.AlarmManager;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -17,6 +20,7 @@ import android.os.Message;
 import android.support.v4.app.NotificationManagerCompat;
 
 import com.dougkeen.bart.BartRunnerApplication;
+import com.dougkeen.bart.R;
 import com.dougkeen.bart.model.Constants;
 import com.dougkeen.bart.model.Departure;
 import com.dougkeen.bart.model.StationPair;
@@ -95,6 +99,16 @@ public class BoardedDepartureService extends Service implements
         mNotificationManager = NotificationManagerCompat.from(this);
         mAlarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         mHandler = new Handler();
+
+        if (Build.VERSION.SDK_INT >= 26) {
+            NotificationChannel channel = new NotificationChannel(
+                    this.getString(R.string.notification_channel_id),
+                    this.getString(R.string.notification_channel_name),
+                    NotificationManager.IMPORTANCE_DEFAULT);
+            NotificationManager notificationManager = this.getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+
         super.onCreate();
     }
 

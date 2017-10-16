@@ -663,7 +663,8 @@ public class Departure implements Parcelable, Comparable<Departure> {
         cancelAlarmIntent.putExtra("cancelNotifications", true);
         String title = getOrigin().shortName + " to " + getPassengerDestination().shortName;
 
-        Builder notificationBuilder = new NotificationCompat.Builder(context)
+        final String channelId = context.getString(R.string.notification_channel_id);
+        Builder notificationBuilder = new NotificationCompat.Builder(context, channelId)
                 .setSmallIcon(R.drawable.ic_stat_notification)
                 .setContentTitle(minutesText + " until departure")
                 .setContentIntent(getNotificationIntent(context))
