@@ -672,9 +672,7 @@ public class Departure implements Parcelable, Comparable<Departure> {
                 .setWhen(0);
 
         if (android.os.Build.VERSION.SDK_INT >= 16) {
-            notificationBuilder
-                    .setPriority(NotificationCompat.PRIORITY_HIGH)
-                    .setContentText(directionText);
+            notificationBuilder.setContentText(directionText);
 
             if (isAlarmPending()) {
                 PendingIntent pendingIntent = PendingIntent.getService(

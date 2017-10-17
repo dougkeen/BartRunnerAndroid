@@ -1,8 +1,5 @@
 package com.dougkeen.bart.services;
 
-import java.lang.ref.WeakReference;
-import java.util.List;
-
 import android.app.AlarmManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -27,6 +24,9 @@ import com.dougkeen.bart.model.StationPair;
 import com.dougkeen.bart.services.EtdService.EtdServiceBinder;
 import com.dougkeen.bart.services.EtdService.EtdServiceListener;
 import com.dougkeen.util.Observer;
+
+import java.lang.ref.WeakReference;
+import java.util.List;
 
 public class BoardedDepartureService extends Service implements
         EtdServiceListener {
@@ -105,6 +105,8 @@ public class BoardedDepartureService extends Service implements
                     this.getString(R.string.notification_channel_id),
                     this.getString(R.string.notification_channel_name),
                     NotificationManager.IMPORTANCE_DEFAULT);
+            channel.enableLights(false);
+            channel.enableVibration(false);
             NotificationManager notificationManager = this.getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
         }
