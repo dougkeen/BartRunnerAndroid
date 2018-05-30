@@ -28,7 +28,7 @@ import com.dougkeen.bart.model.StationPair;
 import com.dougkeen.bart.networktasks.BartApiException;
 import com.dougkeen.bart.networktasks.GetRealTimeDeparturesTask;
 import com.dougkeen.bart.networktasks.GetScheduleInformationTask;
-import com.googlecode.androidannotations.annotations.EService;
+import org.androidannotations.annotations.EService;
 
 @EService
 public class EtdService extends Service {

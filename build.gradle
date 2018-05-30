@@ -2,11 +2,10 @@
 buildscript {
     repositories {
         jcenter()
+        google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.3'
-        // Used for annotation processing needed by the AndroidAnnotations library
-        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.6'
+        classpath 'com.android.tools.build:gradle:3.1.2'
     }
 }
 

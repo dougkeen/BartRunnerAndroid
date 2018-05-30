@@ -1,8 +1,9 @@
 package com.dougkeen.bart.networktasks;
 
 import com.dougkeen.bart.model.Constants;
-import com.googlecode.androidannotations.annotations.rest.Get;
-import com.googlecode.androidannotations.annotations.rest.Rest;
+
+import org.androidannotations.rest.spring.annotations.Get;
+import org.androidannotations.rest.spring.annotations.Rest;
 
 @Rest(rootUrl = "http://api.bart.gov", converters = {ElevatorMessageConverter.class})
 public interface ElevatorClient {

@@ -14,7 +14,7 @@ import com.dougkeen.bart.BartRunnerApplication;
 import com.dougkeen.bart.model.StationPair;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.googlecode.androidannotations.annotations.EBean;
+import org.androidannotations.annotations.EBean;
 
 @EBean
 public class FavoritesPersistence {

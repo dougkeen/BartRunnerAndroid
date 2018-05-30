@@ -1,8 +1,5 @@
 package com.dougkeen.bart.activities;
 
-import java.util.Calendar;
-import java.util.TimeZone;
-
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -34,18 +31,22 @@ import com.dougkeen.bart.model.StationPair;
 import com.dougkeen.bart.networktasks.AlertsClient;
 import com.dougkeen.bart.networktasks.ElevatorClient;
 import com.dougkeen.bart.networktasks.GetRouteFareTask;
-import com.googlecode.androidannotations.annotations.AfterViews;
-import com.googlecode.androidannotations.annotations.App;
-import com.googlecode.androidannotations.annotations.Background;
-import com.googlecode.androidannotations.annotations.Click;
-import com.googlecode.androidannotations.annotations.EActivity;
-import com.googlecode.androidannotations.annotations.InstanceState;
-import com.googlecode.androidannotations.annotations.ItemClick;
-import com.googlecode.androidannotations.annotations.ItemLongClick;
-import com.googlecode.androidannotations.annotations.UiThread;
-import com.googlecode.androidannotations.annotations.ViewById;
-import com.googlecode.androidannotations.annotations.rest.RestService;
 import com.mobeta.android.dslv.DragSortListView;
+
+import org.androidannotations.annotations.AfterViews;
+import org.androidannotations.annotations.App;
+import org.androidannotations.annotations.Background;
+import org.androidannotations.annotations.Click;
+import org.androidannotations.annotations.EActivity;
+import org.androidannotations.annotations.InstanceState;
+import org.androidannotations.annotations.ItemClick;
+import org.androidannotations.annotations.ItemLongClick;
+import org.androidannotations.annotations.UiThread;
+import org.androidannotations.annotations.ViewById;
+import org.androidannotations.rest.spring.annotations.RestService;
+
+import java.util.Calendar;
+import java.util.TimeZone;
 
 @EActivity(R.layout.main)
 public class RoutesListActivity extends AppCompatActivity implements TickSubscriber {

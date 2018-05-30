@@ -25,8 +25,8 @@ import com.dougkeen.bart.model.Constants;
 import com.dougkeen.bart.model.Departure;
 import com.dougkeen.bart.model.Station;
 import com.dougkeen.bart.model.StationPair;
-import com.googlecode.androidannotations.annotations.Bean;
-import com.googlecode.androidannotations.annotations.EApplication;
+import org.androidannotations.annotations.Bean;
+import org.androidannotations.annotations.EApplication;
 
 @EApplication
 public class BartRunnerApplication extends Application implements
