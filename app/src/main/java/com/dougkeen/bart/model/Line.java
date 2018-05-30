@@ -25,7 +25,7 @@ public enum Line {
             Station.MONT, Station.EMBR, Station.WOAK, Station._12TH,
             Station._19TH, Station.MCAR, Station.ROCK, Station.ORIN,
             Station.LAFY, Station.WCRK, Station.PHIL, Station.CONC,
-            Station.NCON, Station.PITT),
+            Station.NCON, Station.PITT, Station.PCTR, Station.ANTC),
     BLUE(true, Station.DALY, Station.BALB, Station.GLEN, Station._24TH,
             Station._16TH, Station.CIVC, Station.POWL, Station.MONT,
             Station.EMBR, Station.WOAK, Station.LAKE, Station.FTVL,
