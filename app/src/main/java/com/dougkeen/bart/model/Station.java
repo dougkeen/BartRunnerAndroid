@@ -45,8 +45,8 @@ public enum Station {
     NCON("ncon", "North Concord/Martinez", "N Conc/Mrtnz", false, false,
             "mcar", "mcar"),
     ORIN("orin", "Orinda", "Orinda", false, false, "mcar", "mcar"),
-    PCTR("pctr", "Pittsburg Center", "Pitt Ctr", false, false, "mcar", "mcar"),
-    PITT("pitt", "Pittsburg/Bay Point", "Pitt/Bay Pt", false, false, "mcar", "mcar"),
+    PCTR("pctr", "Pittsburg Center", "Pitt Ctr", false, true, "mcar", "mcar"),
+    PITT("pitt", "Pittsburg/Bay Point", "Pitt/Bay Pt", false, true, "mcar", "mcar"),
     PHIL("phil", "Pleasant Hill", "Plsnt Hill", false, false, "mcar", "mcar"),
     POWL("powl", "Powell St.", "Powell", false, false),
     RICH("rich", "Richmond", "Richmond", false, true, "mcar", "mcar", true,
@@ -74,35 +74,35 @@ public enum Station {
     public final boolean invertDirection;
     protected final String inboundTransferStation;
     protected final String outboundTransferStation;
-    public final boolean endOfLine;
+    public final boolean ignoreRoutingDirection;
     public final boolean longStationLinger;
     public final int departureEqualityTolerance;
 
     public final static int DEFAULT_DEPARTURE_EQUALITY_TOLERANCE = 119999;
 
     Station(String abbreviation, String name, String shortName,
-            boolean invertDirection, boolean endOfLine) {
-        this(abbreviation, name, shortName, invertDirection, endOfLine, null,
+            boolean invertDirection, boolean ignoreRoutingDirection) {
+        this(abbreviation, name, shortName, invertDirection, ignoreRoutingDirection, null,
                 null, false, DEFAULT_DEPARTURE_EQUALITY_TOLERANCE);
     }
 
     Station(String abbreviation, String name, String shortName,
-            boolean invertDirection, boolean endOfLine, String transferStation) {
-        this(abbreviation, name, shortName, invertDirection, endOfLine,
+            boolean invertDirection, boolean ignoreRoutingDirection, String transferStation) {
+        this(abbreviation, name, shortName, invertDirection, ignoreRoutingDirection,
                 transferStation, null, false,
                 DEFAULT_DEPARTURE_EQUALITY_TOLERANCE);
     }
 
     Station(String abbreviation, String name, String shortName,
-            boolean invertDirection, boolean endOfLine,
+            boolean invertDirection, boolean ignoreRoutingDirection,
             String inboundTransferStation, String outboundTransferStation) {
-        this(abbreviation, name, shortName, invertDirection, endOfLine,
+        this(abbreviation, name, shortName, invertDirection, ignoreRoutingDirection,
                 inboundTransferStation, outboundTransferStation, false,
                 DEFAULT_DEPARTURE_EQUALITY_TOLERANCE);
     }
 
     Station(String abbreviation, String name, String shortName,
-            boolean invertDirection, boolean endOfLine,
+            boolean invertDirection, boolean ignoreRoutingDirection,
             String inboundTransferStation, String outboundTransferStation,
             boolean longStationLinger, int departureEqualityTolerance) {
         this.abbreviation = abbreviation;
@@ -112,7 +112,7 @@ public enum Station {
         this.inboundTransferStation = inboundTransferStation;
         this.transferFriendly = outboundTransferStation != null;
         this.outboundTransferStation = outboundTransferStation;
-        this.endOfLine = endOfLine;
+        this.ignoreRoutingDirection = ignoreRoutingDirection;
         this.longStationLinger = longStationLinger;
         this.departureEqualityTolerance = departureEqualityTolerance;
     }

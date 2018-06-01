@@ -74,7 +74,7 @@ public abstract class GetRealTimeDeparturesTask extends
         String xml = null;
         try {
             String url;
-            if (ignoreDirection || params.getOrigin().endOfLine) {
+            if (ignoreDirection || params.getOrigin().ignoreRoutingDirection) {
                 url = String.format(ETD_URL_NO_DIRECTION,
                         params.getOrigin().abbreviation);
             } else {
