@@ -305,7 +305,14 @@ public class RoutesListActivity extends AppCompatActivity implements TickSubscri
     @Background
     void fetchAlerts() {
         Log.d(TAG, "Fetching alerts");
-        AlertList alertList = alertsClient.getAlerts();
+        AlertList alertList;
+        try {
+            alertList = alertsClient.getAlerts();
+        } catch (Exception e) {
+            // Try again later
+            Log.w(TAG, "Could not fetch alerts", e);
+            return;
+        }
         if (alertList.hasAlerts()) {
             StringBuilder alertText = new StringBuilder();
             boolean firstAlert = true;
