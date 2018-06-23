@@ -668,8 +668,12 @@ public class Departure implements Parcelable, Comparable<Departure> {
                 .setSmallIcon(R.drawable.ic_stat_notification)
                 .setContentTitle(minutesText + " until departure")
                 .setContentIntent(getNotificationIntent(context))
-                .setDeleteIntent(getDeleteNotificationIntent(context))
-                .setWhen(0);
+                .setDeleteIntent(getDeleteNotificationIntent(context));
+
+        if (getMeanSecondsLeft() > 0) {
+            notificationBuilder.setWhen(System.currentTimeMillis() + getMeanSecondsLeft() * 1000)
+                    .setUsesChronometer(true);
+        }
 
         if (android.os.Build.VERSION.SDK_INT >= 16) {
             notificationBuilder.setContentText(directionText);

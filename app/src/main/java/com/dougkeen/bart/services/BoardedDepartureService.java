@@ -1,6 +1,7 @@
 package com.dougkeen.bart.services;
 
 import android.app.AlarmManager;
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
@@ -107,6 +108,7 @@ public class BoardedDepartureService extends Service implements
                     NotificationManager.IMPORTANCE_DEFAULT);
             channel.enableLights(false);
             channel.enableVibration(false);
+            channel.setSound(null, null);
             NotificationManager notificationManager = this.getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
         }
@@ -295,6 +297,7 @@ public class BoardedDepartureService extends Service implements
 
     private void shutDown(boolean isBeingDestroyed) {
         if (!mHasShutDown) {
+            stopForeground(true);
             mHasShutDown = true;
             if (mEtdService != null) {
                 mEtdService.unregisterListener(this);
@@ -318,8 +321,10 @@ public class BoardedDepartureService extends Service implements
         final Departure boardedDeparture = ((BartRunnerApplication) getApplication())
                 .getBoardedDeparture();
         if (boardedDeparture != null) {
+            Notification notification = boardedDeparture.createNotification(getApplicationContext());
             mNotificationManager.notify(DEPARTURE_NOTIFICATION_ID,
-                    boardedDeparture.createNotification(getApplicationContext()));
+                    notification);
+            startForeground(DEPARTURE_NOTIFICATION_ID, notification);
         }
     }
 
