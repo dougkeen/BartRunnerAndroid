@@ -3,6 +3,8 @@ package com.dougkeen.bart.activities;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.view.MenuItemCompat;
@@ -85,6 +87,9 @@ public class RoutesListActivity extends AppCompatActivity implements TickSubscri
     @ViewById(R.id.alertMessages)
     TextView alertMessages;
 
+    @ViewById(R.id.coordinatorLayout)
+    CoordinatorLayout coordinatorLayout;
+
     @Click(R.id.quickLookupButton)
     void quickLookupButtonClick() {
         DialogFragment dialog = new QuickRouteDialogFragment();
@@ -125,9 +130,11 @@ public class RoutesListActivity extends AppCompatActivity implements TickSubscri
 
     private DragSortListView.RemoveListener onRemove = new DragSortListView.RemoveListener() {
         @Override
-        public void remove(int which) {
-            mRoutesAdapter.remove(mRoutesAdapter.getItem(which));
+        public void remove(final int which) {
+            final StationPair stationPair = mRoutesAdapter.getItem(which);
+            mRoutesAdapter.remove(stationPair);
             mRoutesAdapter.notifyDataSetChanged();
+            showRouteDeletedSnackbar(which, stationPair);
         }
     };
 
@@ -383,6 +390,18 @@ public class RoutesListActivity extends AppCompatActivity implements TickSubscri
         mActionMode.setTitle(mCurrentlySelectedStationPair.getOrigin().name);
         mActionMode.setSubtitle("to "
                 + mCurrentlySelectedStationPair.getDestination().name);
+    }
+
+    private void showRouteDeletedSnackbar(final int which, final StationPair stationPair) {
+        Snackbar.make(coordinatorLayout, R.string.snackbar_route_deleted, Snackbar.LENGTH_LONG)
+                .setAction(R.string.undo, new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        mRoutesAdapter.insert(stationPair, which);
+                        mRoutesAdapter.notifyDataSetChanged();
+                    }
+                })
+                .show();
     }
 
     private final class RouteActionMode implements ActionMode.Callback {

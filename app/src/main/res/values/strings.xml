@@ -50,5 +50,6 @@
     <string name="minutes_before_departure">minutes before departure</string>
     <string name="notification_channel_id">BART_Runner_notifications</string>
     <string name="notification_channel_name">BART Runner departure notifications</string>
-
+    <string name="snackbar_route_deleted">Route deleted.</string>
+    <string name="undo">Undo</string>
 </resources>
