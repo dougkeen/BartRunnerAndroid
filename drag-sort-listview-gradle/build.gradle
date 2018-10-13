@@ -4,15 +4,15 @@ apply plugin: 'com.android.library'
 // so we can control how it builds without having to submit pull requests.
 
 dependencies {
-    implementation 'com.android.support:support-v4:27.1.1'
+    implementation 'com.android.support:support-v4:28.0.0'
 }
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion 28
     buildToolsVersion '28.0.2'
 
     defaultConfig {
-        targetSdkVersion 27
+        targetSdkVersion 28
         minSdkVersion = 14
     }
 
