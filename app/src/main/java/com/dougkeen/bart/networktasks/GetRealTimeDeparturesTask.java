@@ -21,9 +21,9 @@ import okhttp3.Response;
 public abstract class GetRealTimeDeparturesTask extends
         AsyncTask<StationPair, Integer, RealTimeDepartures> {
 
-    private final static String ETD_URL = "http://api.bart.gov/api/etd.aspx?cmd=etd&key="
+    private final static String ETD_URL = "https://api.bart.gov/api/etd.aspx?cmd=etd&key="
             + Constants.API_KEY + "&orig=%1$s&dir=%2$s";
-    private final static String ETD_URL_NO_DIRECTION = "http://api.bart.gov/api/etd.aspx?cmd=etd&key="
+    private final static String ETD_URL_NO_DIRECTION = "https://api.bart.gov/api/etd.aspx?cmd=etd&key="
             + Constants.API_KEY + "&orig=%1$s";
     private final static int MAX_ATTEMPTS = 5;
 

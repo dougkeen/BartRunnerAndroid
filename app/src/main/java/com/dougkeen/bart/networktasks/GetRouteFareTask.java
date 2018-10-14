@@ -21,7 +21,7 @@ public abstract class GetRouteFareTask extends
         AsyncTask<GetRouteFareTask.Params, Integer, String> {
 
     private final static int MAX_ATTEMPTS = 5;
-    private final static String FARE_URL = "http://api.bart.gov/api/sched.aspx?cmd=fare&date=today&key="
+    private final static String FARE_URL = "https://api.bart.gov/api/sched.aspx?cmd=fare&date=today&key="
             + Constants.API_KEY + "&orig=%1$s&dest=%2$s";
 
     private final static OkHttpClient client = NetworkUtils.makeHttpClient();

@@ -410,7 +410,7 @@ public class ViewDeparturesActivity extends AbstractViewActivity implements
         } else if (itemId == R.id.view_on_bart_site_button) {
             startActivity(new Intent(
                     Intent.ACTION_VIEW,
-                    Uri.parse("http://m.bart.gov/schedules/qp_results.aspx?type=departure&date=today&time="
+                    Uri.parse("https://m.bart.gov/schedules/qp_results.aspx?type=departure&date=today&time="
                             + DateFormat.format("h:mmaa",
                             System.currentTimeMillis())
                             + "&orig="

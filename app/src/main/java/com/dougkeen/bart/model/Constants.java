@@ -12,7 +12,7 @@ public class Constants {
             + AUTHORITY + "/favorites");
     public static final Uri ARBITRARY_ROUTE_CONTENT_URI_ROOT = Uri
             .parse("content://" + AUTHORITY + "/route");
-    public static final String MAP_URL = "http://m.bart.gov/images/global/system-map29.gif";
+    public static final String MAP_URL = "https://m.bart.gov/images/global/system-map29.gif";
 
     public static final String TAG = "com.dougkeen.BartRunner";
     public static final String API_KEY = "5LD9-IAYI-TRAT-MHHW";

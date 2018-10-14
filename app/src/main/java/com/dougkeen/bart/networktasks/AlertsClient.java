@@ -6,7 +6,7 @@ import com.dougkeen.bart.model.Constants;
 import org.androidannotations.rest.spring.annotations.Get;
 import org.androidannotations.rest.spring.annotations.Rest;
 
-@Rest(rootUrl = "http://api.bart.gov", converters = {AlertListConverter.class})
+@Rest(rootUrl = "https://api.bart.gov", converters = {AlertListConverter.class})
 public interface AlertsClient {
     @Get("/api/bsa.aspx?cmd=bsa&key=" + Constants.API_KEY)
     Alert.AlertList getAlerts();
