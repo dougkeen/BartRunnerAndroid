@@ -25,8 +25,12 @@ import com.dougkeen.bart.model.Constants;
 import com.dougkeen.bart.model.Departure;
 import com.dougkeen.bart.model.Station;
 import com.dougkeen.bart.model.StationPair;
+
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EApplication;
+
+import io.sentry.Sentry;
+import io.sentry.android.AndroidSentryClientFactory;
 
 @EApplication
 public class BartRunnerApplication extends Application implements
@@ -103,6 +107,8 @@ public class BartRunnerApplication extends Application implements
         context = getApplicationContext();
         mApplicationPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         registerActivityLifecycleCallbacks(this);
+
+        Sentry.init("https://cb2a611cee27437c95ee725e1f373137@sentry.io/1325487", new AndroidSentryClientFactory(context));
     }
 
     public static Context getAppContext() {
