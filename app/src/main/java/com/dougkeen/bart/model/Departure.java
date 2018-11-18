@@ -59,15 +59,17 @@ public class Departure implements Parcelable, Comparable<Departure> {
     private Station passengerDestination;
     private Line line;
     private String destinationColor;
-    private
+
     @ColorInt
-    int destinationColorInt;
+    private int destinationColorInt;
+
     private String platform;
     private String direction;
     private boolean bikeAllowed;
     private String trainLength;
     private boolean requiresTransfer;
     private boolean transferScheduled;
+    private boolean limited;
 
     private int minutes;
 
@@ -206,6 +208,14 @@ public class Departure implements Parcelable, Comparable<Departure> {
 
     public void setTransferScheduled(boolean transferScheduled) {
         this.transferScheduled = transferScheduled;
+    }
+
+    public boolean isLimited() {
+        return limited;
+    }
+
+    public void setLimited(boolean limited) {
+        this.limited = limited;
     }
 
     public int getMinutes() {
@@ -739,6 +749,7 @@ public class Departure implements Parcelable, Comparable<Departure> {
         dest.writeByte(bikeAllowed ? (byte) 1 : (byte) 0);
         dest.writeByte(requiresTransfer ? (byte) 1 : (byte) 0);
         dest.writeByte(transferScheduled ? (byte) 1 : (byte) 0);
+        dest.writeByte(limited ? (byte) 1 : (byte) 0);
     }
 
     private void readFromParcel(Parcel in) {
@@ -761,6 +772,7 @@ public class Departure implements Parcelable, Comparable<Departure> {
         bikeAllowed = in.readByte() == (byte) 1;
         requiresTransfer = in.readByte() == (byte) 1;
         transferScheduled = in.readByte() == (byte) 1;
+        limited = in.readByte() == (byte) 1;
     }
 
     public static final Parcelable.Creator<Departure> CREATOR = new Parcelable.Creator<Departure>() {

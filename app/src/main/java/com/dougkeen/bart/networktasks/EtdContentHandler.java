@@ -27,7 +27,7 @@ public class EtdContentHandler extends DefaultHandler {
 
     private final static List<String> TAGS = Arrays.asList("date", "time",
             "abbreviation", "minutes", "platform", "direction", "length",
-            "color", "hexcolor", "bikeflag", "destination", "error");
+            "color", "hexcolor", "bikeflag", "destination", "error", "limited");
 
     private RealTimeDepartures realTimeDepartures;
 
@@ -38,6 +38,7 @@ public class EtdContentHandler extends DefaultHandler {
     private String date;
     private String currentDestinationAbbreviation;
     private String currentDestinationName;
+    private boolean currentDestinationLimited = false;
     private String currentValue;
     private Departure currentDeparture;
     private boolean isParsingTag;
@@ -57,7 +58,7 @@ public class EtdContentHandler extends DefaultHandler {
         if (TAGS.contains(localName)) {
             isParsingTag = true;
         }
-        if (localName.equals("estimate")) {
+        if ("estimate".equals(localName)) {
             currentDeparture = new Departure();
             Station destination = Station.getByAbbreviation(currentDestinationAbbreviation);
             if (destination == null) {
@@ -65,35 +66,40 @@ public class EtdContentHandler extends DefaultHandler {
             }
             currentDeparture.setTrainDestination(destination);
             currentDeparture.setOrigin(realTimeDepartures.getOrigin());
+            currentDeparture.setLimited(currentDestinationLimited);
         }
     }
+
+    private boolean oscillator = false;
 
     @Override
     public void endElement(String uri, String localName, String qName)
             throws SAXException {
-        if (localName.equals("date")) {
+        if ("date".equals(localName)) {
             date = currentValue;
-        } else if (localName.equals("time")) {
+        } else if ("time".equals(localName)) {
             realTimeDepartures.setTime(Date.parse(date + " " + currentValue));
-        } else if (localName.equals("abbreviation")) {
+        } else if ("abbreviation".equals(localName)) {
             currentDestinationAbbreviation = currentValue;
-        } else if (localName.equals("destination")) {
+        } else if ("destination".equals(localName)) {
             currentDestinationName = currentValue;
-        } else if (localName.equals("minutes")) {
+        } else if ("limited".equals(localName)) {
+            currentDestinationLimited = "1".equals(currentValue);
+        } else if ("minutes".equals(localName)) {
             if (StringUtils.isNumeric(currentValue)) {
                 currentDeparture.setMinutes(Integer.parseInt(currentValue));
             } else {
                 currentDeparture.setMinutes(0);
             }
-        } else if (localName.equals("platform")) {
+        } else if ("platform".equals(localName)) {
             currentDeparture.setPlatform(currentValue);
-        } else if (localName.equals("direction")) {
+        } else if ("direction".equals(localName)) {
             currentDeparture.setDirection(currentValue);
-        } else if (localName.equals("length")) {
+        } else if ("length".equals(localName)) {
             currentDeparture.setTrainLength(currentValue);
-        } else if (localName.equals("color")) {
+        } else if ("color".equals(localName)) {
             try {
-                if (currentValue.equalsIgnoreCase("WHITE")) {
+                if ("WHITE".equalsIgnoreCase(currentValue)) {
                     for (Line line : Line.values()) {
                         if (line.stations.indexOf(currentDeparture
                                 .getTrainDestination()) >= 0
@@ -110,23 +116,23 @@ public class EtdContentHandler extends DefaultHandler {
                 Log.w(Constants.TAG, "There is no line called '" + currentValue
                         + "'");
             }
-        } else if (localName.equals("hexcolor")) {
+        } else if ("hexcolor".equals(localName)) {
             currentDeparture.setTrainDestinationColor("#ff"
                     + currentValue.substring(1));
-        } else if (localName.equals("bikeflag")) {
+        } else if ("bikeflag".equals(localName)) {
             currentDeparture.setBikeAllowed(currentValue.equalsIgnoreCase("1"));
-        } else if (localName.equals("estimate")) {
+        } else if ("estimate".equals(localName)) {
             // If we can't infer a real destination because of weird API data,
             // just skip it ¯\_(ツ)_/¯
             if (realTimeDepartures.getDestination() != null) {
                 realTimeDepartures.addDeparture(currentDeparture);
             }
             currentDeparture = null;
-        } else if (localName.equals("etd")) {
+        } else if ("etd".equals(localName)) {
             currentDestinationAbbreviation = null;
-        } else if (localName.equals("station")) {
+        } else if ("station".equals(localName)) {
             realTimeDepartures.finalizeDeparturesList();
-        } else if (localName.equals("error")) {
+        } else if ("error".equals(localName)) {
             error = currentValue;
         }
         isParsingTag = false;

@@ -28,6 +28,7 @@ import com.dougkeen.bart.model.StationPair;
 import com.dougkeen.bart.networktasks.BartApiException;
 import com.dougkeen.bart.networktasks.GetRealTimeDeparturesTask;
 import com.dougkeen.bart.networktasks.GetScheduleInformationTask;
+
 import org.androidannotations.annotations.EService;
 
 @EService
@@ -327,12 +328,9 @@ public class EtdService extends Service {
                             departuresWithoutEstimates--;
                         }
                         break;
-                    } else if (departTimeDiff <= (equalityTolerance + departure
-                            .getUncertaintySeconds() * 1000)
-                            && departure.getEstimatedTripTime() != trip
-                            .getTripLength()
-                            && !(departure.getOrigin().longStationLinger && departure
-                            .hasDeparted())) {
+                    } else if (departTimeDiff <= (equalityTolerance + departure.getUncertaintySeconds() * 1000)
+                            && departure.getEstimatedTripTime() != trip.getTripLength()
+                            && !(departure.getOrigin().longStationLinger && departure.hasDeparted())) {
                         departure.setEstimatedTripTime(trip.getTripLength());
                         lastSearchIndex = i;
                         departureUpdated = true;

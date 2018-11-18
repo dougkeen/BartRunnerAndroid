@@ -21,13 +21,13 @@ public class FareContentHandler extends DefaultHandler {
     @Override
     public void startElement(String uri, String localName, String qName,
                              Attributes attributes) throws SAXException {
-        if (localName.equals("fare")) {
+        if ("fare".equals(localName)) {
             Map<String, String> attributeMap = new HashMap<>();
             for (int i = attributes.getLength() - 1; i >= 0; i--) {
                 attributeMap.put(attributes.getLocalName(i), attributes.getValue(i));
             }
             if (attributeMap.containsKey("class")
-                    && attributeMap.get("class").equals("cash")
+                    && "cash".equals(attributeMap.get("class"))
                     && attributeMap.get("amount") != null) {
                 fare = "$" + attributeMap.get("amount");
             }

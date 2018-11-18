@@ -1,22 +1,22 @@
 package com.dougkeen.bart.networktasks;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.List;
-import java.util.TimeZone;
-
-import org.xml.sax.Attributes;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
-
 import android.util.Log;
 
 import com.dougkeen.bart.model.Constants;
 import com.dougkeen.bart.model.ScheduleInformation;
 import com.dougkeen.bart.model.ScheduleItem;
 import com.dougkeen.bart.model.Station;
+
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.List;
+import java.util.TimeZone;
 
 public class ScheduleContentHandler extends DefaultHandler {
     public ScheduleContentHandler(Station origin, Station destination) {
@@ -70,38 +70,31 @@ public class ScheduleContentHandler extends DefaultHandler {
             isParsingTag = true;
         }
         final int numberOfAttributes = attributes.getLength();
-        if (localName.equals("trip")) {
+        if ("trip".equals(localName)) {
             currentTrip = new ScheduleItem();
             String originDate = null;
             String originTime = null;
             String destinationDate = null;
             String destinationTime = null;
             for (int i = 0; i < numberOfAttributes; i++) {
-                if (attributes.getLocalName(i).equalsIgnoreCase("origin")) {
+                if ("origin".equalsIgnoreCase(attributes.getLocalName(i))) {
                     currentTrip.setOrigin(Station.getByAbbreviation(attributes
                             .getValue(i)));
-                } else if (attributes.getLocalName(i).equalsIgnoreCase(
-                        "destination")) {
+                } else if ("destination".equalsIgnoreCase(attributes.getLocalName(i))) {
                     currentTrip.setDestination(Station
                             .getByAbbreviation(attributes.getValue(i)));
-                } else if (attributes.getLocalName(i).equalsIgnoreCase("fare")) {
+                } else if ("fare".equalsIgnoreCase(attributes.getLocalName(i))) {
                     currentTrip.setFare(attributes.getValue(i));
-                } else if (attributes.getLocalName(i).equalsIgnoreCase(
-                        "origTimeMin")) {
+                } else if ("origTimeMin".equalsIgnoreCase(attributes.getLocalName(i))) {
                     originTime = attributes.getValue(i);
-                } else if (attributes.getLocalName(i).equalsIgnoreCase(
-                        "origTimeDate")) {
+                } else if ("origTimeDate".equalsIgnoreCase(attributes.getLocalName(i))) {
                     originDate = attributes.getValue(i);
-                } else if (attributes.getLocalName(i).equalsIgnoreCase(
-                        "destTimeMin")) {
+                } else if ("destTimeMin".equalsIgnoreCase(attributes.getLocalName(i))) {
                     destinationTime = attributes.getValue(i);
-                } else if (attributes.getLocalName(i).equalsIgnoreCase(
-                        "destTimeDate")) {
+                } else if ("destTimeDate".equalsIgnoreCase(attributes.getLocalName(i))) {
                     destinationDate = attributes.getValue(i);
-                } else if (attributes.getLocalName(i).equalsIgnoreCase(
-                        "bikeFlag")) {
-                    currentTrip.setBikesAllowed(attributes.getValue(i).equals(
-                            "1"));
+                } else if ("bikeFlag".equalsIgnoreCase(attributes.getLocalName(i))) {
+                    currentTrip.setBikesAllowed("1".equals(attributes.getValue(i)));
                 }
             }
 
@@ -117,13 +110,12 @@ public class ScheduleContentHandler extends DefaultHandler {
 
             schedule.addTrip(currentTrip);
         }
-        if (localName.equals("leg")) {
+        if ("leg".equals(localName)) {
             String legNumber = null;
             for (int i = 0; i < numberOfAttributes; i++) {
-                if (attributes.getLocalName(i).equals("order")) {
+                if ("order".equals(attributes.getLocalName(i))) {
                     legNumber = attributes.getValue(i);
-                } else if (attributes.getLocalName(i)
-                        .equals("trainHeadStation") && "1".equals(legNumber)) {
+                } else if ("trainHeadStation".equals(attributes.getLocalName(i)) && "1".equals(legNumber)) {
                     currentTrip.setTrainHeadStation(attributes.getValue(i)
                             .toLowerCase());
                 }
@@ -148,9 +140,9 @@ public class ScheduleContentHandler extends DefaultHandler {
     @Override
     public void endElement(String uri, String localName, String qName)
             throws SAXException {
-        if (localName.equals("date")) {
+        if ("date".equals(localName)) {
             requestDate = currentValue;
-        } else if (localName.equals("time")) {
+        } else if ("time".equals(localName)) {
             requestTime = currentValue;
         }
         isParsingTag = false;

@@ -87,8 +87,8 @@ public class RealTimeDepartures {
         if (departure.getLine() == null)
             return;
         for (Route route : routes) {
-            if (route.trainDestinationIsApplicable(destination,
-                    departure.getLine())) {
+            if (route.trainDestinationIsApplicable(destination, departure.getLine())
+                    && (route.getDestination().includedInLimitedService || !departure.isLimited())) {
                 departure.setRequiresTransfer(route.hasTransfer());
                 departure
                         .setTransferScheduled(Line.YELLOW_ORANGE_SCHEDULED_TRANSFER
