@@ -1,71 +1,176 @@
 package com.dougkeen.bart.model;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import android.util.Log;
-
 public enum Station {
-    _12TH("12th", "12th St./Oakland City Center", "12th St Oak", false, false,
-            "bayf", "bayf"),
-    _16TH("16th", "16th St. Mission", "16th St", false, false),
-    _19TH("19th", "19th St./Oakland", "19th St Oak", false, false, "bayf",
-            "bayf"),
-    _24TH("24th", "24th St. Mission", "24th St", false, false),
-    ANTC("antc", "Antioch", "Antioch", false, true, "mcar", "mcar", true, 719999),
-    ASHB("ashb", "Ashby", "Ashby", false, false, "mcar", "mcar"),
-    BALB("balb", "Balboa Park", "Balboa", false, false),
-    BAYF("bayf", "Bay Fair", "Bay Fair", true, false, "mcar", "mcar"),
-    CAST("cast", "Castro Valley", "Castro Vly", false, false, "bayf", "bayf"),
-    CIVC("civc", "Civic Center", "Civic Ctr", false, false),
-    COLS("cols", "Coliseum/Oakland Airport", "Coliseum/OAK", true, false,
-            "mcar", "mcar"),
-    COLM("colm", "Colma", "Colma", false, false, "balb", "balb"),
-    CONC("conc", "Concord", "Concord", false, false, "mcar", "mcar"),
-    DALY("daly", "Daly City", "Daly City", false, false),
-    DBRK("dbrk", "Downtown Berkeley", "Dtwn Berk", false, false, "mcar", "mcar"),
-    DUBL("dubl", "Dublin/Pleasanton", "Dbln/Plsntn", false, true, "bayf",
-            "bayf", true, 719999),
-    DELN("deln", "El Cerrito del Norte", "El Cer/Norte", false, false, "mcar",
-            "mcar"),
-    PLZA("plza", "El Cerrito Plaza", "El Cer/Plz", false, false, "mcar", "mcar"),
-    EMBR("embr", "Embarcadero", "Embarcdro", false, false),
-    FRMT("frmt", "Fremont", "Fremont", true, false, "bayf", "bayf"),
-    FTVL("ftvl", "Fruitvale", "Fruitvale", true, false, "mcar", "mcar"),
-    GLEN("glen", "Glen Park", "Glen Park", false, false),
-    HAYW("hayw", "Hayward", "Hayward", true, false, "bayf", "bayf"),
-    LAFY("lafy", "Lafayette", "Lafayette", false, false, "mcar", "mcar"),
-    LAKE("lake", "Lake Merritt", "Lk Merritt", true, false, "mcar", "mcar"),
-    MCAR("mcar", "MacArthur", "MacArthur", false, false, "bayf", "bayf"),
-    MLBR("mlbr", "Millbrae", "Millbrae", false, true, "balb", "balb", true,
-            719999),
-    MONT("mont", "Montgomery St.", "Montgomery", false, false),
-    NBRK("nbrk", "North Berkeley", "N Berkeley", false, false, "mcar", "mcar"),
-    NCON("ncon", "North Concord/Martinez", "N Conc/Mrtnz", false, false,
-            "mcar", "mcar"),
-    ORIN("orin", "Orinda", "Orinda", false, false, "mcar", "mcar"),
-    PCTR("pctr", "Pittsburg Center", "Pitt Ctr", false, true, "mcar", "mcar"),
-    PITT("pitt", "Pittsburg/Bay Point", "Pitt/Bay Pt", false, true, "mcar", "mcar"),
-    PHIL("phil", "Pleasant Hill", "Plsnt Hill", false, false, "mcar", "mcar"),
-    POWL("powl", "Powell St.", "Powell", false, false),
-    RICH("rich", "Richmond", "Richmond", false, true, "mcar", "mcar", true,
-            299999),
-    ROCK("rock", "Rockridge", "Rockridge", false, false, "mcar", "mcar"),
-    SBRN("sbrn", "San Bruno", "San Bruno", false, false, "balb", "balb"),
-    SANL("sanl", "San Leandro", "San Leandro", true, false, "mcar", "mcar"),
-    SFIA("sfia", "SFO Airport", "SFO", false, false, "balb", "balb", true,
-            719999),
-    SHAY("shay", "South Hayward", "S Hayward", true, false, "bayf", "bayf"),
-    SSAN("ssan", "South San Francisco", "S San Fran", false, false, "balb",
-            "balb"),
-    UCTY("ucty", "Union City", "Union City", true, false, "bayf", "bayf"),
-    WARM("warm", "Warm Springs/S Fremont", "Warm Springs", true, true, "bayf", "bayf", true, 299999),
-    WCRK("wcrk", "Walnut Creek", "Walnut Crk", false, false, "mcar", "mcar"),
-    WDUB("wdub", "West Dublin/Pleasanton", "W Dbln/Plsntn", false, false,
-            "bayf", "bayf"),
-    WOAK("woak", "West Oakland", "W Oakland", false, false),
-    SPCL("spcl", "Special", "Special", false, false);
+    _12TH(new Builder("12th", "12th St./Oakland City Center", "12th St Oak")
+            .setTransferStation("bayf")),
+
+    _16TH(new Builder("16th", "16th St. Mission", "16th St")),
+
+    _19TH(new Builder("19th", "19th St./Oakland", "19th St Oak")
+            .setTransferStation("bayf")),
+
+    _24TH(new Builder("24th", "24th St. Mission", "24th St")),
+
+    ANTC(new Builder("antc", "Antioch", "Antioch")
+            .setIgnoreRoutingDirection(true)
+            .setTransferStation("mcar")
+            .setLongStationLinger(true)
+            .setDepartureEqualityTolerance(719999)),
+
+    ASHB(new Builder("ashb", "Ashby", "Ashby")
+            .setTransferStation("mcar")),
+
+    BALB(new Builder("balb", "Balboa Park", "Balboa")),
+
+    BAYF(new Builder("bayf", "Bay Fair", "Bay Fair")
+            .setInvertDirection(true)
+            .setTransferStation("mcar")),
+
+    CAST(new Builder("cast", "Castro Valley", "Castro Vly")
+            .setTransferStation("bayf")),
+
+    CIVC(new Builder("civc", "Civic Center", "Civic Ctr")),
+
+    COLS(new Builder("cols", "Coliseum/Oakland Airport", "Coliseum/OAK")
+            .setInvertDirection(true)
+            .setTransferStation("mcar")),
+
+    COLM(new Builder("colm", "Colma", "Colma")
+            .setTransferStation("balb")),
+
+    CONC(new Builder("conc", "Concord", "Concord")
+            .setTransferStation("mcar")),
+
+    DALY(new Builder("daly", "Daly City", "Daly City")),
+
+    DBRK(new Builder("dbrk", "Downtown Berkeley", "Dtwn Berk")
+            .setTransferStation("mcar")),
+
+    DUBL(new Builder("dubl", "Dublin/Pleasanton", "Dbln/Plsntn")
+            .setIgnoreRoutingDirection(true)
+            .setTransferStation("bayf")
+            .setLongStationLinger(true)
+            .setDepartureEqualityTolerance(719999)),
+
+    DELN(new Builder("deln", "El Cerrito del Norte", "El Cer/Norte")
+            .setTransferStation("mcar")),
+
+    PLZA(new Builder("plza", "El Cerrito Plaza", "El Cer/Plz")
+            .setTransferStation("mcar")),
+
+    EMBR(new Builder("embr", "Embarcadero", "Embarcdro")),
+
+    FRMT(new Builder("frmt", "Fremont", "Fremont")
+            .setInvertDirection(true)
+            .setTransferStation("bayf")),
+
+    FTVL(new Builder("ftvl", "Fruitvale", "Fruitvale")
+            .setInvertDirection(true)
+            .setTransferStation("mcar")),
+
+    GLEN(new Builder("glen", "Glen Park", "Glen Park")),
+
+    HAYW(new Builder("hayw", "Hayward", "Hayward")
+            .setInvertDirection(true)
+            .setTransferStation("bayf")),
+
+    LAFY(new Builder("lafy", "Lafayette", "Lafayette")
+            .setTransferStation("mcar")
+            .excludeFromLimitedService()),
+
+    LAKE(new Builder("lake", "Lake Merritt", "Lk Merritt")
+            .setTransferStation("mcar")),
+
+    MCAR(new Builder("mcar", "MacArthur", "MacArthur")
+            .setTransferStation("bayf")),
+
+    MLBR(new Builder("mlbr", "Millbrae", "Millbrae")
+            .setIgnoreRoutingDirection(true)
+            .setTransferStation("balb")
+            .setLongStationLinger(true)
+            .setDepartureEqualityTolerance(719999)),
+
+    MONT(new Builder("mont", "Montgomery St.", "Montgomery")),
+
+    NBRK(new Builder("nbrk", "North Berkeley", "N Berkeley")
+            .setTransferStation("mcar")),
+
+    NCON(new Builder("ncon", "North Concord/Martinez", "N Conc/Mrtnz")
+            .setTransferStation("mcar")),
+
+    ORIN(new Builder("orin", "Orinda", "Orinda")
+            .setTransferStation("mcar")
+            .excludeFromLimitedService()),
+
+    PCTR(new Builder("pctr", "Pittsburg Center", "Pitt Ctr")
+            .setIgnoreRoutingDirection(true)
+            .setTransferStation("mcar")),
+
+    PITT(new Builder("pitt", "Pittsburg/Bay Point", "Pitt/Bay Pt")
+            .setIgnoreRoutingDirection(true)
+            .setTransferStation("mcar")),
+
+    PHIL(new Builder("phil", "Pleasant Hill", "Plsnt Hill")
+            .setTransferStation("mcar")),
+
+    POWL(new Builder("powl", "Powell St.", "Powell")),
+
+    RICH(new Builder("rich", "Richmond", "Richmond")
+            .setIgnoreRoutingDirection(true)
+            .setTransferStation("mcar")
+            .setLongStationLinger(true)
+            .setDepartureEqualityTolerance(299999)),
+
+    ROCK(new Builder("rock", "Rockridge", "Rockridge")
+            .setTransferStation("mcar")
+            .excludeFromLimitedService()),
+
+    SBRN(new Builder("sbrn", "San Bruno", "San Bruno")
+            .setTransferStation("balb")),
+
+    SANL(new Builder("sanl", "San Leandro", "San Leandro")
+            .setInvertDirection(true)
+            .setTransferStation("mcar")),
+
+    SFIA(new Builder("sfia", "SFO Airport", "SFO")
+            .setTransferStation("balb")
+            .setLongStationLinger(true)
+            .setDepartureEqualityTolerance(719999)),
+
+    SHAY(new Builder("shay", "South Hayward", "S Hayward")
+            .setInvertDirection(true)
+            .setTransferStation("bayf")),
+
+    SSAN(new Builder("ssan", "South San Francisco", "S San Fran")
+            .setTransferStation("balb")),
+
+    UCTY(new Builder("ucty", "Union City", "Union City")
+            .setInvertDirection(true)
+            .setTransferStation("bayf")),
+
+    WARM(new Builder("warm", "Warm Springs/S Fremont", "Warm Springs")
+            .setInvertDirection(true)
+            .setIgnoreRoutingDirection(true)
+            .setTransferStation("bayf")
+            .setLongStationLinger(true)
+            .setDepartureEqualityTolerance(299999)),
+
+    WCRK(new Builder("wcrk", "Walnut Creek", "Walnut Crk")
+            .setTransferStation("mcar")
+            .excludeFromLimitedService()),
+
+    WDUB(new Builder("wdub", "West Dublin/Pleasanton", "W Dbln/Plsntn")
+            .setTransferStation("bayf")),
+
+    WOAK(new Builder("woak", "West Oakland", "W Oakland")),
+
+    SPCL(new Builder("spcl", "Special", "Special"));
 
     public final String abbreviation;
     public final String name;
@@ -77,44 +182,83 @@ public enum Station {
     public final boolean ignoreRoutingDirection;
     public final boolean longStationLinger;
     public final int departureEqualityTolerance;
+    public final boolean includedInLimitedService;
 
     public final static int DEFAULT_DEPARTURE_EQUALITY_TOLERANCE = 119999;
 
-    Station(String abbreviation, String name, String shortName,
-            boolean invertDirection, boolean ignoreRoutingDirection) {
-        this(abbreviation, name, shortName, invertDirection, ignoreRoutingDirection, null,
-                null, false, DEFAULT_DEPARTURE_EQUALITY_TOLERANCE);
+    private static class Builder {
+
+        private final String abbreviation;
+        private final String name;
+        private final String shortName;
+        private boolean invertDirection = false;
+        private String inboundTransferStation = null;
+        private String outboundTransferStation = null;
+        private boolean ignoreRoutingDirection = false;
+        private boolean longStationLinger = false;
+        private int departureEqualityTolerance = DEFAULT_DEPARTURE_EQUALITY_TOLERANCE;
+        private boolean includedInLimitedService = true;
+
+        public Builder(String abbreviation, String name, String shortName) {
+            this.abbreviation = abbreviation;
+            this.name = name;
+            this.shortName = shortName;
+        }
+
+        public Builder setInvertDirection(boolean invertDirection) {
+            this.invertDirection = invertDirection;
+            return this;
+        }
+
+        public Builder setIgnoreRoutingDirection(boolean ignoreRoutingDirection) {
+            this.ignoreRoutingDirection = ignoreRoutingDirection;
+            return this;
+        }
+
+        public Builder setTransferStation(String transferStation) {
+            this.inboundTransferStation = transferStation;
+            this.outboundTransferStation = transferStation;
+            return this;
+        }
+
+        public Builder setInboundTransferStation(String inboundTransferStation) {
+            this.inboundTransferStation = inboundTransferStation;
+            return this;
+        }
+
+        public Builder setOutboundTransferStation(String outboundTransferStation) {
+            this.outboundTransferStation = outboundTransferStation;
+            return this;
+        }
+
+        public Builder setLongStationLinger(boolean longStationLinger) {
+            this.longStationLinger = longStationLinger;
+            return this;
+        }
+
+        public Builder setDepartureEqualityTolerance(int departureEqualityTolerance) {
+            this.departureEqualityTolerance = departureEqualityTolerance;
+            return this;
+        }
+
+        public Builder excludeFromLimitedService() {
+            this.includedInLimitedService = false;
+            return this;
+        }
     }
 
-    Station(String abbreviation, String name, String shortName,
-            boolean invertDirection, boolean ignoreRoutingDirection, String transferStation) {
-        this(abbreviation, name, shortName, invertDirection, ignoreRoutingDirection,
-                transferStation, null, false,
-                DEFAULT_DEPARTURE_EQUALITY_TOLERANCE);
-    }
-
-    Station(String abbreviation, String name, String shortName,
-            boolean invertDirection, boolean ignoreRoutingDirection,
-            String inboundTransferStation, String outboundTransferStation) {
-        this(abbreviation, name, shortName, invertDirection, ignoreRoutingDirection,
-                inboundTransferStation, outboundTransferStation, false,
-                DEFAULT_DEPARTURE_EQUALITY_TOLERANCE);
-    }
-
-    Station(String abbreviation, String name, String shortName,
-            boolean invertDirection, boolean ignoreRoutingDirection,
-            String inboundTransferStation, String outboundTransferStation,
-            boolean longStationLinger, int departureEqualityTolerance) {
-        this.abbreviation = abbreviation;
-        this.name = name;
-        this.shortName = shortName;
-        this.invertDirection = invertDirection;
-        this.inboundTransferStation = inboundTransferStation;
-        this.transferFriendly = outboundTransferStation != null;
-        this.outboundTransferStation = outboundTransferStation;
-        this.ignoreRoutingDirection = ignoreRoutingDirection;
-        this.longStationLinger = longStationLinger;
-        this.departureEqualityTolerance = departureEqualityTolerance;
+    Station(Builder builder) {
+        this.abbreviation = builder.abbreviation;
+        this.name = builder.name;
+        this.shortName = builder.shortName;
+        this.invertDirection = builder.invertDirection;
+        this.inboundTransferStation = builder.inboundTransferStation;
+        this.outboundTransferStation = builder.outboundTransferStation;
+        this.ignoreRoutingDirection = builder.ignoreRoutingDirection;
+        this.longStationLinger = builder.longStationLinger;
+        this.departureEqualityTolerance = builder.departureEqualityTolerance;
+        this.includedInLimitedService = builder.includedInLimitedService;
+        this.transferFriendly = this.outboundTransferStation != null;
     }
 
     public static Station getByAbbreviation(String abbr) {
