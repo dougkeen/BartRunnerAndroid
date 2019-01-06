@@ -52,4 +52,6 @@
     <string name="notification_channel_name">BART Runner departure notifications</string>
     <string name="snackbar_route_deleted">Route deleted.</string>
     <string name="undo">Undo</string>
+    <string name="shortcuts_map_short_label">BART Map</string>
+    <string name="shortcuts_map_long_label">View BART system map</string>
 </resources>
