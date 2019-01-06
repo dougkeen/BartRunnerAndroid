@@ -4,21 +4,34 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ObjectUtils;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ShortcutInfo;
+import android.content.pm.ShortcutManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Icon;
 import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
+import android.support.annotation.RequiresApi;
+import android.support.v4.content.pm.ShortcutManagerCompat;
 import android.util.Log;
 
+import com.dougkeen.bart.activities.ViewDeparturesActivity;
 import com.dougkeen.bart.data.DatabaseHelper;
 import com.dougkeen.bart.data.FavoritesPersistence;
 import com.dougkeen.bart.model.Constants;
@@ -62,6 +75,9 @@ public class BartRunnerApplication extends Application implements
     public void saveFavorites() {
         if (favorites != null) {
             favoritesPersistenceContext.persist(favorites);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+                createAppShortcuts(favorites);
+            }
         }
     }
 
@@ -248,6 +264,32 @@ public class BartRunnerApplication extends Application implements
         return mApplicationPreferences.getLong(PREFS_ACTIVITY_TIMESTAMP, 0L);
     }
 
+    /**
+     * Make the first 4 favorite routes into app shortcuts. Save room for the
+     * static map shortcut.
+     *
+     * @param favorites The user's saved routes
+     */
+    @TargetApi(Build.VERSION_CODES.O)
+    @RequiresApi(api = Build.VERSION_CODES.N_MR1)
+    private void createAppShortcuts(List<StationPair> favorites) {
+        List<ShortcutInfo> shortcuts = new ArrayList<>();
+        for (int i=0; i<favorites.size() && i<4; i++) {
+            StationPair favorite = favorites.get(i);
+            Icon icon = Icon.createWithResource(this, R.drawable.shorcut_station);
+            shortcuts.add(new ShortcutInfo.Builder(this, favorite.toString())
+                    .setShortLabel(favorite.getOrigin().shortName)
+                    .setLongLabel(favorite.toString())
+                    .setIcon(icon)
+                    .setIntent(new Intent(this, ViewDeparturesActivity.class)
+                            .setAction(Intent.ACTION_VIEW)
+                            .putExtra(ViewDeparturesActivity.EXTRA_ORIGIN, favorite.getOrigin().abbreviation)
+                            .putExtra(ViewDeparturesActivity.EXTRA_DESTINATION, favorite.getDestination().abbreviation))
+                    .build());
+        }
+        ShortcutManager shortcutManager = (ShortcutManager) getSystemService(Context.SHORTCUT_SERVICE);
+        shortcutManager.setDynamicShortcuts(shortcuts);
+    }
 
     @Override
     public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
