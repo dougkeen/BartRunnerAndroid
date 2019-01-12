@@ -1,16 +1,5 @@
 package com.dougkeen.bart;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ObjectUtils;
-
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.Application;
@@ -19,16 +8,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Icon;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.support.annotation.RequiresApi;
-import android.support.v4.content.pm.ShortcutManagerCompat;
 import android.util.Log;
 
 import com.dougkeen.bart.activities.ViewDeparturesActivity;
@@ -41,6 +26,15 @@ import com.dougkeen.bart.model.StationPair;
 
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EApplication;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ObjectUtils;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import io.sentry.Sentry;
 import io.sentry.android.AndroidSentryClientFactory;
@@ -270,7 +264,6 @@ public class BartRunnerApplication extends Application implements
      *
      * @param favorites The user's saved routes
      */
-    @TargetApi(Build.VERSION_CODES.O)
     @RequiresApi(api = Build.VERSION_CODES.N_MR1)
     private void createAppShortcuts(List<StationPair> favorites) {
         List<ShortcutInfo> shortcuts = new ArrayList<>();
@@ -278,8 +271,9 @@ public class BartRunnerApplication extends Application implements
             StationPair favorite = favorites.get(i);
             Icon icon = Icon.createWithResource(this, R.drawable.shorcut_station);
             shortcuts.add(new ShortcutInfo.Builder(this, favorite.toString())
-                    .setShortLabel(favorite.getOrigin().shortName)
-                    .setLongLabel(favorite.toString())
+                    .setShortLabel(getString(R.string.station_pair_description,
+                            favorite.getOrigin().shortName,
+                            favorite.getDestination().shortName))
                     .setIcon(icon)
                     .setIntent(new Intent(this, ViewDeparturesActivity.class)
                             .setAction(Intent.ACTION_VIEW)
