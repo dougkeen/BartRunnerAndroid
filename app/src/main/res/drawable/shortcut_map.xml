@@ -1,5 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
-<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
-    <background android:drawable="@color/ic_background"/>
-    <foreground android:drawable="@drawable/ic_map" />
-</adaptive-icon>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+  <path
+      android:fillColor="#FFEDEDED"
+      android:pathData="M46,30 L30.96,35.067C30.4,35.253 30,35.733 30,36.347V76.667A1.333,1.333 0,0 0,31.333 78L31.76,77.92 46,72.4 62,78 77.04,72.933C77.6,72.747 78,72.267 78,71.653V31.333A1.333,1.333 0,0 0,76.667 30L76.24,30.08 62,35.6 46,30m-2.667,6.533v31.2l-8,3.093V39.227l8,-2.693m5.334,0.053 l10.666,3.733V71.413L48.667,67.68V36.587m24,0.613v31.573l-8,2.693V40.293l8,-3.093m-30.774,1.6 l-5.04,1.787v5.733l5.04,-1.787v-5.733m0,7.333 l-5.04,1.787v5.733l5.04,-1.787v-5.733m0,7.333 l-5.04,1.787v5.733l5.04,-1.787v-5.733m0,7.333 l-5.04,1.787V68.32l5.04,-1.787z"
+      android:strokeWidth="2.66666675"/>
+</vector>

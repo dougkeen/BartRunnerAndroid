@@ -269,7 +269,7 @@ public class BartRunnerApplication extends Application implements
         List<ShortcutInfo> shortcuts = new ArrayList<>();
         for (int i=0; i<favorites.size() && i<4; i++) {
             StationPair favorite = favorites.get(i);
-            Icon icon = Icon.createWithResource(this, R.drawable.shorcut_station);
+            Icon icon = Icon.createWithResource(this, R.drawable.shortcut_station);
             shortcuts.add(new ShortcutInfo.Builder(this, favorite.toString())
                     .setShortLabel(getString(R.string.station_pair_description,
                             favorite.getOrigin().shortName,
