@@ -154,7 +154,7 @@ public enum Station {
             .setInvertDirection(true)
             .setTransferStation("bayf")),
 
-    WARM(new Builder("warm", "Warm Springs/S Fremont", "Warm Springs")
+    WARM(new Builder("warm", "Warm Springs/South Fremont", "Warm Springs")
             .setInvertDirection(true)
             .setIgnoreRoutingDirection(true)
             .setTransferStation("bayf")

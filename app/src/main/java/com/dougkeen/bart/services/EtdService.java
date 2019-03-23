@@ -300,8 +300,7 @@ public class EtdService extends Service {
                     ScheduleItem trip = mLatestScheduleInfo.getTrips().get(i);
                     // Definitely not a match if they have different
                     // destinations
-                    if (!departure.getTrainDestination().abbreviation
-                            .equals(trip.getTrainHeadStation())) {
+                    if (!departure.getTrainDestination().name.toLowerCase().equals(trip.getTrainHeadStation())) {
                         continue;
                     }
 
