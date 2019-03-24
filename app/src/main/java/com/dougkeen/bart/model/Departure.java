@@ -145,7 +145,11 @@ public class Departure implements Parcelable, Comparable<Departure> {
     @ColorInt
     public int getTrainDestinationColor() {
         if (destinationColorInt == 0) {
-            destinationColorInt = Color.parseColor(destinationColor);
+            try {
+                destinationColorInt = Color.parseColor(destinationColor);
+            } catch (IllegalArgumentException e) {
+                destinationColorInt = Color.WHITE;
+            }
         }
         return destinationColorInt;
     }
