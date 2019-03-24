@@ -1,7 +1,9 @@
 package com.dougkeen.bart.model;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -17,6 +19,7 @@ public class RealTimeDepartures {
     private Station origin;
     private Station destination;
     private long time;
+    private boolean transfersIncluded = false;
 
     private List<Departure> departures;
 
@@ -59,12 +62,46 @@ public class RealTimeDepartures {
         this.departures = departures;
     }
 
+    public boolean areTransfersIncluded() {
+        return transfersIncluded;
+    }
+
+    public Departure getEarliestDirectDeparture() {
+        Departure earliest = null;
+        for (Departure departure : getDepartures()) {
+            if (!departure.getRequiresTransfer() && (earliest == null || departure.getMinutes() < earliest.getMinutes())) {
+                earliest = departure;
+            }
+        }
+        return earliest;
+    }
+
+    public Departure getEarliestTransferDeparture() {
+        List<Route> xferRoutes = origin.getTransferRoutes(destination);
+        List<Departure> xferDepartures = new ArrayList<>();
+        for (Departure departure : unfilteredDepartures) {
+            Route route = findRouteForDeparture(departure, xferRoutes);
+            if (route != null && route.hasTransfer()) {
+                xferDepartures.add(departure);
+            }
+        }
+        Departure earliest = null;
+        for (Departure departure : xferDepartures) {
+            if (earliest == null || departure.getMinutes() < earliest.getMinutes()) {
+                earliest = departure;
+            }
+        }
+        return earliest;
+    }
+
     public void includeTransferRoutes() {
+        transfersIncluded = true;
         routes.addAll(origin.getTransferRoutes(destination));
         rebuildFilteredDepaturesCollection();
     }
 
     public void includeDoubleTransferRoutes() {
+        transfersIncluded = true;
         routes.addAll(origin.getDoubleTransferRoutes(destination));
         rebuildFilteredDepaturesCollection();
     }
@@ -82,26 +119,36 @@ public class RealTimeDepartures {
     }
 
     private void addDepartureIfApplicable(Departure departure) {
-        Station destination = Station.getByAbbreviation(departure
-                .getTrainDestinationAbbreviation());
-        if (departure.getLine() == null)
-            return;
-        for (Route route : routes) {
-            if (route.trainDestinationIsApplicable(destination, departure.getLine())
-                    && (route.getDestination().includedInLimitedService || !departure.isLimited())) {
-                departure.setRequiresTransfer(route.hasTransfer());
-                departure
-                        .setTransferScheduled(Line.YELLOW_ORANGE_SCHEDULED_TRANSFER
-                                .equals(route.getDirectLine()));
-                getDepartures().add(departure);
-                departure.calculateEstimates(time);
-                return;
-            }
+        Route route = findRouteForDeparture(departure, this.routes);
+        if (route != null) {
+            departure.setRequiresTransfer(route.hasTransfer());
+            departure.setTransferScheduled(Line.YELLOW_ORANGE_SCHEDULED_TRANSFER.equals(route.getDirectLine()));
+            getDepartures().add(departure);
+            departure.calculateEstimates(time);
         }
     }
 
+    private Route findRouteForDeparture(Departure departure, List<Route> routes) {
+        Station destination = Station.getByAbbreviation(departure
+                .getTrainDestinationAbbreviation());
+        if (departure.getLine() == null)
+            return null;
+        for (Route route : routes) {
+            if (route.trainDestinationIsApplicable(destination, departure.getLine())
+                    && (route.getDestination().includedInLimitedService || !departure.isLimited())) {
+                return route;
+            }
+        }
+        return null;
+    }
+
     public void sortDepartures() {
-        Collections.sort(getDepartures());
+        Collections.sort(departures, new Comparator<Departure>() {
+            @Override
+            public int compare(Departure o1, Departure o2) {
+                return o1.getMinutes() - o2.getMinutes();
+            }
+        });
     }
 
     public void finalizeDeparturesList() {

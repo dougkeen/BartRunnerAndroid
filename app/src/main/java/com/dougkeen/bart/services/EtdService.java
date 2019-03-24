@@ -1,13 +1,5 @@
 package com.dougkeen.bart.services;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.lang3.math.NumberUtils;
-
 import android.app.Service;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -30,6 +22,14 @@ import com.dougkeen.bart.networktasks.GetRealTimeDeparturesTask;
 import com.dougkeen.bart.networktasks.GetScheduleInformationTask;
 
 import org.androidannotations.annotations.EService;
+import org.apache.commons.lang3.math.NumberUtils;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
 
 @EService
 public class EtdService extends Service {
@@ -300,7 +300,7 @@ public class EtdService extends Service {
                     ScheduleItem trip = mLatestScheduleInfo.getTrips().get(i);
                     // Definitely not a match if they have different
                     // destinations
-                    if (!departure.getTrainDestination().name.toLowerCase().equals(trip.getTrainHeadStation())) {
+                    if (!departure.getTrainDestination().apiName.equals(trip.getTrainHeadStation())) {
                         continue;
                     }
 
@@ -394,6 +394,26 @@ public class EtdService extends Service {
             if (result.getDepartures().isEmpty()) {
                 result.includeTransferRoutes();
             }
+            result.sortDepartures();
+            if (!result.areTransfersIncluded() && !result.getDepartures().isEmpty()) {
+                Departure earliestDirectDeparture = result.getEarliestDirectDeparture();
+                Departure earliestTransferDeparture = result.getEarliestTransferDeparture();
+                List<Departure> directDepartures = result.getDepartures();
+                int directDepartureCount = directDepartures.size();
+                int minutesBetweenDirectDepartures = 0;
+                if (directDepartureCount >= 2) {
+                    minutesBetweenDirectDepartures = directDepartures.get(1).getMinutes() - directDepartures.get(0).getMinutes();
+                }
+                boolean hasFullArrivalEstimates = earliestTransferDeparture.hasAnyArrivalEstimate() && earliestDirectDeparture.hasAnyArrivalEstimate();
+                boolean transferArrivesSoonerThanDirect = hasFullArrivalEstimates && earliestTransferDeparture.getEstimatedArrivalTime() < earliestDirectDeparture.getEstimatedArrivalTime();
+                if (transferArrivesSoonerThanDirect
+                        || (!hasFullArrivalEstimates && earliestTransferDeparture.getMinutes() < earliestDirectDeparture.getMinutes() - 10)
+                        || directDepartureCount <= 1
+                        || minutesBetweenDirectDepartures > 20
+                ) {
+                    result.includeTransferRoutes();
+                }
+            }
             if (result.getDepartures().isEmpty()) {
                 result.includeDoubleTransferRoutes();
             }
@@ -409,6 +429,20 @@ public class EtdService extends Service {
                 mIgnoreDepartureDirection = true;
                 scheduleDepartureFetch(50);
                 return;
+            }
+
+            // Remove any transfer departures that leave earlier than, but arrive later than subsequent departures
+            ListIterator<Departure> iterator = result.getDepartures().listIterator();
+            while (iterator.hasNext()) {
+                Departure departure = iterator.next();
+                if (iterator.hasNext()) {
+                    Departure nextDeparture = result.getDepartures().get(iterator.nextIndex());
+                    if (departure.getRequiresTransfer()
+                            && departure.hasAnyArrivalEstimate() && nextDeparture.hasAnyArrivalEstimate()
+                            && departure.getEstimatedArrivalTime() > nextDeparture.getEstimatedArrivalTime()) {
+                        iterator.remove();
+                    }
+                }
             }
 
             boolean needsBetterAccuracy = false;

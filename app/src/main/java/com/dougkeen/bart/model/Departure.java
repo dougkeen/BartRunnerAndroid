@@ -25,7 +25,10 @@ import org.apache.commons.lang3.time.DateFormatUtils;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 
 public class Departure implements Parcelable, Comparable<Departure> {
     private static final int MINIMUM_MERGE_OVERLAP_MILLIS = 5000;
@@ -37,12 +40,12 @@ public class Departure implements Parcelable, Comparable<Departure> {
         super();
     }
 
-    public Departure(String destinationAbbr, String destinationColor,
+    public Departure(String destinationAbbr, String destinationColorHex,
                      String platform, String direction, boolean bikeAllowed,
                      String trainLength, int minutes) {
         super();
         this.trainDestination = Station.getByAbbreviation(destinationAbbr);
-        this.destinationColor = destinationColor;
+        this.destinationColorHex = destinationColorHex;
         this.platform = platform;
         this.direction = direction;
         this.bikeAllowed = bikeAllowed;
@@ -58,7 +61,8 @@ public class Departure implements Parcelable, Comparable<Departure> {
     private Station trainDestination;
     private Station passengerDestination;
     private Line line;
-    private String destinationColor;
+    private String destinationColorHex;
+    private String destinationColorText;
 
     @ColorInt
     private int destinationColorInt;
@@ -146,7 +150,7 @@ public class Departure implements Parcelable, Comparable<Departure> {
     public int getTrainDestinationColor() {
         if (destinationColorInt == 0) {
             try {
-                destinationColorInt = Color.parseColor(destinationColor);
+                destinationColorInt = Color.parseColor(destinationColorHex);
             } catch (IllegalArgumentException e) {
                 destinationColorInt = Color.WHITE;
             }
@@ -154,8 +158,16 @@ public class Departure implements Parcelable, Comparable<Departure> {
         return destinationColorInt;
     }
 
-    public void setTrainDestinationColor(String destinationColor) {
-        this.destinationColor = destinationColor;
+    public void setTrainDestinationColorHex(String destinationColor) {
+        this.destinationColorHex = destinationColor;
+    }
+
+    public String getTrainDestinationColorText() {
+        return destinationColorText;
+    }
+
+    public void setTrainDestinationColorText(String destinationColorText) {
+        this.destinationColorText = destinationColorText;
     }
 
     public String getPlatform() {
@@ -455,7 +467,7 @@ public class Departure implements Parcelable, Comparable<Departure> {
                 + ((trainDestination == null) ? 0 : trainDestination.hashCode());
         result = prime
                 * result
-                + ((destinationColor == null) ? 0 : destinationColor.hashCode());
+                + ((destinationColorHex == null) ? 0 : destinationColorHex.hashCode());
         result = prime * result
                 + ((direction == null) ? 0 : direction.hashCode());
         result = prime * result + ((line == null) ? 0 : line.hashCode());
@@ -483,10 +495,10 @@ public class Departure implements Parcelable, Comparable<Departure> {
             return false;
         if (trainDestination != other.trainDestination)
             return false;
-        if (destinationColor == null) {
-            if (other.destinationColor != null)
+        if (destinationColorHex == null) {
+            if (other.destinationColorHex != null)
                 return false;
-        } else if (!destinationColor.equals(other.destinationColor))
+        } else if (!destinationColorHex.equals(other.destinationColorHex))
             return false;
         if (direction == null) {
             if (other.direction != null)
@@ -737,7 +749,7 @@ public class Departure implements Parcelable, Comparable<Departure> {
         dest.writeString(trainDestination.abbreviation);
         dest.writeString(passengerDestination == null ? null
                 : passengerDestination.abbreviation);
-        dest.writeString(destinationColor);
+        dest.writeString(destinationColorHex);
         dest.writeString(platform);
         dest.writeString(direction);
         dest.writeByte((byte) (bikeAllowed ? 1 : 0));
@@ -760,7 +772,7 @@ public class Departure implements Parcelable, Comparable<Departure> {
         origin = Station.getByAbbreviation(in.readString());
         trainDestination = Station.getByAbbreviation(in.readString());
         passengerDestination = Station.getByAbbreviation(in.readString());
-        destinationColor = in.readString();
+        destinationColorHex = in.readString();
         platform = in.readString();
         direction = in.readString();
         bikeAllowed = in.readByte() != 0;

@@ -1,5 +1,6 @@
 package com.dougkeen.bart.networktasks;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -98,26 +99,9 @@ public class EtdContentHandler extends DefaultHandler {
         } else if ("length".equals(localName)) {
             currentDeparture.setTrainLength(currentValue);
         } else if ("color".equals(localName)) {
-            try {
-                if ("WHITE".equalsIgnoreCase(currentValue)) {
-                    for (Line line : Line.values()) {
-                        if (line.stations.indexOf(currentDeparture
-                                .getTrainDestination()) >= 0
-                                && line.stations.indexOf(realTimeDepartures
-                                .getDestination()) >= 0) {
-                            currentDeparture.setLine(line);
-                            break;
-                        }
-                    }
-                } else {
-                    currentDeparture.setLine(Line.valueOf(currentValue));
-                }
-            } catch (IllegalArgumentException e) {
-                Log.w(Constants.TAG, "There is no line called '" + currentValue
-                        + "'");
-            }
+            currentDeparture.setTrainDestinationColorText(currentValue);
         } else if ("hexcolor".equals(localName)) {
-            currentDeparture.setTrainDestinationColor("#ff"
+            currentDeparture.setTrainDestinationColorHex("#ff"
                     + currentValue.substring(1));
         } else if ("bikeflag".equals(localName)) {
             currentDeparture.setBikeAllowed(currentValue.equalsIgnoreCase("1"));
@@ -125,6 +109,28 @@ public class EtdContentHandler extends DefaultHandler {
             // If we can't infer a real destination because of weird API data,
             // just skip it ¯\_(ツ)_/¯
             if (realTimeDepartures.getDestination() != null) {
+                // Infer line
+                String lineColor = currentDeparture.getTrainDestinationColorText();
+                try {
+                    Line selectedLine = null;
+                    if ("WHITE".equalsIgnoreCase(lineColor)) {
+                        selectedLine = guessLine();
+                    } else {
+                        try {
+                            selectedLine = Line.valueOf(lineColor);
+                        } catch (IllegalArgumentException e) {
+                            selectedLine = guessLine();
+                        }
+                    }
+                    if (selectedLine == null || !selectedLine.containsStation(currentDeparture.getTrainDestination())) {
+                        selectedLine = guessLine();
+                    }
+                    currentDeparture.setLine(selectedLine);
+                } catch (IllegalArgumentException e) {
+                    Log.w(Constants.TAG, "There is no line called '" + currentValue
+                            + "'");
+                }
+
                 realTimeDepartures.addDeparture(currentDeparture);
             }
             currentDeparture = null;
@@ -137,6 +143,17 @@ public class EtdContentHandler extends DefaultHandler {
         }
         isParsingTag = false;
         currentValue = null;
+    }
+
+    private Line guessLine() {
+        for (Line line : Line.values()) {
+            if (line.stations.indexOf(currentDeparture.getTrainDestination()) >= 0
+                    && line.stations.indexOf(realTimeDepartures.getOrigin()) >= 0
+            ) {
+                return line;
+            }
+        }
+        return null;
     }
 
     public String getError() {

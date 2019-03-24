@@ -44,7 +44,7 @@
     <string name="set_alarm">Set alarm</string>
     <string name="leaving">Leaving</string>
     <string name="departed">Departed</string>
-    <string name="arrives_at_destination">Arrive @ dest. ~</string>
+    <string name="arrives_at_destination">Arrive around\u00A0</string>
     <string name="arrival_message">I\'ll be arriving at %1$s around %2$s</string>
     <string name="share_arrival_time">Share arrival time</string>
     <string name="minutes_before_departure">minutes before departure</string>

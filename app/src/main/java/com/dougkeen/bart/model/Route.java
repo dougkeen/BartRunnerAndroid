@@ -89,14 +89,11 @@ public class Route {
     public boolean trainDestinationIsApplicable(Station lineDestination,
                                                 Line viaLine) {
         Line routeLine = getDirectLine();
-        if (routeLine.transferLine1 != null
-                && viaLine.equals(routeLine.transferLine1)) {
+        if (routeLine.transferLine1 != null && viaLine.equals(routeLine.transferLine1)) {
             return true;
-        } else if (routeLine.transferLine2 != null
-                && viaLine.equals(routeLine.transferLine2)) {
+        } else if (routeLine.transferLine2 != null && viaLine.equals(routeLine.transferLine2)) {
             return true;
-        } else if (requiresTransfer && transferLines != null
-                && !transferLines.isEmpty()) {
+        } else if (requiresTransfer && transferLines != null && !transferLines.isEmpty()) {
             return transferLines.contains(viaLine);
         } else {
             int originIndex = viaLine.stations.indexOf(origin);

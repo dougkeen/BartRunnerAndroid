@@ -7,12 +7,12 @@ import java.util.Collection;
 import java.util.List;
 
 public enum Station {
-    _12TH(new Builder("12th", "12th St./Oakland City Center", "12th St Oak")
+    _12TH(new Builder("12th", "12th St. Oakland City Center", "12th St Oak")
             .setTransferStation("bayf")),
 
     _16TH(new Builder("16th", "16th St. Mission", "16th St")),
 
-    _19TH(new Builder("19th", "19th St./Oakland", "19th St Oak")
+    _19TH(new Builder("19th", "19th St. Oakland", "19th St Oak")
             .setTransferStation("bayf")),
 
     _24TH(new Builder("24th", "24th St. Mission", "24th St")),
@@ -35,10 +35,12 @@ public enum Station {
     CAST(new Builder("cast", "Castro Valley", "Castro Vly")
             .setTransferStation("bayf")),
 
-    CIVC(new Builder("civc", "Civic Center", "Civic Ctr")),
+    CIVC(new Builder("civc", "Civic Center", "Civic Ctr")
+            .setApiName("Civic Center/UN Plaza")),
 
     COLS(new Builder("cols", "Coliseum/Oakland Airport", "Coliseum/OAK")
             .setInvertDirection(true)
+            .setApiName("Coliseum")
             .setTransferStation("mcar")),
 
     COLM(new Builder("colm", "Colma", "Colma")
@@ -118,6 +120,7 @@ public enum Station {
             .setTransferStation("mcar")),
 
     PHIL(new Builder("phil", "Pleasant Hill", "Plsnt Hill")
+            .setApiName("Pleasant Hill/Contra Costa Centre")
             .setTransferStation("mcar")),
 
     POWL(new Builder("powl", "Powell St.", "Powell")),
@@ -141,6 +144,7 @@ public enum Station {
 
     SFIA(new Builder("sfia", "SFO Airport", "SFO")
             .setTransferStation("balb")
+            .setApiName("San Francisco International Airport")
             .setLongStationLinger(true)
             .setDepartureEqualityTolerance(719999)),
 
@@ -175,6 +179,7 @@ public enum Station {
 
     public final String abbreviation;
     public final String name;
+    public final String apiName;
     public final String shortName;
     public final boolean transferFriendly;
     public final boolean invertDirection;
@@ -199,6 +204,7 @@ public enum Station {
         private boolean longStationLinger = false;
         private int departureEqualityTolerance = DEFAULT_DEPARTURE_EQUALITY_TOLERANCE;
         private boolean includedInLimitedService = true;
+        private String apiName = null;
 
         public Builder(String abbreviation, String name, String shortName) {
             this.abbreviation = abbreviation;
@@ -246,11 +252,17 @@ public enum Station {
             this.includedInLimitedService = false;
             return this;
         }
+
+        public Builder setApiName(String apiName) {
+            this.apiName = apiName;
+            return this;
+        }
     }
 
     Station(Builder builder) {
         this.abbreviation = builder.abbreviation;
         this.name = builder.name;
+        this.apiName = builder.apiName != null ? builder.apiName.toLowerCase() : builder.name.toLowerCase();
         this.shortName = builder.shortName;
         this.invertDirection = builder.invertDirection;
         this.inboundTransferStation = builder.inboundTransferStation;

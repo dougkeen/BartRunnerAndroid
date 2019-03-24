@@ -65,8 +65,10 @@ public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
         if (estimatedArrival != null) {
             ((TextView) view.findViewById(R.id.trainLengthText))
                     .setText(departure.getTrainLengthAndPlatform());
-            estimatedArrival.setText(arrivesAtDestinationPrefix
-                    + estimatedArrivalTimeText);
+            if (estimatedArrivalTimeText != "") {
+                estimatedArrival.setText(arrivesAtDestinationPrefix
+                        + estimatedArrivalTimeText);
+            }
         } else {
             TimedTextSwitcher textSwitcher = (TimedTextSwitcher) view
                     .findViewById(R.id.trainLengthText);
@@ -135,7 +137,7 @@ public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
                 }
             });
         }
-        
+
         ImageView bikeIcon = (ImageView) view.findViewById(R.id.bikeIcon);
         if (departure.isBikeAllowed()) {
             bikeIcon.setImageDrawable(bikeDrawable);

@@ -79,6 +79,15 @@ public enum Line {
         this.transferLine2 = transferLine2;
     }
 
+    public boolean containsStation(Station station) {
+        for (Station lineStation : stations) {
+            if (lineStation.equals(station)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static Collection<Line> getLinesForStation(Station station) {
         Collection<Line> lines = new ArrayList<Line>();
         for (Line line : Line.values()) {
