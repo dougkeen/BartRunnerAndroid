@@ -8,7 +8,7 @@ dependencies {
     implementation 'org.apache.commons:commons-lang3:3.4'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.6.1'
     implementation 'org.springframework.android:spring-android-rest-template:1.0.1.RELEASE'
-    implementation 'com.squareup.okhttp3:okhttp:3.11.0'
+    implementation 'com.squareup.okhttp3:okhttp:3.12.1'
     implementation 'com.github.chrisbanes:PhotoView:2.0.0'
     implementation 'io.sentry:sentry-android:1.7.14'
     implementation 'org.slf4j:slf4j-nop:1.7.25'
