@@ -85,6 +85,7 @@ public enum Station {
             .excludeFromLimitedService()),
 
     LAKE(new Builder("lake", "Lake Merritt", "Lk Merritt")
+            .setInvertDirection(true)
             .setTransferStation("mcar")),
 
     MCAR(new Builder("mcar", "MacArthur", "MacArthur")
