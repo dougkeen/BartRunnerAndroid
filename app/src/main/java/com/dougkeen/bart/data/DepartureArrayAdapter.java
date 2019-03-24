@@ -116,8 +116,8 @@ public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
         if (departureTime != null) {
             ((TextView) view.findViewById(R.id.uncertainty)).setText(departure
                     .getUncertaintyText());
-            departureTime.setText(departure
-                    .getEstimatedDepartureTimeText(getContext(), false));
+            departureTime.setText("Dep " + departure
+                    .getEstimatedDepartureTimeText(getContext(), true));
         } else {
             TimedTextSwitcher uncertaintySwitcher = (TimedTextSwitcher) view
                     .findViewById(R.id.uncertainty);
