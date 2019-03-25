@@ -404,10 +404,11 @@ public class EtdService extends Service {
                 if (directDepartureCount >= 2) {
                     minutesBetweenDirectDepartures = directDepartures.get(1).getMinutes() - directDepartures.get(0).getMinutes();
                 }
-                boolean hasFullArrivalEstimates = earliestTransferDeparture.hasAnyArrivalEstimate() && earliestDirectDeparture.hasAnyArrivalEstimate();
-                boolean transferArrivesSoonerThanDirect = hasFullArrivalEstimates && earliestTransferDeparture.getEstimatedArrivalTime() < earliestDirectDeparture.getEstimatedArrivalTime();
+                boolean hasDirectAndTransferRoutes = earliestTransferDeparture != null && earliestDirectDeparture != null;
+                boolean hasFullArrivalEstimates = hasDirectAndTransferRoutes && earliestTransferDeparture.hasAnyArrivalEstimate() && earliestDirectDeparture.hasAnyArrivalEstimate();
+                boolean transferArrivesSoonerThanDirect = hasFullArrivalEstimates && earliestTransferDeparture.getEstimatedArrivalTime() < earliestDirectDeparture.getEstimatedArrivalTime() - 2;
                 if (transferArrivesSoonerThanDirect
-                        || (!hasFullArrivalEstimates && earliestTransferDeparture.getMinutes() < earliestDirectDeparture.getMinutes() - 10)
+                        || (hasDirectAndTransferRoutes && !hasFullArrivalEstimates && earliestTransferDeparture.getMinutes() < earliestDirectDeparture.getMinutes() - 10)
                         || directDepartureCount <= 1
                         || minutesBetweenDirectDepartures > 20
                 ) {

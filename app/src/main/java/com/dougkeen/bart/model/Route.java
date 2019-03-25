@@ -100,7 +100,7 @@ public class Route {
             int routeDestinationIndex = viaLine.stations.indexOf(destination);
             int lineDestinationIndex = viaLine.stations
                     .indexOf(lineDestination);
-            return routeDestinationIndex >= 0
+            return originIndex >=0 && routeDestinationIndex >= 0
                     && ((originIndex <= routeDestinationIndex && routeDestinationIndex <= lineDestinationIndex) || (originIndex >= routeDestinationIndex && routeDestinationIndex >= lineDestinationIndex));
         }
     }
