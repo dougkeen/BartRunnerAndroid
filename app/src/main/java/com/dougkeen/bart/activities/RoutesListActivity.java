@@ -46,9 +46,12 @@ import org.androidannotations.annotations.ItemLongClick;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
 import org.androidannotations.rest.spring.annotations.RestService;
+import org.springframework.web.client.ResourceAccessException;
 
 import java.util.Calendar;
 import java.util.TimeZone;
+
+import io.sentry.Sentry;
 
 @EActivity(R.layout.main)
 public class RoutesListActivity extends AppCompatActivity implements TickSubscriber {
@@ -364,7 +367,12 @@ public class RoutesListActivity extends AppCompatActivity implements TickSubscri
 
     @Background
     void fetchElevatorInfo() {
-        String elevatorMessage = elevatorClient.getElevatorMessage();
+        String elevatorMessage = null;
+        try {
+            elevatorMessage = elevatorClient.getElevatorMessage();
+        } catch (ResourceAccessException e) {
+            Sentry.capture(e);
+        }
         if (elevatorMessage != null) {
             showElevatorMessage(elevatorMessage);
         }
