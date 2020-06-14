@@ -244,9 +244,13 @@ public class ViewDeparturesActivity extends AbstractViewActivity implements
     }
 
     private void setListTitle() {
-        ((TextView) findViewById(R.id.listTitle))
-                .setText(mStationPair.getOrigin().name + " to "
-                        + mStationPair.getDestination().name);
+        String listTitle;
+        if (mStationPair == null || mStationPair.getOrigin() == null || mStationPair.getDestination() == null) {
+            listTitle = "";
+        } else {
+            listTitle = mStationPair.getOrigin().name + " to " + mStationPair.getDestination().name;
+        }
+        ((TextView) findViewById(R.id.listTitle)).setText(listTitle);
     }
 
     private ListView getListView() {

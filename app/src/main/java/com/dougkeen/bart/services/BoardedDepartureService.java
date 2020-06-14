@@ -332,7 +332,7 @@ public class BoardedDepartureService extends Service implements
         final Departure boardedDeparture = ((BartRunnerApplication) getApplication())
                 .getBoardedDeparture();
 
-        if (boardedDeparture.getSecondsUntilAlarm() > 3 * 60) {
+        if (boardedDeparture != null && boardedDeparture.getSecondsUntilAlarm() > 3 * 60) {
             return 15 * 1000;
         } else {
             return 6 * 1000;

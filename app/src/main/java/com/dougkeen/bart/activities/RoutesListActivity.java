@@ -96,7 +96,12 @@ public class RoutesListActivity extends AppCompatActivity implements TickSubscri
     @Click(R.id.quickLookupButton)
     void quickLookupButtonClick() {
         DialogFragment dialog = new QuickRouteDialogFragment();
-        dialog.show(getSupportFragmentManager(), QuickRouteDialogFragment.TAG);
+        try {
+            dialog.show(getSupportFragmentManager(), QuickRouteDialogFragment.TAG);
+        } catch (IllegalStateException e) {
+            // Sometimes this gets called after onSaveInstanceState. We can ignore the resulting exception.
+            Log.w(TAG, "Could not open quick lookup dialog", e);
+        }
     }
 
     @ItemClick(android.R.id.list)
@@ -231,8 +236,8 @@ public class RoutesListActivity extends AppCompatActivity implements TickSubscri
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
         outState.putBoolean("hasActionMode", mActionMode != null);
+        super.onSaveInstanceState(outState);
     }
 
     @Override
