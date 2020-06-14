@@ -32,10 +32,18 @@ public enum Station {
             .setInvertDirection(true)
             .setTransferStation("mcar")),
 
+    BERY(new Builder("bery", "Berryessa/North San José", "Berryessa")
+            .setInvertDirection(true)
+            .setIgnoreRoutingDirection(true)
+            .setTransferStation("bayf")
+            .setLongStationLinger(true)
+            .setDepartureEqualityTolerance(299999)),
+
     CAST(new Builder("cast", "Castro Valley", "Castro Vly")
             .setTransferStation("bayf")),
 
     CIVC(new Builder("civc", "Civic Center", "Civic Ctr")
+            .setTransferStation("embr")
             .setApiName("Civic Center/UN Plaza")),
 
     COLS(new Builder("cols", "Coliseum/Oakland Airport", "Coliseum/OAK")
@@ -93,13 +101,18 @@ public enum Station {
     MCAR(new Builder("mcar", "MacArthur", "MacArthur")
             .setTransferStation("bayf")),
 
+    MLPT(new Builder("mlpt", "Milpitas", "Milpitas")
+            .setInvertDirection(true)
+            .setTransferStation("bayf")),
+
     MLBR(new Builder("mlbr", "Millbrae", "Millbrae")
             .setIgnoreRoutingDirection(true)
             .setTransferStation("balb")
             .setLongStationLinger(true)
             .setDepartureEqualityTolerance(719999)),
 
-    MONT(new Builder("mont", "Montgomery St.", "Montgomery")),
+    MONT(new Builder("mont", "Montgomery St.", "Montgomery")
+            .setTransferStation("embr")),
 
     NBRK(new Builder("nbrk", "North Berkeley", "N Berkeley")
             .setTransferStation("mcar")),
@@ -123,7 +136,8 @@ public enum Station {
             .setApiName("Pleasant Hill/Contra Costa Centre")
             .setTransferStation("mcar")),
 
-    POWL(new Builder("powl", "Powell St.", "Powell")),
+    POWL(new Builder("powl", "Powell St.", "Powell")
+            .setTransferStation("embr")),
 
     RICH(new Builder("rich", "Richmond", "Richmond")
             .setIgnoreRoutingDirection(true)
@@ -162,9 +176,7 @@ public enum Station {
     WARM(new Builder("warm", "Warm Springs/South Fremont", "Warm Springs")
             .setInvertDirection(true)
             .setIgnoreRoutingDirection(true)
-            .setTransferStation("bayf")
-            .setLongStationLinger(true)
-            .setDepartureEqualityTolerance(299999)),
+            .setTransferStation("bayf")),
 
     WCRK(new Builder("wcrk", "Walnut Creek", "Walnut Crk")
             .setTransferStation("mcar")
@@ -389,6 +401,11 @@ public enum Station {
 
     public List<Route> getTransferRoutes(Station dest) {
         List<Route> returnList = new ArrayList<Route>();
+
+        if (this == Station.SFIA && dest == Station.MLBR) {
+            // The SFO to Millbrae routes are weird. Only go direct.
+            return returnList;
+        }
 
         if (dest.getInboundTransferStation() != null) {
             // Try getting to the destination's inbound xfer station first
