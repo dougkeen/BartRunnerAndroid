@@ -43,6 +43,7 @@ import com.dougkeen.bart.controls.YourTrainLayout;
 import com.dougkeen.bart.data.DepartureArrayAdapter;
 import com.dougkeen.bart.model.Constants;
 import com.dougkeen.bart.model.Departure;
+import com.dougkeen.bart.model.Station;
 import com.dougkeen.bart.model.StationPair;
 import com.dougkeen.bart.services.BoardedDepartureService;
 import com.dougkeen.bart.services.EtdService;
@@ -55,6 +56,9 @@ import com.dougkeen.util.WakeLocker;
 
 public class ViewDeparturesActivity extends AbstractViewActivity implements
         EtdServiceListener {
+
+    public static final String EXTRA_DESTINATION = "ViewDeparturesActivity.destination";
+    public static final String EXTRA_ORIGIN = "ViewDeparturesActivity.origin";
 
     private StationPair mStationPair;
 
@@ -115,8 +119,15 @@ public class ViewDeparturesActivity extends AbstractViewActivity implements
             mStationPair = savedInstanceState.getParcelable("stationPair");
             setListTitle();
         } else {
-            mStationPair = intent.getExtras().getParcelable(
-                    Constants.STATION_PAIR_EXTRA);
+            if (intent.hasExtra(Constants.STATION_PAIR_EXTRA)) {
+                mStationPair = intent.getExtras().getParcelable(Constants.STATION_PAIR_EXTRA);
+            } else {
+                // App shortcut intents can only save basic data types. That is,
+                // the intent can't contain a StationPair object, only Strings.
+                // If there's no StationPair extra, look for String extras.
+                mStationPair = new StationPair(Station.getByAbbreviation(intent.getStringExtra(EXTRA_ORIGIN)),
+                        Station.getByAbbreviation(intent.getStringExtra(EXTRA_DESTINATION)));
+            }
             setListTitle();
             if (mBound && mEtdService != null)
                 mEtdService

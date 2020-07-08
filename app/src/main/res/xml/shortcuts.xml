@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="map"
+        android:icon="@drawable/shortcut_map"
+        android:shortcutShortLabel="@string/shortcuts_map_short_label"
+        android:shortcutLongLabel="@string/shortcuts_map_long_label">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.dougkeen.bart"
+            android:targetClass="com.dougkeen.bart.activities.ViewMapActivity"
+            />
+    </shortcut>
+
+    <categories android:name="android.intent.category.DEFAULT" />
+</shortcuts>
