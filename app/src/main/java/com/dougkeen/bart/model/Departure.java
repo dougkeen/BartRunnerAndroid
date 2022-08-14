@@ -610,7 +610,7 @@ public class Departure implements Parcelable, Comparable<Departure> {
     private PendingIntent getAlarmIntent(Context context) {
         Intent intent = new Intent(context, AlarmBroadcastReceiver.class);
         intent.setAction(Constants.ACTION_ALARM);
-        return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
     }
 
     private long getAlarmClockTime() {
@@ -671,7 +671,7 @@ public class Departure implements Parcelable, Comparable<Departure> {
                     getStationPair());
             targetIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             notificationIntent = PendingIntent.getActivity(context, 0,
-                    targetIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                    targetIntent, PendingIntent.FLAG_IMMUTABLE);
         }
         return notificationIntent;
     }
@@ -684,7 +684,7 @@ public class Departure implements Parcelable, Comparable<Departure> {
                     BoardedDepartureService.class);
             targetIntent.putExtra(Constants.CLEAR_DEPARTURE, true);
             deleteNotificationIntent = PendingIntent.getService(context, 0,
-                    targetIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                    targetIntent, PendingIntent.FLAG_IMMUTABLE);
         }
         return deleteNotificationIntent;
     }
@@ -719,7 +719,7 @@ public class Departure implements Parcelable, Comparable<Departure> {
 
             if (isAlarmPending()) {
                 PendingIntent pendingIntent = PendingIntent.getService(
-                        context, 0, cancelAlarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                        context, 0, cancelAlarmIntent, PendingIntent.FLAG_IMMUTABLE);
                 String subText = "Alarm " + getAlarmLeadTimeMinutes() + " minutes before departure";
 
                 notificationBuilder
