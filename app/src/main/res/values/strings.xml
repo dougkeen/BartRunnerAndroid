@@ -8,6 +8,7 @@
     <string name="add_route">Add a route</string>
     <string name="origin">Origin</string>
     <string name="destination">Destination</string>
+    <string name="station_pair_description">%1$s to %2$s</string>
     <string name="save">Save</string>
     <string name="error_matching_origin_and_destination">The origin and destination stations must be
         different</string>
@@ -52,4 +53,6 @@
     <string name="notification_channel_name">BART Runner departure notifications</string>
     <string name="snackbar_route_deleted">Route deleted.</string>
     <string name="undo">Undo</string>
+    <string name="shortcuts_map_short_label">BART Map</string>
+    <string name="shortcuts_map_long_label">View BART system map</string>
 </resources>

@@ -21,6 +21,9 @@
             android:name=".activities.RoutesListActivity_"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/app_name">
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
