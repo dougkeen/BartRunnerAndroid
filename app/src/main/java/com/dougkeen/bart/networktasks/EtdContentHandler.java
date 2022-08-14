@@ -28,7 +28,8 @@ public class EtdContentHandler extends DefaultHandler {
 
     private final static List<String> TAGS = Arrays.asList("date", "time",
             "abbreviation", "minutes", "platform", "direction", "length",
-            "color", "hexcolor", "bikeflag", "destination", "error", "limited");
+            "color", "hexcolor", "bikeflag", "destination", "error", "limited",
+            "cancelflag");
 
     private RealTimeDepartures realTimeDepartures;
 
@@ -95,7 +96,7 @@ public class EtdContentHandler extends DefaultHandler {
         } else if ("platform".equals(localName)) {
             currentDeparture.setPlatform(currentValue);
         } else if ("direction".equals(localName)) {
-            currentDeparture.setDirection(currentValue);
+            currentDeparture.setDirection(currentValue.toLowerCase());
         } else if ("length".equals(localName)) {
             currentDeparture.setTrainLength(currentValue);
         } else if ("color".equals(localName)) {
@@ -105,6 +106,8 @@ public class EtdContentHandler extends DefaultHandler {
                     + currentValue.substring(1));
         } else if ("bikeflag".equals(localName)) {
             currentDeparture.setBikeAllowed(currentValue.equalsIgnoreCase("1"));
+        } else if ("cancelflag".equals(localName)) {
+            currentDeparture.setCanceled(currentValue.equalsIgnoreCase("1"));
         } else if ("estimate".equals(localName)) {
             // If we can't infer a real destination because of weird API data,
             // just skip it ¯\_(ツ)_/¯

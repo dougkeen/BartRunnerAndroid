@@ -2,6 +2,7 @@ package com.dougkeen.bart.data;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -52,8 +53,16 @@ public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
 
         ((Checkable) view).setChecked(departure.isSelected());
 
-        ((TextView) view.findViewById(R.id.destinationText)).setText(departure
-                .getTrainDestination().toString());
+        TextView destinationTextView = (TextView) view.findViewById(R.id.destinationText);
+        destinationTextView.setText(departure.getTrainDestination().toString());
+
+        if (departure.isCanceled()) {
+            destinationTextView.setPaintFlags(destinationTextView.getPaintFlags()
+                    | Paint.STRIKE_THRU_TEXT_FLAG);
+        } else {
+            destinationTextView.setPaintFlags(destinationTextView.getPaintFlags()
+                    & ~Paint.STRIKE_THRU_TEXT_FLAG);
+        }
 
         final String arrivesAtDestinationPrefix = getContext().getString(
                 R.string.arrives_at_destination);
@@ -65,7 +74,9 @@ public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
         if (estimatedArrival != null) {
             ((TextView) view.findViewById(R.id.trainLengthText))
                     .setText(departure.getTrainLengthAndPlatform());
-            if (estimatedArrivalTimeText != "") {
+            if (departure.isCanceled()) {
+                estimatedArrival.setText("");
+            } else if (estimatedArrivalTimeText != "") {
                 estimatedArrival.setText(arrivesAtDestinationPrefix
                         + estimatedArrivalTimeText);
             }
@@ -118,8 +129,14 @@ public class DepartureArrayAdapter extends ArrayAdapter<Departure> {
         if (departureTime != null) {
             ((TextView) view.findViewById(R.id.uncertainty)).setText(departure
                     .getUncertaintyText());
-            departureTime.setText("Dep " + departure
-                    .getEstimatedDepartureTimeText(getContext(), true));
+            String departureText = "";
+            if (!departure.isCanceled()) {
+                departureText = "Dep " + departure.getEstimatedDepartureTimeText(
+                        getContext(),
+                        true
+                );
+            }
+            departureTime.setText(departureText);
         } else {
             TimedTextSwitcher uncertaintySwitcher = (TimedTextSwitcher) view
                     .findViewById(R.id.uncertainty);

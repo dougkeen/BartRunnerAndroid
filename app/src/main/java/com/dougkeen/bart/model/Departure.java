@@ -74,6 +74,7 @@ public class Departure implements Parcelable, Comparable<Departure> {
     private boolean requiresTransfer;
     private boolean transferScheduled;
     private boolean limited;
+    private boolean canceled;
 
     private int minutes;
 
@@ -192,6 +193,14 @@ public class Departure implements Parcelable, Comparable<Departure> {
 
     public void setBikeAllowed(boolean bikeAllowed) {
         this.bikeAllowed = bikeAllowed;
+    }
+
+    public boolean isCanceled() {
+        return canceled;
+    }
+
+    public void setCanceled(boolean canceled) {
+        this.canceled = canceled;
     }
 
     public String getTrainLength() {
@@ -336,7 +345,9 @@ public class Departure implements Parcelable, Comparable<Departure> {
             return "Estimated arrival unknown";
         }
         long minutesLeft = getEstimatedArrivalMinutesLeft();
-        if (minutesLeft < 0) {
+        if (this.isCanceled()) {
+            return "";
+        } else if (minutesLeft < 0) {
             return "Arrived at destination";
         } else if (minutesLeft == 0) {
             return "Arrives ~" + getEstimatedArrivalTimeText(context, false)
@@ -535,7 +546,9 @@ public class Departure implements Parcelable, Comparable<Departure> {
     public String getCountdownText() {
         StringBuilder builder = new StringBuilder();
         int secondsLeft = getMeanSecondsLeft();
-        if (hasDeparted()) {
+        if (isCanceled()) {
+            return "Canceled";
+        } else if (hasDeparted()) {
             if (origin != null && origin.longStationLinger && beganAsDeparted) {
                 builder.append("At station");
             } else if (isListedInETDs()) {
@@ -555,7 +568,7 @@ public class Departure implements Parcelable, Comparable<Departure> {
     }
 
     public String getUncertaintyText() {
-        if (hasDeparted()) {
+        if (hasDeparted() || isCanceled()) {
             return "";
         } else {
             return "(±" + getUncertaintySeconds() + "s)";

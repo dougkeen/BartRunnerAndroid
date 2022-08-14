@@ -134,7 +134,9 @@ public class YourTrainLayout extends FrameLayout implements Checkable {
         final TextProvider textProvider = new TextProvider() {
             @Override
             public String getText(long tickNumber) {
-                if (boardedDeparture.hasDeparted()) {
+                if (boardedDeparture.isCanceled()) {
+                    return "CANCELED";
+                } else if (boardedDeparture.hasDeparted()) {
                     return boardedDeparture.getCountdownText();
                 } else {
                     return "Leaves in " + boardedDeparture.getCountdownText()

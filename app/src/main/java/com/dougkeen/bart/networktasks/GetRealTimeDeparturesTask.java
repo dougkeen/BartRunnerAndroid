@@ -74,13 +74,15 @@ public abstract class GetRealTimeDeparturesTask extends
         String xml = null;
         try {
             String url;
-            if (ignoreDirection || params.getOrigin().ignoreRoutingDirection) {
-                url = String.format(ETD_URL_NO_DIRECTION,
-                        params.getOrigin().abbreviation);
-            } else {
-                url = String.format(ETD_URL, params.getOrigin().abbreviation,
-                        mRoutes.get(0).getDirection());
-            }
+            // BART API direction filter is broken (last checked Aug 2022), so always ignore direction
+            url = String.format(ETD_URL_NO_DIRECTION, params.getOrigin().abbreviation);
+//            if (ignoreDirection || params.getOrigin().ignoreRoutingDirection) {
+//                url = String.format(ETD_URL_NO_DIRECTION,
+//                        params.getOrigin().abbreviation);
+//            } else {
+//                url = String.format(ETD_URL, params.getOrigin().abbreviation,
+//                        mRoutes.get(0).getDirection());
+//            }
 
 
             Request request = new Request.Builder().url(url).build();
@@ -115,6 +117,12 @@ public abstract class GetRealTimeDeparturesTask extends
             if (handler.getError() != null) {
                 mException = new BartApiException("BART's systems are reporting a problem:\n\"" + handler.getError() + "\"");
                 return null;
+            }
+
+            // BART API direction filter is broken (last checked Aug 2022), so do local filtering
+            // if necessary
+            if (!ignoreDirection && !params.getOrigin().ignoreRoutingDirection) {
+                realTimeDepartures.filterByDirection(mRoutes.get(0).getDirection());
             }
 
             return realTimeDepartures;

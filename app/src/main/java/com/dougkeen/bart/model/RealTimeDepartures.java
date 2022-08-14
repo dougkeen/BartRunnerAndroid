@@ -1,6 +1,7 @@
 package com.dougkeen.bart.model;
 
-import java.lang.reflect.Array;
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -97,16 +98,34 @@ public class RealTimeDepartures {
     public void includeTransferRoutes() {
         transfersIncluded = true;
         routes.addAll(origin.getTransferRoutes(destination));
-        rebuildFilteredDepaturesCollection();
+        rebuildFilteredDeparturesCollection();
     }
 
     public void includeDoubleTransferRoutes() {
         transfersIncluded = true;
         routes.addAll(origin.getDoubleTransferRoutes(destination));
-        rebuildFilteredDepaturesCollection();
+        rebuildFilteredDeparturesCollection();
     }
 
-    private void rebuildFilteredDepaturesCollection() {
+    /**
+     * This is a temporary fix until BART API fixes their implementation of `dir` filters in API urls
+     *
+     * @param direction "n" or "s"
+     */
+    public void filterByDirection(String direction) {
+        if (direction == null || direction.isEmpty()) return;
+        Iterator<Departure> iterator = unfilteredDepartures.iterator();
+        while (iterator.hasNext()) {
+            Departure departure = iterator.next();
+            if (!departure.getDirection().toLowerCase().startsWith(direction)) {
+                Log.v(Constants.TAG, "Removing departure in wrong direction: " + departure);
+                iterator.remove();
+            }
+        }
+        rebuildFilteredDeparturesCollection();
+    }
+
+    private void rebuildFilteredDeparturesCollection() {
         getDepartures().clear();
         for (Departure departure : unfilteredDepartures) {
             addDepartureIfApplicable(departure);
