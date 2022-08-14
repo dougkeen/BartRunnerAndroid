@@ -23,7 +23,7 @@ dependencies {
     implementation "org.androidannotations:rest-spring-api:$AAVersion"}
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 32
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
@@ -35,7 +35,7 @@ android {
         versionCode 54
 
         minSdkVersion 14
-        targetSdkVersion 28
+        targetSdkVersion 32
     }
 
     buildTypes {
