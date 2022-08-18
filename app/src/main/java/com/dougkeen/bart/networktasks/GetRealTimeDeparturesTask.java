@@ -37,7 +37,9 @@ public abstract class GetRealTimeDeparturesTask extends
 
     public GetRealTimeDeparturesTask(boolean ignoreDirection) {
         super();
-        this.ignoreDirection = ignoreDirection;
+        // this.ignoreDirection = ignoreDirection;
+        // BART API direction data is really screwed up, so always ignore direction
+        this.ignoreDirection = true;
     }
 
     @Override

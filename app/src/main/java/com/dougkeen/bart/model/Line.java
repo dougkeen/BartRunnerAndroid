@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 public enum Line {
-    RED(false, Station.MLBR, Station.SBRN, Station.SSAN, Station.COLM,
+    RED(false, Station.SFIA, Station.MLBR, Station.SBRN, Station.SSAN, Station.COLM,
             Station.DALY, Station.BALB, Station.GLEN, Station._24TH,
             Station._16TH, Station.CIVC, Station.POWL, Station.MONT,
             Station.EMBR, Station.WOAK, Station._12TH, Station._19TH,
@@ -20,6 +20,14 @@ public enum Line {
             Station.ASHB, Station.DBRK, Station.NBRK, Station.PLZA,
             Station.DELN, Station.RICH),
     YELLOW(false, Station.SFIA, Station.SBRN, Station.SSAN,
+            Station.COLM, Station.DALY, Station.BALB, Station.GLEN,
+            Station._24TH, Station._16TH, Station.CIVC, Station.POWL,
+            Station.MONT, Station.EMBR, Station.WOAK, Station._12TH,
+            Station._19TH, Station.MCAR, Station.ROCK, Station.ORIN,
+            Station.LAFY, Station.WCRK, Station.PHIL, Station.CONC,
+            Station.NCON, Station.PITT, Station.PCTR, Station.ANTC),
+    YELLOW_LATE_NIGHT(false, Station.MLBR,
+            Station.SFIA, Station.SBRN, Station.SSAN,
             Station.COLM, Station.DALY, Station.BALB, Station.GLEN,
             Station._24TH, Station._16TH, Station.CIVC, Station.POWL,
             Station.MONT, Station.EMBR, Station.WOAK, Station._12TH,

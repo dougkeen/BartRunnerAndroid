@@ -121,6 +121,11 @@ public class EtdContentHandler extends DefaultHandler {
                     } else {
                         try {
                             selectedLine = Line.valueOf(lineColor);
+
+                            // The yellow line changes, so check the train destination to see if it's the late night variant
+                            if (Line.YELLOW == selectedLine && currentDeparture.getTrainDestination() == Station.MLBR) {
+                                selectedLine = Line.YELLOW_LATE_NIGHT;
+                            }
                         } catch (IllegalArgumentException e) {
                             selectedLine = guessLine();
                         }
