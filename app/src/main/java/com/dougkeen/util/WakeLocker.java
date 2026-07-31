@@ -9,7 +9,7 @@ public abstract class WakeLocker {
     private static PowerManager.WakeLock wakeLock;
 
     public static void acquire(Context ctx) {
-        if (wakeLock != null)
+        if (wakeLock != null && wakeLock.isHeld())
             wakeLock.release();
 
         PowerManager pm = (PowerManager) ctx
@@ -21,7 +21,7 @@ public abstract class WakeLocker {
     }
 
     public static void release() {
-        if (wakeLock != null)
+        if (wakeLock != null && wakeLock.isHeld())
             wakeLock.release();
         wakeLock = null;
     }
